@@ -2,8 +2,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const mongoose = require("mongoose");
-
 const employeeSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -19,6 +17,7 @@ const employeeSchema = new mongoose.Schema({
     },
     username: {
         type: String,
+        unique: true,
         required: true,
     },
     password: {
@@ -50,11 +49,11 @@ const employeeSchema = new mongoose.Schema({
     address: {
         building_apt: {
             type: String,
-            required: true,
+            // required: true,
         },
         street_name: {
             type: String,
-            required: true,
+            // required: true,
         },
         city: {
             type: String,
@@ -106,7 +105,7 @@ const employeeSchema = new mongoose.Schema({
                 type: String,
             },
             relationship: {
-                type: string,
+                type: String,
             },
         },
         Emergency_contact: {
@@ -126,7 +125,7 @@ const employeeSchema = new mongoose.Schema({
                 type: String,
             },
             relationship: {
-                type: string,
+                type: String,
             },
         },
     },
@@ -144,8 +143,8 @@ const employeeSchema = new mongoose.Schema({
     document_status: {
         type: String,
     },
-    steps: ["OPT Receipt", "OPT EAD", "I-983", "I-20"],
-    current_file_step: {
+    document_steps: ["OPT Receipt", "OPT EAD", "I-983", "I-20"],
+    current_document_step: {
         type: Number,
         default: 0,
     },

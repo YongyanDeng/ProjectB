@@ -14,11 +14,11 @@ const documentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    file_type: {
+    contentType: {
         type: String,
         required: true,
     },
-    file_content: {
+    data: {
         type: Buffer,
         required: true,
     },
@@ -32,7 +32,7 @@ const documentSchema = new mongoose.Schema({
     },
 });
 
-messageSchema.pre("deleteOne", { document: true }, async function (next) {
+documentSchema.pre("deleteOne", { document: true }, async function (next) {
     try {
         // find the employee and update employee.documents
         const employee = await Employee.findById(this.employee);
@@ -44,6 +44,5 @@ messageSchema.pre("deleteOne", { document: true }, async function (next) {
     }
 });
 
-// Export the subdocument schema
 const Document = mongoose.model("Document", documentSchema);
 module.exports = Document;
