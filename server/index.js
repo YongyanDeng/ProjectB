@@ -5,6 +5,8 @@ const app = express();
 
 const { loginVerify, userVerify, hrVerify } = require("./middleware/auth");
 const authRouter = require("./routes/auth");
+const employeeRouter = require("./routes/employee");
+const hrRouter = require("./routes/hr");
 const errorHandler = require("./handlers/error");
 const db = require("./models");
 
@@ -15,6 +17,8 @@ app.use(cors());
 
 // signin/signup/update password
 app.use("/api/auth", authRouter);
+app.use("/api/employee/:id", loginVerify, userVerify, employeeRouter);
+app.use("/api/hr/:id", loginVerify, userVerify, hrVerify, hrRouter);
 
 // Wrong url matching
 app.use((req, res, next) => {

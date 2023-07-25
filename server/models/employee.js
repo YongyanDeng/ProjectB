@@ -65,7 +65,7 @@ const employeeSchema = new mongoose.Schema({
             type: String,
         },
     },
-    contact_Info: {
+    contact_info: {
         cell_phone: {
             type: String,
         },
@@ -143,10 +143,16 @@ const employeeSchema = new mongoose.Schema({
     document_status: {
         type: String,
     },
-    document_steps: ["OPT Receipt", "OPT EAD", "I-983", "I-20"],
+    document_steps: {
+        type: Array,
+        default: ["OPT Receipt", "OPT EAD", "I-983", "I-20"],
+    },
     current_document_step: {
         type: Number,
         default: 0,
+    },
+    feedback: {
+        type: String,
     },
 });
 
