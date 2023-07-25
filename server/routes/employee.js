@@ -3,17 +3,23 @@ const {
     getAllEmployee,
     updateEmployee,
     getEmployee,
+} = require("../handlers/employee");
+const {
+    getAllDocuments,
+    getDocument,
     uploadDocument,
     deleteDocument,
-} = require("../handlers/employee");
+} = require("../handlers/document");
 const router = express.Router({ mergeParams: true });
 const { loginVerify, userVerify, vendorVerify } = require("../middleware/auth");
 
-//  prefix: /api/employees/:id"
+//  prefix: /api/employees/:employeeId"
 router.get("/", getEmployee);
 router.put("/", updateEmployee);
 
+router.get("/documents", getAllDocuments);
 router.post("/documents", uploadDocument);
+router.get("/documents/:documentId", getDocument);
 router.delete("/documents/:documentId", deleteDocument);
 
 module.exports = router;
