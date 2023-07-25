@@ -6,17 +6,24 @@ const documentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    file_name: {
+    document_name: {
         type: String,
         required: true,
     },
     file_url: {
         type: String,
+        // required: true,
+    },
+    contentType: {
+        type: String,
         required: true,
     },
-    data: {
+    content: {
         type: Buffer,
         required: true,
+    },
+    document_status: {
+        type: String,
     },
     upload_date: {
         type: Date,

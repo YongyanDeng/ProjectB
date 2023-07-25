@@ -27,20 +27,24 @@ const employeeSchema = new mongoose.Schema({
     name: {
         first_name: {
             type: String,
+            default: "",
         },
         last_name: {
             type: String,
+            default: "",
         },
         middle_name: {
             type: String,
+            default: "",
         },
         preferred_name: {
             type: String,
+            default: "",
         },
     },
     profile_picture: {
-        data: Buffer, // To store the binary image data
-        contentType: String, // To store the MIME type of the image
+        type: String,
+        default: "https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar.png",
     },
     role: {
         type: String,
@@ -140,17 +144,6 @@ const employeeSchema = new mongoose.Schema({
             ref: "Document",
         },
     ],
-    document_status: {
-        type: String,
-    },
-    document_steps: {
-        type: Array,
-        default: ["OPT Receipt", "OPT EAD", "I-983", "I-20"],
-    },
-    current_document_step: {
-        type: Number,
-        default: 0,
-    },
     feedback: {
         type: String,
     },

@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 /**
+ * Sign In
  * @param {body: {email, password}} req
  * @param {id, username, role, ducoments, document_status, document_needed: document_steps[current_document_step], token} res
  * @param {middleware()} next

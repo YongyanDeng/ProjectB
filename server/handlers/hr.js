@@ -16,13 +16,14 @@ exports.getAllApplications = async function (req, res, next) {
 
         const output = employees?.reduce((acc, employee) => {
             const { id, email, name, role, onboarding_status } = employee;
+
             // Skip self application
             if (id === req.params.id) return acc;
 
             acc.push({
                 id,
                 email,
-                name: !!Object.keys(name).length ? `${name.first_name} ${name.last_name}` : ``,
+                name,
                 role,
                 onboarding_status,
             });
