@@ -4,6 +4,7 @@ const documentSchema = new mongoose.Schema({
     document_type: {
         type: String,
         required: true,
+        unique: true,
     },
     file_name: {
         type: String,
