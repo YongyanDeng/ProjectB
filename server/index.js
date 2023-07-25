@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
+const fileUpload = require("express-fileupload");
 const { loginVerify, userVerify, hrVerify } = require("./middleware/auth");
 const authRouter = require("./routes/auth");
 const employeeRouter = require("./routes/employee");
@@ -13,7 +13,9 @@ const db = require("./models");
 const PORT = 8080;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(fileUpload());
 
 // signin/signup/update password
 app.use("/api/auth", authRouter);

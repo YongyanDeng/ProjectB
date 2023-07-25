@@ -1,29 +1,69 @@
 const db = require("../models");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const express = require("express");
+// const multer = require("multer");
 
-/**
- * Upload a single employee's application data
- * @param {body: {input field data}} req
- * @param {updated application data} res
- * @param {} next
- * @returns
- */
-exports.uploadApplication = async function (req, res, next) {
+const app = express();
+
+// Route to handle document uploads
+
+const getAllEmployee = async (req, res, next) => {
     try {
-        const employee = await db.Employee.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
-        if (!employee) {
-            return res.status(401).json({ error: "Employee not found" });
-        }
-
-        return res.json(employee);
-    } catch (err) {
-        if (err.code === 11000) err.message = "Sorry, this name/email is taken!";
+        const employees = await db.Product.find().select("-password");
+        return res.status(200).json(employees);
+    } catch (error) {
         return next({
             status: 500,
             message: err.message,
         });
     }
+};
+
+const updateEmployee = async function (req, res, next) {
+    try {
+        const employeeId = req.params.id;
+        const updates = req.body;
+
+        // Find the employee by ID
+        const employee = await db.Employee.findById(employeeId);
+
+        if (!employee) {
+            return res.status(404).json({ error: "Employee not found" });
+        }
+        Object.assign(employee, updates);
+        const updatedEmployee = await employee.save();
+
+        return res.status(201).json(updatedEmployee);
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+const getEmployee = async (req, res, next) => {
+    try {
+        const employeeId = req.params.id;
+
+        // Find the employee by ID
+        const employee = await db.Employee.findById(employeeId).select(
+            "-password"
+        );
+        if (!employee) {
+            return res.status(404).json({ error: "Employee not found" });
+        }
+
+        return res.status(200).json(employee);
+    } catch (error) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+module.exports = {
+    getAllEmployee,
+    updateEmployee,
+    getEmployee,
 };
