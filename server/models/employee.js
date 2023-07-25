@@ -1,8 +1,6 @@
-import documentSchema from "./document";
+// import documentSchema from "./document";
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-
-const mongoose = require("mongoose");
 
 const employeeSchema = new mongoose.Schema({
     email: {
@@ -11,12 +9,16 @@ const employeeSchema = new mongoose.Schema({
         unique: true,
         validate: {
             validator: function (emailInput) {
-                const emailRegex =
-                    /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
                 return emailRegex.test(emailInput);
             },
-            message: "Invalid Email format",
+            message: "Invalid Email",
         },
+    },
+    username: {
+        type: String,
+        unique: true,
+        required: true,
     },
     password: {
         type: String,
@@ -25,29 +27,37 @@ const employeeSchema = new mongoose.Schema({
     name: {
         first_name: {
             type: String,
+            default: "",
         },
         last_name: {
             type: String,
+            default: "",
         },
         middle_name: {
             type: String,
+            default: "",
         },
         preferred_name: {
             type: String,
+            default: "",
         },
     },
     profile_picture: {
-        data: Buffer, // To store the binary image data
-        contentType: String, // To store the MIME type of the image
+        type: String,
+        default: "https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar.png",
+    },
+    role: {
+        type: String,
+        default: "Employee",
     },
     address: {
         building_apt: {
             type: String,
-            required: true,
+            // required: true,
         },
         street_name: {
             type: String,
-            required: true,
+            // required: true,
         },
         city: {
             type: String,
@@ -59,8 +69,7 @@ const employeeSchema = new mongoose.Schema({
             type: String,
         },
     },
-
-    contact_Info: {
+    contact_info: {
         cell_phone: {
             type: String,
         },
@@ -68,7 +77,6 @@ const employeeSchema = new mongoose.Schema({
             type: String,
         },
     },
-
     identification_info: {
         SSN: {
             type: String,
@@ -101,10 +109,9 @@ const employeeSchema = new mongoose.Schema({
                 type: String,
             },
             relationship: {
-                type: string,
+                type: String,
             },
         },
-
         Emergency_contact: {
             first_name: {
                 type: String,
@@ -122,15 +129,23 @@ const employeeSchema = new mongoose.Schema({
                 type: String,
             },
             relationship: {
-                type: string,
+                type: String,
             },
         },
     },
-    documents: [documentSchema],
     onboarding_status: {
         type: String,
         enum: ["Never submitted", "Pending", "Rejected", "Approved"],
         default: "Never submitted",
+    },
+    documents: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Document",
+        },
+    ],
+    feedback: {
+        type: String,
     },
 });
 
@@ -146,11 +161,18 @@ employeeSchema.pre("save", async function (next) {
     }
 });
 
+// create user's role
+employeeSchema.pre("save", async function (next) {
+    try {
+        if (this.email.includes("@hr.com")) this.role = "HR";
+        return next();
+    } catch (err) {
+        return next(err);
+    }
+});
+
 // password matching
-employeeSchema.methods.comparePassword = async function (
-    candidatePassword,
-    next
-) {
+employeeSchema.methods.comparePassword = async function (candidatePassword, next) {
     try {
         const isMatch = await bcrypt.compare(candidatePassword, this.password);
         return isMatch;

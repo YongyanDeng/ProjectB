@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-// showing additionl information about db
-mongoose.set("debug", true);
 require("dotenv").config();
+
+const mongoose = require("mongoose");
+mongoose.set("debug", true);
 
 mongoose
     .connect(process.env.MONGODB_URI, {
@@ -16,5 +16,5 @@ mongoose
     });
 
 module.exports = mongoose;
-module.exports.User = require("./user");
-module.exports.Product = require("./product");
+module.exports.Employee = require("./employee");
+module.exports.Document = require("./document");
