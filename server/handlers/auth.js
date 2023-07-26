@@ -15,16 +15,7 @@ exports.signin = async function (req, res, next) {
             email: req.body.email,
         });
 
-        const {
-            id,
-            username,
-            role,
-            name,
-            ducoments,
-            document_status,
-            document_steps,
-            current_document_step,
-        } = employee;
+        const { id, username, role, name, ducoments, feedback } = employee;
 
         const isMatch = await employee.comparePassword(req.body.password, next);
         if (isMatch) {
@@ -41,10 +32,10 @@ exports.signin = async function (req, res, next) {
                 id,
                 username,
                 role,
+                name,
                 ducoments,
-                document_status,
-                document_needed: document_steps[current_document_step],
                 token,
+                feedback,
             });
         } else {
             return next({

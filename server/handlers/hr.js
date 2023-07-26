@@ -2,16 +2,17 @@ const db = require("../models");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const visaProcess = ["OPT Receipt", "OPT EAD", "I-983", "I-20"];
+
 /**
  * Get all applications besides himself/herself as list
  * @param {*} req
- * @param {[brief info of each applications]} res
+ * @param {[brief info of each application]} res
  * @param {*} next
  * @returns
  */
 exports.getAllApplications = async function (req, res, next) {
     try {
-        console.log(req.params.id);
         const employees = await db.Employee.find();
 
         const output = employees?.reduce((acc, employee) => {
@@ -44,12 +45,10 @@ exports.getAllApplications = async function (req, res, next) {
  * @param {application detail} res
  * @param {*} next
  */
-exports.getEmployeeApplicaton = async function (req, res, next) {
+exports.getAnApplicaton = async function (req, res, next) {
     try {
         const employee = await db.Employee.findById(req.params.employeeId);
-        if (!employee) {
-            return res.status(401).json({ error: "Employee not found" });
-        }
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
 
         const {
             id,
@@ -64,16 +63,16 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
             reference,
             onboarding_status,
             documents,
-            // document_status,
-            // document_steps,
-            current_document_step,
             feedback,
         } = employee;
+
+        // Output
+        const current_document = await db.Document.findById(documents[documents.length - 1]);
 
         return res.status(200).json({
             id,
             username,
-            name: name ? `${name.first_name} ${name.last_name}` : ``,
+            name,
             role,
             address,
             profile_picture,
@@ -82,8 +81,9 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
             work_authorization,
             reference,
             onboarding_status,
-            document: documents[current_document_step],
-            document_status: document ? "No file uploaded" : "Pending",
+            documents,
+            // if documents is empty, current_document return null
+            current_document,
             feedback,
         });
     } catch (err) {
@@ -95,7 +95,7 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
 };
 
 /**
- * HR provide review & feedback of rejection
+ * HR provide review & feedback of rejection in onboarding application
  * @param {params: {id, employeeId}, body: {review, feedback}} req
  * @param {application detail} res
  * @param {*} next
@@ -104,9 +104,7 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
 exports.reviewApplication = async function (req, res, next) {
     try {
         const employee = await db.Employee.findById(req.params.employeeId);
-        if (!employee) {
-            return res.status(401).json({ error: "Employee not found" });
-        }
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
 
         const { review, feedback } = req.body;
         employee.onboarding_status = review;
@@ -128,14 +126,11 @@ exports.reviewApplication = async function (req, res, next) {
             reference,
             onboarding_status,
             documents,
-            document_status,
-            document_steps,
-            current_document_step,
         } = employee;
         return res.status(200).json({
             id,
             username,
-            name: name ? `${name.first_name} ${name.last_name}` : ``,
+            name,
             role,
             address,
             profile_picture,
@@ -144,9 +139,84 @@ exports.reviewApplication = async function (req, res, next) {
             work_authorization,
             reference,
             onboarding_status,
-            document: documents[current_document_step],
-            document_status: document ? "No file uploaded" : "Pending",
+            documents,
+            document_status: !!documents.length ? "No file uploaded yet" : "Pending",
             feedback,
         });
-    } catch (err) {}
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+/**
+ * Get all employees' visa status
+ * @param {params: {id}} req
+ * @param {inProgess: [], all: []} res
+ * @param {*} next
+ */
+exports.getVisaList = async function (req, res, next) {
+    try {
+        const employees = await db.Employee.find();
+
+        const inProgress = [];
+        for (const employee of employees) {
+            const { documents } = employee;
+            if (documents.length < 4) inProgress.push(employee);
+            else {
+                const lastDoc = await db.Document.findById(documents[documents.length - 1]);
+                if (lastDoc.document_status !== "approved") inProgress.push(employee);
+            }
+        }
+
+        // Output
+        return res.status(200).json({
+            inProgress,
+            all: employees,
+        });
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+exports.reviewOneVisa = async function (req, res, next) {
+    try {
+        const employee = await db.Employee.findById(req.params.employeeId);
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
+
+        const { id, email, name, role, work_authorization, documents } = employee;
+
+        const lastDoc = await db.Document.findById(documents[documents.length - 1]);
+        if (!lastDoc && documents.length === 0) {
+            console.log(`${name.first_name} ${name.last_name} hasn't upload any visa file yet!`);
+        } else if (lastDoc.document_status !== "pending" && documents.length < 4) {
+            console.log(
+                `${name.first_name} ${name.last_name} hasn't process to next step: ${
+                    visaProcess[document.length]
+                }!`
+            );
+        } else if (document.length === 4) {
+            console.log("This employee has completed all processes");
+        }
+
+        return res.status(200).json({
+            id,
+            email,
+            name,
+            role,
+            work_authorization,
+            documents,
+            current_document: lastDoc,
+        });
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
 };
