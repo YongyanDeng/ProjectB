@@ -255,8 +255,10 @@ exports.reviewOneVisa = async function (req, res, next) {
             console.log("This employee has completed all processes");
         }
 
-        // Update document's status
+        // Update document's status & feedback;
         lastDoc.document_status = req.body.review;
+        if (req.body.review === "Rejected" && req.body.feedback)
+            lastDoc.feedback = req.body.feedback;
         await lastDoc.save();
 
         return res.status(200).json({

@@ -33,6 +33,10 @@ const documentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Employee",
     },
+    feedback: {
+        type: String,
+        default: "",
+    },
 });
 
 documentSchema.pre("deleteOne", { document: true }, async function (next) {
