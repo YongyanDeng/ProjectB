@@ -59,11 +59,12 @@ const getDocument = async (req, res, next) => {
 };
 const uploadDocument = async (req, res, next) => {
     try {
-        console.log(req.files);
         const employeeId = req.params.id;
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).json({ error: "No file uploaded" });
         }
+
+        const employee = await db.Employee.findById(employeeId);
 
         const pdfFile = req.files.pdf;
 
@@ -82,6 +83,8 @@ const uploadDocument = async (req, res, next) => {
             document_status: "pending",
             employee: employeeId,
         });
+
+        employee.documents.push(newDocument.id);
 
         // Save the document to the database
         await newDocument.save();
