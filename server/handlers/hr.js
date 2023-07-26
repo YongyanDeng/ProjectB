@@ -2,23 +2,21 @@ const db = require("../models");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const visaProcess = ["OPT Receipt", "OPT EAD", "I-983", "I-20"];
+
 /**
  * Get all applications besides himself/herself as list
  * @param {*} req
- * @param {[brief info of each applications]} res
+ * @param {[brief info of each application]} res
  * @param {*} next
  * @returns
  */
 exports.getAllApplications = async function (req, res, next) {
     try {
-        console.log(req.params.id);
-        const employees = await db.Employee.find();
+        const employees = await db.Employee.find({ _id: { $ne: req.params.id } });
 
         const output = employees?.reduce((acc, employee) => {
             const { id, email, name, role, onboarding_status } = employee;
-
-            // Skip self application
-            if (id === req.params.id) return acc;
 
             acc.push({
                 id,
@@ -44,12 +42,10 @@ exports.getAllApplications = async function (req, res, next) {
  * @param {application detail} res
  * @param {*} next
  */
-exports.getEmployeeApplicaton = async function (req, res, next) {
+exports.getAnApplicaton = async function (req, res, next) {
     try {
         const employee = await db.Employee.findById(req.params.employeeId);
-        if (!employee) {
-            return res.status(401).json({ error: "Employee not found" });
-        }
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
 
         const {
             id,
@@ -64,26 +60,43 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
             reference,
             onboarding_status,
             documents,
-            // document_status,
-            // document_steps,
-            current_document_step,
             feedback,
         } = employee;
 
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            const { _id, document_name, document_status } = document;
+            docs.push({
+                id,
+                document_name,
+                document_status,
+            });
+        }
+
+        // Calculate OPT's remaining days
+        let end = work_authorization.end_date.getTime();
+        let now = new Date().getTime();
+        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        const extendedWorkAuth = {
+            ...work_authorization,
+            remaining_days,
+        };
+
+        // Output
         return res.status(200).json({
             id,
             username,
-            name: name ? `${name.first_name} ${name.last_name}` : ``,
+            name,
             role,
             address,
             profile_picture,
             contact_Info,
             identification_info,
-            work_authorization,
+            work_authorization: extendedWorkAuth,
             reference,
             onboarding_status,
-            document: documents[current_document_step],
-            document_status: document ? "No file uploaded" : "Pending",
+            documents: docs,
             feedback,
         });
     } catch (err) {
@@ -95,7 +108,7 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
 };
 
 /**
- * HR provide review & feedback of rejection
+ * HR provide review & feedback of rejection in onboarding application
  * @param {params: {id, employeeId}, body: {review, feedback}} req
  * @param {application detail} res
  * @param {*} next
@@ -104,13 +117,12 @@ exports.getEmployeeApplicaton = async function (req, res, next) {
 exports.reviewApplication = async function (req, res, next) {
     try {
         const employee = await db.Employee.findById(req.params.employeeId);
-        if (!employee) {
-            return res.status(401).json({ error: "Employee not found" });
-        }
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
 
+        // update application's onboarding_status & feedback
         const { review, feedback } = req.body;
         employee.onboarding_status = review;
-        if (review === "Rejected" && feedback) employee.feedback = feedback;
+        employee.feedback = feedback;
 
         await employee.save();
 
@@ -128,14 +140,11 @@ exports.reviewApplication = async function (req, res, next) {
             reference,
             onboarding_status,
             documents,
-            document_status,
-            document_steps,
-            current_document_step,
         } = employee;
         return res.status(200).json({
             id,
             username,
-            name: name ? `${name.first_name} ${name.last_name}` : ``,
+            name,
             role,
             address,
             profile_picture,
@@ -144,9 +153,154 @@ exports.reviewApplication = async function (req, res, next) {
             work_authorization,
             reference,
             onboarding_status,
-            document: documents[current_document_step],
-            document_status: document ? "No file uploaded" : "Pending",
+            documents,
+            document_status: !!documents.length ? "No file uploaded yet" : "Pending",
             feedback,
         });
-    } catch (err) {}
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+/**
+ * Get all employees visa data and make it as 2 lists
+ * @param {params: {id}} req
+ * @param {inProgess: [], all: []} res
+ * @param {*} next
+ */
+exports.getVisaList = async function (req, res, next) {
+    try {
+        const employees = await db.Employee.find({ _id: { $ne: req.params.id } });
+
+        const inProgress = [];
+        for (const employee of employees) {
+            const { documents } = employee;
+            if (documents.length < 4) inProgress.push(employee);
+            else {
+                const lastDoc = await db.Document.findById(documents[documents.length - 1]);
+                if (lastDoc.document_status !== "approved") inProgress.push(employee);
+            }
+        }
+
+        // Output
+        return res.status(200).json({
+            inProgress,
+            all: employees,
+        });
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+/**
+ * Get a employee's visa detail
+ * @param {params: {id, employeeId}} req
+ * @param {id, email, id, email, name, role, work_authorization } res
+ * @param {*} next
+ * @returns
+ */
+exports.getOneVisa = async function (req, res, next) {
+    try {
+        const employee = await db.Employee.findById(req.params.employeeId);
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
+
+        const { id, email, name, role, work_authorization, documents } = employee;
+
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            const { id, document_name, document_status } = document;
+            docs.push({
+                id,
+                document_name,
+                document_status,
+            });
+        }
+
+        // Calculate OPT's remaining days
+        let end = work_authorization.end_date.getTime();
+        let now = new Date().getTime();
+        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        const extendedWorkAuth = {
+            ...work_authorization,
+            remaining_days,
+        };
+
+        // Output
+        return res.status(200).json({
+            id,
+            email,
+            name,
+            role,
+            work_authorization: extendedWorkAuth,
+            documents: docs,
+        });
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+/**
+ * Select a document and add review
+ * @param {params: {id, employeeId}, body: {review, feedback}} req
+ * @param {id, email, name, role, work_authorization, documents} res
+ * @param {*} next
+ * @returns
+ */
+exports.reviewOneVisa = async function (req, res, next) {
+    try {
+        const employee = await db.Employee.findById(req.params.employeeId);
+        if (!employee) return res.status(401).json({ error: "Employee not found" });
+
+        const { id, email, name, role, work_authorization, documents } = employee;
+
+        // Update newest document's status & feedback;
+        const lastDoc = await db.Document.findById(documents[documents.length - 1]);
+        lastDoc.document_status = req.body.review;
+        lastDoc.feedback = req.body.feedback;
+        await lastDoc.save();
+
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            const { id, document_name, document_status } = document;
+            docs.push({
+                id,
+                document_name,
+                document_status,
+            });
+        }
+
+        // Calculate OPT's remaining days
+        let end = work_authorization.end_date.getTime();
+        let now = new Date().getTime();
+        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        const extendedWorkAuth = {
+            ...work_authorization,
+            remaining_days,
+        };
+
+        return res.status(200).json({
+            id,
+            email,
+            name,
+            role,
+            work_authorization: extendedWorkAuth,
+            documents: docs,
+        });
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
 };

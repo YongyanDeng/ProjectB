@@ -1,9 +1,5 @@
 const express = require("express");
-const {
-    getAllEmployee,
-    updateEmployee,
-    getEmployee,
-} = require("../handlers/employee");
+const { getAllEmployee, updateEmployee, getEmployee } = require("../handlers/employee");
 const {
     getAllDocuments,
     getDocument,

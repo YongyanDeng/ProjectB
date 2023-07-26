@@ -40,15 +40,10 @@ const getDocument = async (req, res, next) => {
 
         // check if the document was uploaded by the employee
         if (document.employee.toString() !== employeeId) {
-            return res
-                .status(401)
-                .json({ error: "Unauthorized to get this document" });
+            return res.status(401).json({ error: "Unauthorized to get this document" });
         }
 
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${document.document_name}"`
-        );
+        res.setHeader("Content-Disposition", `attachment; filename="${document.document_name}"`);
         res.setHeader("Content-Type", "application/pdf");
 
         res.send(document.content);
@@ -57,6 +52,7 @@ const getDocument = async (req, res, next) => {
         res.status(500).json({ error: "Failed to download PDF" });
     }
 };
+
 const uploadDocument = async (req, res, next) => {
     try {
         const employeeId = req.params.id;
@@ -111,9 +107,7 @@ const deleteDocument = async (req, res, next) => {
         }
         // verify if this document belongs to employee who wants to delete this doc
         if (deletedDocument.employee.toString() !== req.params.id) {
-            return res
-                .status(401)
-                .json({ error: "Unauthorized to delete this document" });
+            return res.status(401).json({ error: "Unauthorized to delete this document" });
         }
         // // Remove the document from the collection
         // await db.Document.findByIdAndRemove(documentId);

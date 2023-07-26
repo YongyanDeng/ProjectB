@@ -5,30 +5,17 @@ const express = require("express");
 const app = express();
 
 // Route to handle document uploads
-
-const getAllEmployee = async (req, res, next) => {
-    try {
-        const employees = await db.Product.find().select("-password");
-        return res.status(200).json(employees);
-    } catch (error) {
-        return next({
-            status: 500,
-            message: err.message,
-        });
-    }
-};
-
 const updateEmployee = async function (req, res, next) {
     try {
         const employeeId = req.params.id;
         const updates = req.body;
 
         // Find the employee by ID
-        const employee = await db.Employee.findById(employeeId);
-
+        const employee = await db.Employee.findById(employeeId).select("-password");
         if (!employee) {
             return res.status(404).json({ error: "Employee not found" });
         }
+
         Object.assign(employee, updates);
         const updatedEmployee = await employee.save();
 
@@ -46,9 +33,7 @@ const getEmployee = async (req, res, next) => {
         const employeeId = req.params.id;
 
         // Find the employee by ID
-        const employee = await db.Employee.findById(employeeId).select(
-            "-password"
-        );
+        const employee = await db.Employee.findById(employeeId).select("-password");
         if (!employee) {
             return res.status(404).json({ error: "Employee not found" });
         }
@@ -63,7 +48,6 @@ const getEmployee = async (req, res, next) => {
 };
 
 module.exports = {
-    getAllEmployee,
     updateEmployee,
     getEmployee,
 };

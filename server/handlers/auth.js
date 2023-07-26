@@ -15,7 +15,7 @@ exports.signin = async function (req, res, next) {
             email: req.body.email,
         });
 
-        const { id, username, role, name, documents } = employee;
+        const { id, username, role, name, ducoments, feedback } = employee;
 
         const isMatch = await employee.comparePassword(req.body.password, next);
         if (isMatch) {
@@ -32,8 +32,10 @@ exports.signin = async function (req, res, next) {
                 id,
                 username,
                 role,
-                documents,
+                name,
+                ducoments,
                 token,
+                feedback,
             });
         } else {
             return next({
@@ -75,8 +77,7 @@ exports.signup = async function (req, res, next) {
             token,
         });
     } catch (err) {
-        if (err.code === 11000)
-            err.message = "Sorry, this email / username is taken!";
+        if (err.code === 11000) err.message = "Sorry, this email / username is taken!";
         return next({
             status: 400,
             message: err.message,
