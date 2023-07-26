@@ -9,7 +9,8 @@ const employeeSchema = new mongoose.Schema({
         unique: true,
         validate: {
             validator: function (emailInput) {
-                const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                const emailRegex =
+                    /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
                 return emailRegex.test(emailInput);
             },
             message: "Invalid Email",
@@ -44,7 +45,8 @@ const employeeSchema = new mongoose.Schema({
     },
     profile_picture: {
         type: String,
-        default: "https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar.png",
+        default:
+            "https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar.png",
     },
     role: {
         type: String,
@@ -89,7 +91,15 @@ const employeeSchema = new mongoose.Schema({
         },
     },
     work_authorization: {
-        type: String,
+        title: {
+            type: String,
+        },
+        start_date: {
+            type: Date,
+        },
+        end_date: {
+            type: Date,
+        },
     },
     reference: {
         referee_info: {
@@ -172,7 +182,10 @@ employeeSchema.pre("save", async function (next) {
 });
 
 // password matching
-employeeSchema.methods.comparePassword = async function (candidatePassword, next) {
+employeeSchema.methods.comparePassword = async function (
+    candidatePassword,
+    next
+) {
     try {
         const isMatch = await bcrypt.compare(candidatePassword, this.password);
         return isMatch;
