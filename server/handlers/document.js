@@ -64,8 +64,6 @@ const uploadDocument = async (req, res, next) => {
             return res.status(400).json({ error: "No file uploaded" });
         }
 
-        const employee = await db.Employee.findById(employeeId);
-
         const pdfFile = req.files.pdf;
 
         // Assuming you have a directory named 'uploads' to store the PDF files
@@ -84,7 +82,12 @@ const uploadDocument = async (req, res, next) => {
             employee: employeeId,
         });
 
+        const employee = await db.Employee.findById(employeeId);
+        if (!employee) {
+            return res.status(401).json({ error: "employee do not exist" });
+        }
         employee.documents.push(newDocument.id);
+        await employee.save();
 
         // Save the document to the database
         await newDocument.save();
