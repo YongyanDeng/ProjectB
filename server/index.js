@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 const fileUpload = require("express-fileupload");
 const { loginVerify, userVerify, hrVerify } = require("./middleware/auth");
+const { uploadRegisterToken } = require("./handlers/registerToken");
 const authRouter = require("./routes/auth");
 const employeeRouter = require("./routes/employee");
 const hrRouter = require("./routes/hr");
@@ -17,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(fileUpload());
 
-// signin/signup/update password
+// register/signin/signup/update password
 app.use("/api/auth", authRouter);
 app.use("/api/employee/:id", loginVerify, userVerify, employeeRouter);
 app.use("/api/hr/:id", loginVerify, userVerify, hrVerify, hrRouter);

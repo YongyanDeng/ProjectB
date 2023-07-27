@@ -18,3 +18,4 @@ mongoose
 module.exports = mongoose;
 module.exports.Employee = require("./employee");
 module.exports.Document = require("./document");
+module.exports.RegisterToken = require("./registerToken");

@@ -1,4 +1,3 @@
-// import documentSchema from "./document";
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
