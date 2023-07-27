@@ -44,7 +44,17 @@ export default function SignUp() {
             rules: [
                 {
                     required: true,
-                    message: "Invalid Password Input",
+                    message: "Password Cannot be Empty",
+                },
+            ],
+        },
+        {
+            name: "Username",
+            type: "text",
+            rules: [
+                {
+                    required: true,
+                    message: "Username Cannot be Empty",
                 },
             ],
         },

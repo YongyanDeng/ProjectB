@@ -12,7 +12,6 @@ const { Title } = Typography;
 const title = "Chuwa Employee Management System";
 
 export default function Navbar() {
-    const [open, setOpen] = useState(false);
     const { pathname: location } = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -22,17 +21,9 @@ export default function Navbar() {
     //     if (isAuthenticated) dispatch(getCart(user));
     // }, [isAuthenticated]);
 
-    useEffect(() => {
-        setOpen(false);
-    }, [location]);
-
     const handleSignoutBtnClick = (e) => {
         if (e.target.innerText === "Sign Out") dispatch(logOut());
         navigate("/signin");
-    };
-
-    const closePopover = () => {
-        setOpen(false);
     };
 
     return (

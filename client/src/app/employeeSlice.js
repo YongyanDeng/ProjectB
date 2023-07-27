@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { signup, signin, updatePassword } from "services/auth";
+import { signup, signin, updatePassword, register } from "services/auth";
 import { addError, removeError } from "./errorSlice";
 
 const initialState = {
@@ -45,6 +45,21 @@ export const updateEmployeePassword = createAsyncThunk(
             const employee = await updatePassword(data);
             thunkAPI.dispatch(removeError());
             return employee;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
+// Check if register token expired or not
+export const registerCheck = createAsyncThunk(
+    "currentEmployee/registerTokenCheck",
+    async (data, thunkAPI) => {
+        try {
+            const res = await register(data);
+            thunkAPI.dispatch(removeError());
+            return res;
         } catch (err) {
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
@@ -104,6 +119,17 @@ const currentEmployeeSlice = createSlice({
             state.status = "failed";
         });
         builder.addCase(updateEmployeePassword.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Register
+        builder.addCase(registerCheck.fulfilled, (state, action) => {
+            state.status = "successed";
+        });
+        builder.addCase(registerCheck.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(registerCheck.pending, (state, action) => {
             state.status = "pending";
         });
     },
