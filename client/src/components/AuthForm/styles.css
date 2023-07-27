@@ -1,0 +1,11 @@
+.ant-form-item-explain {
+    text-align: right;
+}
+
+@media screen and (max-width: 392px) {
+    .style_buttomText__AVtew .ant-typography,
+    .right-link {
+        width: 100%;
+        text-align: center;
+    }
+}

@@ -52,6 +52,7 @@ exports.signin = async function (req, res, next) {
 };
 
 /**
+ * Signup process.
  * @param {body: {email, password, username}} req
  * @param {id, username, role, documents, token} res
  * @param {middleware()} next
@@ -86,6 +87,7 @@ exports.signup = async function (req, res, next) {
 };
 
 /**
+ * Update employee's pasword
  * @param {body: {email, password}} req
  * @param {message} res
  * @param {middleware()} next
