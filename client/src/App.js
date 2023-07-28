@@ -4,10 +4,14 @@ import Home from "pages/Home";
 import SignUp from "pages/Signup";
 import SignIn from "pages/Signin";
 import ProtectLayout from "components/Layout/ProtectLayout";
+import HRProtectLayout from "components/Layout/HRProtectLayout";
 import AuthProtectLayout from "components/Layout/AuthProtectLayout";
 import UpdatePassword from "pages/UpdatePassword";
 import Register from "pages/Register";
 import HrOnboarding from "pages/HrOnboarding";
+import Profiles from "pages/HrProfiles";
+import Visa from "pages/HrVisa";
+import HiringManagement from "pages/HrHiringManagement";
 import NotFound from "pages/NotFound";
 
 function App() {
@@ -21,7 +25,14 @@ function App() {
                     <Route path="signin" element={<SignIn />} />
                     <Route path="updatePassword" element={<UpdatePassword />} />
                     <Route element={<AuthProtectLayout />}></Route>
-                    <Route path="onboarding/hr" element={<HrOnboarding />}></Route>
+                    <Route element={<ProtectLayout />}>
+                        <Route element={<HRProtectLayout />}>
+                            <Route path="hr/onboarding" element={<HrOnboarding />} />
+                            <Route path="hr/profiles" element={<Profiles />} />
+                            <Route path="hr/visas" element={<Visa />} />
+                            <Route path="hr/hiringManagement" element={<HiringManagement />} />
+                        </Route>
+                    </Route>
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>

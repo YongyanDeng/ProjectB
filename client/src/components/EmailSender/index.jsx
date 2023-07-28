@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
 import { Button, Form, Input, message } from "antd";
 import emailjs from "@emailjs/browser";
 
 import generateToken from "features/registerToken";
 import { sendRegisterToken } from "app/hrSlice";
 
-export default function HrOnboarding() {
+export default function EmailSender() {
     const dispatch = useDispatch();
     const { employee } = useSelector((state) => state.employee);
 
@@ -40,16 +39,15 @@ export default function HrOnboarding() {
     };
 
     return (
-        <>
+        <div className="EmailSender">
             <Form onFinish={onSubmit} autoComplete="off" layout="vertical">
                 <Form.Item
                     key="email"
                     name="email"
-                    label="email"
                     labelCol={{ span: 24 }}
                     wrapperCol={{ span: 24 }}
                 >
-                    <Input size="large"></Input>
+                    <Input size="large" placeholder="Email"></Input>
                 </Form.Item>
                 <Form.Item>
                     <Button type="primary" htmlType="submit" size="large">
@@ -57,6 +55,6 @@ export default function HrOnboarding() {
                     </Button>
                 </Form.Item>
             </Form>
-        </>
+        </div>
     );
 }
