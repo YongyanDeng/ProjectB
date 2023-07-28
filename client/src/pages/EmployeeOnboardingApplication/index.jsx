@@ -1,5 +1,5 @@
 import React from "react";
-import OnboardingForm from "./OnboardingForm";
+import OnboardingForm from "./onboardingForm";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchEmployeeAction } from "app/employeeSlice";
