@@ -8,7 +8,6 @@ import HRProtectLayout from "components/Layout/HRProtectLayout";
 import AuthProtectLayout from "components/Layout/AuthProtectLayout";
 import UpdatePassword from "pages/UpdatePassword";
 import Register from "pages/Register";
-import HrOnboarding from "pages/HrOnboarding";
 import Profiles from "pages/HrProfiles";
 import Visa from "pages/HrVisa";
 import EmailHistory from "pages/EmailHistory";
@@ -29,7 +28,6 @@ function App() {
                     </Route>
                     <Route element={<ProtectLayout />}>
                         <Route element={<HRProtectLayout />}>
-                            <Route path="hr/onboarding" element={<HrOnboarding />} />
                             <Route path="hr/profiles" element={<Profiles />} />
                             <Route path="hr/visas" element={<Visa />} />
                             <Route path="hr/emailHistory" element={<EmailHistory />} />
