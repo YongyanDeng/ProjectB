@@ -14,6 +14,8 @@ import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import style from "./onboardingForm.module.css";
 import {
+    fetchEmployeeAction,
+    updateEmployeeAction,
     setOnboardingApplication,
     uploadDocumentAction,
 } from "app/employeeSlice";
@@ -25,6 +27,10 @@ const OnboardingForm = () => {
     const [savedonboardingApplication, setSavedonboardingApplication] =
         useState(null);
     const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
+
+    // useEffect(() => {
+    //     dispatch(fetchEmployeeAction(employee.id));
+    // }, []);
 
     const onFinish = (values) => {
         // dispatch(fetchEmployeeAction(values));
@@ -44,30 +50,59 @@ const OnboardingForm = () => {
 
     const handleWorkAuthorization = (value) => {
         // Update the onboardingApplication with the selected value for usCitizen
-        dispatch(
-            setOnboardingApplication({
-                ...employee,
-                workAuthorization: value,
-            })
-        );
-    };
-    const handleStartDateChange = (date) => {
-        // Update the onboardingApplication with the selected value for startDate
-        dispatch(
-            setOnboardingApplication({
-                ...employee,
-                startDate: date,
-            })
-        );
-    };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+        dispatch(
+            setOnboardingApplication({
+                ...employee,
+                work_authorization: { title: value },
+            })
+        );
+    };
+    // const handleStartDateChange = (date) => {
+    //     // Update the onboardingApplication with the selected value for startDate
+    //     console.log("show start date", date);
+    //     dispatch(
+    //         setOnboardingApplication({
+    //             ...employee,
+    //             startDate: date,
+    //         })
+    //     );
+    // };
+
+    const handleChange = (value, name) => {
         if (Array.isArray(name)) {
             // Clone the previous form data to avoid mutating it directly
-            const formDataCopy = { ...employee };
-
+            const formDataCopy = JSON.parse(JSON.stringify(employee));
             // Traverse the nested keys to update the corresponding value
+            let result = null;
+            if (typeof value === "object") {
+                const {
+                    $y: year,
+                    $M: month,
+                    $D: day,
+                    $H: hour,
+                    $m: minute,
+                    $s: second,
+                    $ms: millisecond,
+                } = value;
+
+                // Create a new Date object using the extracted components
+                const date = new Date(
+                    year,
+                    month - 1,
+                    day,
+                    hour,
+                    minute,
+                    second,
+                    millisecond
+                );
+
+                // // Get the ISO 8601 date string
+                // result = date.toISOString();
+                result = "";
+            } else {
+                result = value;
+            }
             let tempObj = formDataCopy;
             for (let i = 0; i < name.length - 1; i++) {
                 if (!tempObj[name[i]]) {
@@ -75,13 +110,10 @@ const OnboardingForm = () => {
                 }
                 tempObj = tempObj[name[i]];
             }
-
             // Update the value of the last key in the nested structure
-            tempObj[name[name.length - 1]] = value;
-
+            tempObj[name[name.length - 1]] = result;
             dispatch(setOnboardingApplication(formDataCopy));
         }
-
         // If the name is a single string (no nested keys)
         else {
             dispatch(
@@ -204,7 +236,36 @@ const OnboardingForm = () => {
         //     dispatch(updateProductAction({ id, productId, product: product }));
         // };
         // setSavedonboardingApplication(employee);
+        // const start_date = data.work_authorization.start_date;
+        // const year = start_date.$y;
+        // const month = start_date.$M + 1; // Month starts from 0 (January) in JavaScript, so we add 1
+        // const day = start_date.$D;
+
+        // // Creating the "year-month-day" format
+        // const formattedDate = `${year}-${month
+        //     .toString()
+        //     .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+        // employee.work_authorization.start_date = formattedDate;
+        if (
+            data.work_authorization?.start_date &&
+            data.work_authorization?.start_date instanceof Date
+        ) {
+            // data.work_authorization.start_date =
+            //     data.work_authorization.start_date.toISOString();
+        }
+        if (
+            data.work_authorization?.end_date &&
+            data.work_authorization?.start_date instanceof Date
+        ) {
+            // data.work_authorization.end_date =
+            //     data.work_authorization.end_date.toISOString();
+        }
         console.log("show data", data);
+        // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
+        const savedData = Object.assign({}, employee, data);
+        dispatch(
+            updateEmployeeAction({ id: employee._id, employee: savedData })
+        );
         message.success("Form data saved successfully!");
     };
 
@@ -250,7 +311,6 @@ const OnboardingForm = () => {
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Last Name"
                         name={["name", "last_name"]}
@@ -263,21 +323,18 @@ const OnboardingForm = () => {
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Middle Name"
                         name={["name", "middle_name"]}
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Preferred Name"
                         name={["name", "preferred_name"]}
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Profile Picture"
                         valuePropName="fileList"
@@ -300,7 +357,6 @@ const OnboardingForm = () => {
                             </p>
                         </Upload.Dragger>
                     </Form.Item>
-
                     <Form.Item
                         label="Street Name"
                         name={["address", "street_name"]} // Use an array for nested fields
@@ -335,7 +391,6 @@ const OnboardingForm = () => {
                     <Form.Item label="ZIP" name={["address", "zip"]}>
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Cell Phone Number"
                         name={["contact_info", "cell_phone"]}
@@ -348,33 +403,31 @@ const OnboardingForm = () => {
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Work Phone Number"
                         name={["contact_info", "work_phone"]}
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item label="Email">
                         <Input disabled value={employee.email} />
                     </Form.Item>
-
                     <Form.Item
                         label="SSN"
                         name={["identification_info", "SSN"]}
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
                         label="Date of Birth"
                         name={["identification_info", "date_of_birth"]}
                     >
                         <Input />
                     </Form.Item>
-
-                    <Form.Item label="Gender" name="gender">
+                    <Form.Item
+                        label="Gender"
+                        name={["identification_info", "gender"]}
+                    >
                         <Select>
                             <Option value="male">Male</Option>
                             <Option value="female">Female</Option>
@@ -383,14 +436,23 @@ const OnboardingForm = () => {
                             </Option>
                         </Select>
                     </Form.Item>
-
-                    <Form.Item label="Permanent resident or citizen of the U.S.?">
+                    <Form.Item
+                        label="Permanent resident or citizen of the U.S.?"
+                        name="usCitizen"
+                    >
                         <Select onChange={handleUsCitizenChange}>
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
                         </Select>
                     </Form.Item>
-
+                    {employee.usCitizen === "yes" && (
+                        <Form.Item label="What is your work authorization?">
+                            <Select onChange={handleWorkAuthorization}>
+                                <Option value="Green Card">Green Card</Option>
+                                <Option value="Citizen">Citizen</Option>
+                            </Select>
+                        </Form.Item>
+                    )}
                     {employee.usCitizen === "no" && (
                         <div>
                             <Form.Item label="What is your work authorization?">
@@ -405,7 +467,8 @@ const OnboardingForm = () => {
                                 </Select>
                             </Form.Item>
 
-                            {employee.workAuthorization === "F1(CPT/OPT)" && (
+                            {employee.work_authorization?.title ===
+                                "F1(CPT/OPT)" && (
                                 <div>
                                     <Form.Item
                                         label="Upload PDF File"
@@ -494,7 +557,7 @@ const OnboardingForm = () => {
                                 </div>
                             )}
 
-                            {employee.workAuthorization === "Other" && (
+                            {employee.work_authorization?.title === "Other" && (
                                 <Form.Item label="Specify Visa Title">
                                     <Input />
                                 </Form.Item>
@@ -505,23 +568,27 @@ const OnboardingForm = () => {
                                 label="Start Date"
                             >
                                 <DatePicker
-                                    value={
-                                        employee.work_authorization.start_date
+                                    onChange={(value) =>
+                                        handleChange(value, [
+                                            "work_authorization",
+                                            "start_date",
+                                        ])
                                     }
-                                    onChange={handleChange}
                                 />
                             </Form.Item>
 
-                            <Form.Item label="End Date">
+                            <Form.Item
+                                label="End Date"
+                                name={["work_authorization", "end_date"]}
+                            >
                                 <DatePicker
-                                    value={employee.work_authorization.end_date}
-                                    onChange={handleChange}
+                                    // value={employee.work_authorization.end_date}
+                                    // onChange={handleChange}
                                     disabledDate={disabledEndDate}
                                 />
                             </Form.Item>
                         </div>
                     )}
-
                     <Form.Item label="Reference">
                         <Form.Item
                             name={["reference", "first_name"]}
@@ -554,7 +621,6 @@ const OnboardingForm = () => {
                             <Input />
                         </Form.Item>
                     </Form.Item>
-
                     {/* Emergency Contacts */}
                     <Form.List name="emergency_contacts">
                         {(fields, { add, remove }) => (
@@ -636,7 +702,6 @@ const OnboardingForm = () => {
                             </>
                         )}
                     </Form.List>
-
                     {/* Add summary of uploaded files or documents */}
                     {/* ... */}
                     <List
@@ -658,7 +723,6 @@ const OnboardingForm = () => {
                             </List.Item>
                         )}
                     />
-
                     <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                         <Button type="primary" htmlType="submit">
                             save
