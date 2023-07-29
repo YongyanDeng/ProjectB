@@ -12,7 +12,6 @@ const initialState = {
     isAuthenticated: false,
     employee: {},
     documents: [],
-    onboardingApplication: {},
     status: "idle",
 };
 
@@ -158,7 +157,7 @@ const currentEmployeeSlice = createSlice({
             localStorage.removeItem("token");
         },
         setOnboardingApplication: (state, action) => {
-            state.onboardingApplication = action.payload;
+            state.employee = action.payload;
         },
     },
     extraReducers: (builder) => {

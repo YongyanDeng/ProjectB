@@ -21,9 +21,7 @@ import { useEffect, useState } from "react";
 const { Option } = Select;
 const OnboardingForm = () => {
     const dispatch = useDispatch();
-    const { employee, onboardingApplication } = useSelector(
-        (state) => state.employee
-    );
+    const { employee } = useSelector((state) => state.employee);
     const [savedonboardingApplication, setSavedonboardingApplication] =
         useState(null);
     const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
@@ -38,22 +36,17 @@ const OnboardingForm = () => {
         // Update the onboardingApplication with the selected value for usCitizen
         dispatch(
             setOnboardingApplication({
-                ...onboardingApplication,
+                ...employee,
                 usCitizen: value,
             })
         );
-    };
-    const handleSaveForm = () => {
-        // Save the form data to the local state
-        setSavedonboardingApplication(employee);
-        message.success("Form data saved successfully!");
     };
 
     const handleWorkAuthorization = (value) => {
         // Update the onboardingApplication with the selected value for usCitizen
         dispatch(
             setOnboardingApplication({
-                ...onboardingApplication,
+                ...employee,
                 workAuthorization: value,
             })
         );
@@ -62,14 +55,46 @@ const OnboardingForm = () => {
         // Update the onboardingApplication with the selected value for startDate
         dispatch(
             setOnboardingApplication({
-                ...onboardingApplication,
+                ...employee,
                 startDate: date,
             })
         );
     };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (Array.isArray(name)) {
+            // Clone the previous form data to avoid mutating it directly
+            const formDataCopy = { ...employee };
+
+            // Traverse the nested keys to update the corresponding value
+            let tempObj = formDataCopy;
+            for (let i = 0; i < name.length - 1; i++) {
+                if (!tempObj[name[i]]) {
+                    tempObj[name[i]] = {};
+                }
+                tempObj = tempObj[name[i]];
+            }
+
+            // Update the value of the last key in the nested structure
+            tempObj[name[name.length - 1]] = value;
+
+            dispatch(setOnboardingApplication(formDataCopy));
+        }
+
+        // If the name is a single string (no nested keys)
+        else {
+            dispatch(
+                setOnboardingApplication({
+                    ...employee,
+                    [name]: value,
+                })
+            );
+        }
+    };
     // Function to disable dates earlier than the start date
     const disabledEndDate = (current) => {
-        const startDate = onboardingApplication.startDate;
+        const startDate = employee.startDate;
         if (!current || !startDate) {
             return false;
         }
@@ -156,6 +181,33 @@ const OnboardingForm = () => {
         );
         setUploadedfileList(newFileList);
     };
+
+    const handleSaveForm = (data) => {
+        // // Save the form data to the local state
+        // const onSubmit = (data) => {
+        //     setSubmitted(true);
+        //     const {
+        //         productName: name,
+        //         productDescription: description,
+        //         price: price,
+        //         category: category,
+        //         inStockQuantity: stockNum,
+        //         addImageLink: imageUrl,
+        //     } = data;
+        //     const product = { ...oneProduct };
+        //     product.name = name;
+        //     product.description = description;
+        //     product.price = price;
+        //     product.category = category;
+        //     product.stockNum = stockNum;
+        //     product.imageUrl = imageUrl;
+        //     dispatch(updateProductAction({ id, productId, product: product }));
+        // };
+        // setSavedonboardingApplication(employee);
+        console.log("show data", data);
+        message.success("Form data saved successfully!");
+    };
+
     const handleSubmit = () => {
         dispatch(
             uploadDocumentAction({
@@ -181,7 +233,7 @@ const OnboardingForm = () => {
             >
                 <Form
                     initialValues={employee}
-                    onFinish={onFinish}
+                    onFinish={handleSaveForm}
                     layout="vertical"
                     labelCol={{ span: 8 }}
                     wrapperCol={{ span: 16 }}
@@ -212,11 +264,17 @@ const OnboardingForm = () => {
                         <Input />
                     </Form.Item>
 
-                    <Form.Item label="Middle Name" name="middle_name">
+                    <Form.Item
+                        label="Middle Name"
+                        name={["name", "middle_name"]}
+                    >
                         <Input />
                     </Form.Item>
 
-                    <Form.Item label="Preferred Name" name="preferred_name">
+                    <Form.Item
+                        label="Preferred Name"
+                        name={["name", "preferred_name"]}
+                    >
                         <Input />
                     </Form.Item>
 
@@ -280,6 +338,7 @@ const OnboardingForm = () => {
 
                     <Form.Item
                         label="Cell Phone Number"
+                        name={["contact_info", "cell_phone"]}
                         rules={[
                             {
                                 required: true,
@@ -290,7 +349,10 @@ const OnboardingForm = () => {
                         <Input />
                     </Form.Item>
 
-                    <Form.Item label="Work Phone Number">
+                    <Form.Item
+                        label="Work Phone Number"
+                        name={["contact_info", "work_phone"]}
+                    >
                         <Input />
                     </Form.Item>
 
@@ -298,11 +360,17 @@ const OnboardingForm = () => {
                         <Input disabled value={employee.email} />
                     </Form.Item>
 
-                    <Form.Item label="SSN">
+                    <Form.Item
+                        label="SSN"
+                        name={["identification_info", "SSN"]}
+                    >
                         <Input />
                     </Form.Item>
 
-                    <Form.Item label="Date of Birth">
+                    <Form.Item
+                        label="Date of Birth"
+                        name={["identification_info", "date_of_birth"]}
+                    >
                         <Input />
                     </Form.Item>
 
@@ -323,7 +391,7 @@ const OnboardingForm = () => {
                         </Select>
                     </Form.Item>
 
-                    {onboardingApplication.usCitizen === "no" && (
+                    {employee.usCitizen === "no" && (
                         <div>
                             <Form.Item label="What is your work authorization?">
                                 <Select onChange={handleWorkAuthorization}>
@@ -337,8 +405,7 @@ const OnboardingForm = () => {
                                 </Select>
                             </Form.Item>
 
-                            {onboardingApplication.workAuthorization ===
-                                "F1(CPT/OPT)" && (
+                            {employee.workAuthorization === "F1(CPT/OPT)" && (
                                 <div>
                                     <Form.Item
                                         label="Upload PDF File"
@@ -427,19 +494,30 @@ const OnboardingForm = () => {
                                 </div>
                             )}
 
-                            {onboardingApplication.workAuthorization ===
-                                "Other" && (
+                            {employee.workAuthorization === "Other" && (
                                 <Form.Item label="Specify Visa Title">
                                     <Input />
                                 </Form.Item>
                             )}
 
-                            <Form.Item label="Start Date">
-                                <DatePicker onChange={handleStartDateChange} />
+                            <Form.Item
+                                name={["work_authorization", "start_date"]}
+                                label="Start Date"
+                            >
+                                <DatePicker
+                                    value={
+                                        employee.work_authorization.start_date
+                                    }
+                                    onChange={handleChange}
+                                />
                             </Form.Item>
 
                             <Form.Item label="End Date">
-                                <DatePicker disabledDate={disabledEndDate} />
+                                <DatePicker
+                                    value={employee.work_authorization.end_date}
+                                    onChange={handleChange}
+                                    disabledDate={disabledEndDate}
+                                />
                             </Form.Item>
                         </div>
                     )}
@@ -582,19 +660,15 @@ const OnboardingForm = () => {
                     />
 
                     <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            onClick={handleSubmit}
-                        >
-                            Submit
+                        <Button type="primary" htmlType="submit">
+                            save
                         </Button>
-                        <Button
+                        {/* <Button
                             style={{ marginLeft: 10 }}
                             onClick={handleSaveForm}
                         >
                             Save
-                        </Button>
+                        </Button> */}
                     </Form.Item>
                 </Form>
             </div>
