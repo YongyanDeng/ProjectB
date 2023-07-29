@@ -19,42 +19,41 @@ export default function Profiles() {
     }, []);
 
     useEffect(() => {
-        let key = 1;
         setList(
-            employees.map((employee) => {
-                const output = {
-                    key,
+            employees.map((employee, index) => {
+                return {
+                    key: index + 1,
                     id: employee.id,
                     email: employee.email,
                     name: `${employee.name.first_name} ${employee.name.last_name}`,
-                    phone: employee.contact_info.cell_phone,
-                    ssn: employee.identification_info.SSN,
-                    work_authorization_title: employee.work_authorization.title,
+                    phone: employee.contact_info ? employee.contact_info.cell_phone : null,
+                    ssn: employee.identification_info ? employee.identification_info.SSN : null,
+                    work_authorization_title: employee.work_authorization
+                        ? employee.work_authorization.title
+                        : null,
                 };
-                key++;
-                return output;
             }),
         );
     }, [employees]);
 
     useEffect(() => {
-        let key = 1;
         const filteredList = [];
-        for (const employee of employees) {
+        employees.forEach((employee, index) => {
             const output = {
-                key,
+                key: index + 1,
                 id: employee.id,
                 email: employee.email,
                 name: `${employee.name.first_name} ${employee.name.last_name}`,
-                phone: employee.contact_info.cell_phone,
-                ssn: employee.identification_info.SSN,
-                work_authorization_title: employee.work_authorization.title,
+                phone: employee.contact_info ? employee.contact_info.cell_phone : null,
+                ssn: employee.identification_info ? employee.identification_info.SSN : null,
+                work_authorization_title: employee.work_authorization
+                    ? employee.work_authorization.title
+                    : null,
             };
             if (output.name.toLowerCase().includes(searchInput.toLowerCase())) {
-                key++;
                 filteredList.push(output);
             }
-        }
+        });
         setList(filteredList);
     }, [searchInput]);
 
@@ -95,6 +94,7 @@ export default function Profiles() {
         <EmployeeTable
             title={title}
             searchInput={searchInput}
+            placeholder="Search by name.."
             lists={[{ name: "Profile", list }]}
             columns={columns}
             handleSearchChange={handleSearchChange}

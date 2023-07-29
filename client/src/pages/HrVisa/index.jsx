@@ -28,7 +28,9 @@ export default function Visa() {
                     id: employee.id,
                     email: employee.email,
                     name: `${employee.name.first_name} ${employee.name.last_name}`,
-                    work_authorization_title: employee.work_authorization.title,
+                    work_authorization_title: employee.work_authorization
+                        ? employee.work_authorization.title
+                        : null,
                 };
                 return output;
             }),
@@ -44,7 +46,9 @@ export default function Visa() {
                     id: employee.id,
                     email: employee.email,
                     name: `${employee.name.first_name} ${employee.name.last_name}`,
-                    work_authorization_title: employee.work_authorization.title,
+                    work_authorization_title: employee.work_authorization
+                        ? employee.work_authorization.title
+                        : null,
                 };
                 return output;
             }),
@@ -80,8 +84,8 @@ export default function Visa() {
                 filtedInProgressList.push(output);
             }
         }
-        setList((list) => filtedList);
-        setInProgressList((inProgressList) => filtedInProgressList);
+        setList(() => filtedList);
+        setInProgressList(() => filtedInProgressList);
     }, [searchInput]);
 
     // Table columns model
@@ -111,6 +115,7 @@ export default function Visa() {
     return (
         <EmployeeTable
             title={title}
+            placeholder="Search by name.."
             searchInput={searchInput}
             lists={[
                 { name: "All", list },

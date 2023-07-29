@@ -1,12 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { uploadRegisterToken, fetchAllApplications, fetchAllVisas } from "services/hr";
+import {
+    uploadRegisterToken,
+    fetchAllApplications,
+    fetchAllVisas,
+    fetchEmailHistory,
+    fetchAllOBApplication,
+} from "services/hr";
 import { addError, removeError } from "./errorSlice";
 
 const initialState = {
     employees: [],
     inProgress: [],
-    signleEmployee: {},
+    selectedEmployee: {},
+    emailHistory: [],
+    obApplications: [],
     status: "idle",
 };
 
@@ -49,6 +57,31 @@ export const getVisaList = createAsyncThunk("hr/getVisaList", async (data, thunk
     }
 });
 
+export const getEmailHistory = createAsyncThunk("hr/getEmailHistory", async (data, thunkAPI) => {
+    try {
+        const res = await fetchEmailHistory(data);
+        thunkAPI.dispatch(removeError());
+        return res;
+    } catch (err) {
+        thunkAPI.dispatch(addError(err.message));
+        return thunkAPI.rejectWithValue(err.message);
+    }
+});
+
+export const getAllOBApplication = createAsyncThunk(
+    "hr/getOnboardingApplication",
+    async (data, thunkAPI) => {
+        try {
+            const res = await fetchAllOBApplication(data);
+            thunkAPI.dispatch(removeError());
+            return res;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
 const hrSlice = createSlice({
     name: "hr",
     initialState,
@@ -87,6 +120,30 @@ const hrSlice = createSlice({
             state.status = "failed";
         });
         builder.addCase(getVisaList.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Get email history list
+        builder.addCase(getEmailHistory.fulfilled, (state, action) => {
+            state.emailHistory = action.payload;
+            state.status = "successed";
+        });
+        builder.addCase(getEmailHistory.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(getEmailHistory.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Get all onboarding applicatons
+        builder.addCase(getAllOBApplication.fulfilled, (state, action) => {
+            state.obApplications = action.payload;
+            state.status = "successed";
+        });
+        builder.addCase(getAllOBApplication.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(getAllOBApplication.pending, (state, action) => {
             state.status = "pending";
         });
     },

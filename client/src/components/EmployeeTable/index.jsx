@@ -1,14 +1,21 @@
 import "./styles.css";
 import { Typography, Input, Table, Tabs } from "antd";
 
-export default function EmployeeTable({ title, searchInput, lists, columns, handleSearchChange }) {
+export default function EmployeeTable({
+    title,
+    searchInput,
+    placeholder,
+    lists,
+    columns,
+    handleSearchChange,
+}) {
     return (
         <div className="container">
             <Typography.Title level={2}>{title}</Typography.Title>
             <Input.Search
                 className="searchBox"
                 allowClear
-                placeholder="Search by name..."
+                placeholder={placeholder}
                 value={searchInput}
                 onChange={handleSearchChange}
             />

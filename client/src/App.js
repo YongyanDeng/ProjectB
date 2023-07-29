@@ -11,6 +11,7 @@ import Register from "pages/Register";
 import HrOnboarding from "pages/HrOnboarding";
 import Profiles from "pages/HrProfiles";
 import Visa from "pages/HrVisa";
+import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
 import NotFound from "pages/NotFound";
 
@@ -21,15 +22,17 @@ function App() {
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
                     <Route path="register/:hashToken" element={<Register />} />
-                    <Route path="signup" element={<SignUp />} />
-                    <Route path="signin" element={<SignIn />} />
-                    <Route path="updatePassword" element={<UpdatePassword />} />
-                    <Route element={<AuthProtectLayout />}></Route>
+                    <Route element={<AuthProtectLayout />}>
+                        <Route path="signup" element={<SignUp />} />
+                        <Route path="signin" element={<SignIn />} />
+                        <Route path="updatePassword" element={<UpdatePassword />} />
+                    </Route>
                     <Route element={<ProtectLayout />}>
                         <Route element={<HRProtectLayout />}>
                             <Route path="hr/onboarding" element={<HrOnboarding />} />
                             <Route path="hr/profiles" element={<Profiles />} />
                             <Route path="hr/visas" element={<Visa />} />
+                            <Route path="hr/emailHistory" element={<EmailHistory />} />
                             <Route path="hr/hiringManagement" element={<HiringManagement />} />
                         </Route>
                     </Route>

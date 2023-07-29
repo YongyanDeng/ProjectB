@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
-import { Space, Spin, Typography, message } from "antd";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Spin, message } from "antd";
 
 import { registerCheck } from "app/employeeSlice";
 
@@ -14,7 +14,6 @@ export default function Register() {
     const { message: error } = useSelector((state) => state.error);
 
     useEffect(() => {
-        console.log(hashToken);
         dispatch(registerCheck({ hashToken }));
     }, []);
 

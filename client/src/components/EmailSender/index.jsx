@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Input, message } from "antd";
+import { MailOutlined } from "@ant-design/icons";
 import emailjs from "@emailjs/browser";
 
 import generateToken from "features/registerToken";
@@ -33,28 +34,34 @@ export default function EmailSender() {
             )
             .then((res) => {
                 message.success("Email Sent!");
-                dispatch(sendRegisterToken({ id: employee.id, hashToken }));
+                dispatch(sendRegisterToken({ id: employee.id, hashToken, email }));
             })
             .catch((err) => console.error(err));
     };
 
     return (
-        <div className="EmailSender">
-            <Form onFinish={onSubmit} autoComplete="off" layout="vertical">
-                <Form.Item
-                    key="email"
-                    name="email"
-                    labelCol={{ span: 24 }}
-                    wrapperCol={{ span: 24 }}
-                >
-                    <Input size="large" placeholder="Email"></Input>
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" size="large">
-                        Send Email
-                    </Button>
-                </Form.Item>
-            </Form>
-        </div>
+        <Form onFinish={onSubmit} autoComplete="off" layout="inline">
+            <Form.Item
+                key="email"
+                name="email"
+                rules={[
+                    {
+                        required: true,
+                        message: "Email Cannot be empty",
+                    },
+                    {
+                        type: "email",
+                        message: "Invalid Email Format",
+                    },
+                ]}
+            >
+                <Input prefix={<MailOutlined />} placeholder="Email"></Input>
+            </Form.Item>
+            <Form.Item>
+                <Button type="primary" htmlType="submit">
+                    Send Email
+                </Button>
+            </Form.Item>
+        </Form>
     );
 }
