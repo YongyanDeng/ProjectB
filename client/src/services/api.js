@@ -7,9 +7,11 @@ export default async function apiCall({ url: apiUrl, method, data, headers }) {
     };
 
     if (localStorage.getItem("token")) {
-        defaultHeaders["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
+        defaultHeaders["Authorization"] = `Bearer ${localStorage.getItem(
+            "token"
+        )}`;
     }
-
+    console.log("data is ", data);
     const response = await fetch(url, {
         method,
         headers: {
