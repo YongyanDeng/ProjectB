@@ -258,11 +258,18 @@ exports.getOneVisa = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            const { id, document_name, document_status } = document;
-            docs.push({
+            docs.push(document);
+        }
+
+        // Corner case
+        if (!work_authorization.title) {
+            return res.status(200).json({
                 id,
-                document_name,
-                document_status,
+                email,
+                name,
+                role,
+                work_authorization,
+                documents: docs,
             });
         }
 

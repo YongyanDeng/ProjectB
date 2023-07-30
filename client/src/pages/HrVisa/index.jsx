@@ -94,7 +94,7 @@ export default function Visa() {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            render: (text, employee) => <Link to={`/profileDetail/${employee.id}`}>{text}</Link>,
+            render: (text, employee) => <Link to={`/hr/visaDetail/${employee.id}`}>{text}</Link>,
         },
         {
             title: "Work Authorization Title",

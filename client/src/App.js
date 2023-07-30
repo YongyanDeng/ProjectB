@@ -9,9 +9,13 @@ import AuthProtectLayout from "components/Layout/AuthProtectLayout";
 import UpdatePassword from "pages/UpdatePassword";
 import Register from "pages/Register";
 import Profiles from "pages/HrProfiles";
+
 import Visa from "pages/HrVisa";
+import HrVisaDetail from "pages/HrVisaDetail";
+
 import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
+
 import NotFound from "pages/NotFound";
 
 function App() {
@@ -27,11 +31,12 @@ function App() {
                         <Route path="updatePassword" element={<UpdatePassword />} />
                     </Route>
                     <Route element={<ProtectLayout />}>
-                        <Route element={<HRProtectLayout />}>
-                            <Route path="hr/profiles" element={<Profiles />} />
-                            <Route path="hr/visas" element={<Visa />} />
-                            <Route path="hr/emailHistory" element={<EmailHistory />} />
-                            <Route path="hr/hiringManagement" element={<HiringManagement />} />
+                        <Route path="/hr" element={<HRProtectLayout />}>
+                            <Route path="profiles" element={<Profiles />} />
+                            <Route path="visas" element={<Visa />} />
+                            <Route path="emailHistory" element={<EmailHistory />} />
+                            <Route path="hiringManagement" element={<HiringManagement />} />
+                            <Route path="visaDetail/:employeeId" element={<HrVisaDetail />} />
                         </Route>
                     </Route>
                     <Route path="*" element={<NotFound />} />

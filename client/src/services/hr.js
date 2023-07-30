@@ -40,3 +40,11 @@ export const fetchAllOBApplication = async function ({ id }) {
     });
     return res;
 };
+
+export const fetchVisaDetail = async function ({ id, employeeId }) {
+    const res = await apiCall({
+        url: `/api/hr/${id}/visa/${employeeId}`,
+        method: "GET",
+    });
+    return res;
+};

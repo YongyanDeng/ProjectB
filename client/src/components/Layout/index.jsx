@@ -43,8 +43,8 @@ export default function MainLayout() {
         () => ({
             display: "flex",
             width: !isMobile ? "100%" : "392px",
-            height: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
-            padding: !isMobile ? "0 50px" : "0 6px",
+            minHeight: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
+            padding: !isMobile ? "20px 0px" : "0px 6px",
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "#F9FAFB",
