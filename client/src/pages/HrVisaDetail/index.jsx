@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Form, Input, Table, Button, Select, Space, message } from "antd";
-import { DownloadOutlined, MailOutlined } from "@ant-design/icons";
+import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 import emailjs from "@emailjs/browser";
 
 import { getVisaDetail, reviewVisa } from "app/hrSlice";
@@ -27,13 +27,10 @@ export default function HrVisaDetail() {
     useEffect(() => {
         if (status === "successed" && !!Object.keys(selectedEmployee).length) {
             const docs = selectedEmployee.documents.map((document, index) => {
-                const pdfBlob = new Blob(document.content.data, {
-                    type: "application/pdf",
-                });
                 return {
                     key: index + 1,
                     name: document.document_name,
-                    download_info: { fileName: document.document_name, pdfBlob },
+                    content: document.content.data,
                     type: document.document_type,
                     status: document.document_status,
                 };
@@ -46,7 +43,6 @@ export default function HrVisaDetail() {
             } else if (selectedEmployee.documents.length < 4) {
                 next_step = visaProcess[selectedEmployee.documents.length];
             }
-            console.log(next_step);
 
             setDetail({
                 name: `${selectedEmployee.name.first_name} ${selectedEmployee.name.last_name}`,
@@ -75,23 +71,29 @@ export default function HrVisaDetail() {
         },
         {
             title: "",
-            dataIndex: "download_info",
+            dataIndex: "content",
             key: "url",
-            render: (download_info) => {
-                return <DownloadOutlined onClick={() => handleDownload(download_info)} />;
+            render: (content) => {
+                return (
+                    <Button type="link" onClick={() => handlePreview(content)}>
+                        <FilePdfOutlined style={{ fontSize: "25px", color: "red" }} />
+                    </Button>
+                );
             },
         },
     ];
 
-    const handleDownload = (download_info) => {
-        const { fileName, pdfBlob } = download_info;
+    // handle pdf preview in new window
+    const handlePreview = (content) => {
+        // Data transfer: Buffer -> Blob
+        const uint8Array = new Uint8Array(content);
+        const pdfBlob = new Blob([uint8Array], { type: "application/pdf" });
 
-        const downloadLink = document.createElement("a");
-        downloadLink.href = URL.createObjectURL(pdfBlob);
-        downloadLink.setAttribute("download", fileName);
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        // Open the PDF in a new window or tab
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, "_blank");
+        // Revoke the object URL after use to release memory
+        URL.revokeObjectURL(pdfUrl);
     };
 
     const handleOptionChange = (value) => {
@@ -103,8 +105,6 @@ export default function HrVisaDetail() {
     };
 
     const handleNotification = async () => {
-        console.log("send notification", detail.next_step);
-
         let email = "deng.yo@northeastern.edu";
         emailjs
             .send(
@@ -124,7 +124,6 @@ export default function HrVisaDetail() {
     };
 
     const handleFormSubmit = () => {
-        console.log(employee.id, employeeId, review, feedback);
         // Update file review & feedback
         dispatch(reviewVisa({ id: employee.id, employeeId, review, feedback })).then(() =>
             message.success("Reviewed"),
