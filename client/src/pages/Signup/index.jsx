@@ -63,8 +63,8 @@ export default function SignUp() {
     const onSubmit = (data) => {
         setSubmitted(true);
         // Convert to lowercase to match database's property
-        const { Email: email, Password: password } = data;
-        dispatch(signUpEmployee({ email, password }));
+        const { Email: email, Password: password, Username: username } = data;
+        dispatch(signUpEmployee({ email, password, username }));
     };
 
     return (

@@ -7,6 +7,7 @@ import {
     fetchEmailHistory,
     fetchAllOBApplication,
     fetchVisaDetail,
+    uploadVisaReview,
 } from "services/hr";
 import { addError, removeError } from "./errorSlice";
 
@@ -94,6 +95,17 @@ export const getVisaDetail = createAsyncThunk("hr/getVisaDetail", async (data, t
     }
 });
 
+export const reviewVisa = createAsyncThunk("hr/reviewVisa", async (data, thunkAPI) => {
+    try {
+        const res = await uploadVisaReview(data);
+        thunkAPI.dispatch(removeError());
+        return res;
+    } catch (err) {
+        thunkAPI.dispatch(addError(err.message));
+        return thunkAPI.rejectWithValue(err.message);
+    }
+});
+
 const hrSlice = createSlice({
     name: "hr",
     initialState,
@@ -168,6 +180,18 @@ const hrSlice = createSlice({
             state.status = "failed";
         });
         builder.addCase(getVisaDetail.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Upload file review & feedback
+        builder.addCase(reviewVisa.fulfilled, (state, action) => {
+            state.selectedEmployee = action.payload;
+            state.status = "successed";
+        });
+        builder.addCase(reviewVisa.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(reviewVisa.pending, (state, action) => {
             state.status = "pending";
         });
     },

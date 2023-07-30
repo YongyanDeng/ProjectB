@@ -7,8 +7,7 @@ import { Form, Input, Table, Button, Select, Space, message } from "antd";
 import { DownloadOutlined, MailOutlined } from "@ant-design/icons";
 import emailjs from "@emailjs/browser";
 
-import { getVisaDetail } from "app/hrSlice";
-import generateToken from "features/registerToken";
+import { getVisaDetail, reviewVisa } from "app/hrSlice";
 
 export default function HrVisaDetail() {
     const dispatch = useDispatch();
@@ -41,11 +40,13 @@ export default function HrVisaDetail() {
             });
 
             let next_step = null;
-            if (
-                selectedEmployee.documents.length < 4 ||
-                selectedEmployee.documents.slice(-1)[0].status !== "approved"
-            )
+            const last = selectedEmployee.documents[selectedEmployee.documents.length - 1];
+            if (last?.document_status !== "approved") {
+                next_step = visaProcess[selectedEmployee.documents.length - 1];
+            } else if (selectedEmployee.documents.length < 4) {
                 next_step = visaProcess[selectedEmployee.documents.length];
+            }
+            console.log(next_step);
 
             setDetail({
                 name: `${selectedEmployee.name.first_name} ${selectedEmployee.name.last_name}`,
@@ -123,7 +124,11 @@ export default function HrVisaDetail() {
     };
 
     const handleFormSubmit = () => {
-        console.log(review, feedback);
+        console.log(employee.id, employeeId, review, feedback);
+        // Update file review & feedback
+        dispatch(reviewVisa({ id: employee.id, employeeId, review, feedback })).then(() =>
+            message.success("Reviewed"),
+        );
     };
 
     return (
@@ -196,7 +201,7 @@ export default function HrVisaDetail() {
                 {!!detail?.next_step ? (
                     <Form.Item label="Next Step">
                         <Space.Compact>
-                            <Input value={visaProcess[detail.documents.length]} />
+                            <Input value={detail.next_step} />
                             <Button type="primary" onClick={handleNotification}>
                                 <MailOutlined />
                             </Button>

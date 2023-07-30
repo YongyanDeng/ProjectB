@@ -48,3 +48,12 @@ export const fetchVisaDetail = async function ({ id, employeeId }) {
     });
     return res;
 };
+
+export const uploadVisaReview = async function ({ id, employeeId, review, feedback }) {
+    const res = await apiCall({
+        url: `/api/hr/${id}/visa/${employeeId}`,
+        method: "PUT",
+        data: { review, feedback },
+    });
+    return res;
+};
