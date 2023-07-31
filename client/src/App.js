@@ -8,16 +8,21 @@ import HRProtectLayout from "components/Layout/HRProtectLayout";
 import AuthProtectLayout from "components/Layout/AuthProtectLayout";
 import UpdatePassword from "pages/UpdatePassword";
 import Register from "pages/Register";
-import Profiles from "pages/HrProfiles";
+
+import HrProfiles from "pages/HrProfiles";
+import HrProfileDetail from "pages/HrProfileDetail";
 
 import Visa from "pages/HrVisa";
 import HrVisaDetail from "pages/HrVisaDetail";
 
 import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
+import HrOnboardingDetail from "pages/HrOnboardingDetail";
 
 import NotFound from "pages/NotFound";
-import HrProfileDetail from "pages/HrProfileDetail";
+
+import EmployeeProfile from "pages/EmployeeProfile";
+import EmployeeVisa from "pages/EmployeeVisa";
 
 function App() {
     return (
@@ -33,13 +38,19 @@ function App() {
                     </Route>
                     <Route element={<ProtectLayout />}>
                         <Route path="/hr" element={<HRProtectLayout />}>
-                            <Route path="profiles" element={<Profiles />} />
+                            <Route path="profiles" element={<HrProfiles />} />
                             <Route path="profiles/:employeeId" element={<HrProfileDetail />} />
                             <Route path="visas" element={<Visa />} />
                             <Route path="emailHistory" element={<EmailHistory />} />
                             <Route path="hiringManagement" element={<HiringManagement />} />
+                            <Route
+                                path="hiringManagement/:employeeId"
+                                element={<HrOnboardingDetail />}
+                            />
                             <Route path="visaDetail/:employeeId" element={<HrVisaDetail />} />
                         </Route>
+                        <Route path="/employee/:id/profile" element={<EmployeeProfile />} />
+                        <Route path="/employee/:id/visa" element={<EmployeeVisa />} />
                     </Route>
                     <Route path="*" element={<NotFound />} />
                 </Route>

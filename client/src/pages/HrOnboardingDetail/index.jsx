@@ -5,12 +5,12 @@ import { useParams } from "react-router-dom";
 import { getProfileDetail } from "app/hrSlice";
 import OnboardingForm from "pages/EmployeeOnboardingApplication/OnboardingForm";
 
-export default function HrProfileDetail() {
+export default function HrOnboardingDetail() {
     const dispatch = useDispatch();
     const { employeeId } = useParams();
     const { employee } = useSelector((state) => state.employee);
     const { selectedEmployee } = useSelector((state) => state.hr);
-    const title = "Persoanl Profile (View Only)";
+    const title = "Onboarding Application Detail";
 
     useEffect(() => {
         dispatch(getProfileDetail({ id: employee.id, employeeId }));
