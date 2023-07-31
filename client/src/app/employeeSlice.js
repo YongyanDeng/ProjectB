@@ -300,3 +300,4 @@ const currentEmployeeSlice = createSlice({
 export const { setCurrentEmployee, logOut, setOnboardingApplication } =
     currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;
+//
