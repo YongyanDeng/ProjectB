@@ -9,6 +9,7 @@ import {
     fetchAllOBApplication,
     fetchVisaDetail,
     uploadVisaReview,
+    uploadOBApplicationReview,
 } from "services/hr";
 import { addError, removeError } from "./errorSlice";
 
@@ -74,6 +75,20 @@ export const getAllOBApplication = createAsyncThunk(
     async (data, thunkAPI) => {
         try {
             const res = await fetchAllOBApplication(data);
+            thunkAPI.dispatch(removeError());
+            return res;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
+export const reviewOBApplication = createAsyncThunk(
+    "hr/reviewOBApplication",
+    async (data, thunkAPI) => {
+        try {
+            const res = await uploadOBApplicationReview(data);
             thunkAPI.dispatch(removeError());
             return res;
         } catch (err) {
@@ -190,6 +205,18 @@ const hrSlice = createSlice({
             state.status = "failed";
         });
         builder.addCase(getAllOBApplication.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Upload review and update state.selectedEmployee
+        builder.addCase(reviewOBApplication.fulfilled, (state, action) => {
+            state.selectedEmployee = action.payload;
+            state.status = "successed";
+        });
+        builder.addCase(reviewOBApplication.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(reviewOBApplication.pending, (state, action) => {
             state.status = "pending";
         });
 

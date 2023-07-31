@@ -32,10 +32,15 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const [selectedDate, setSelectedDate] = useState({
         work_authorization: { start_date: "", end_date: "" },
     });
+    const { message: errMessage } = useSelector((state) => state.error);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
     const [saved, setSaved] = useState(false);
+
+    // useEffect(() => {
+
+    // }, [])
 
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
@@ -47,6 +52,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             setOnboardingApplication({
                 ...employee,
                 usCitizen: value,
+            }),
             }),
         );
     };
@@ -62,12 +68,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                     title: value,
                 },
             }),
+            }),
         );
     };
 
     const handleDateChange = (date, name) => {
         // Update the onboardingApplication with the selected value for Date
 
+        const dateString = date ? dayjs(date).format("MMMM D, YYYY, h:mm A") : null;
         const dateString = date ? dayjs(date).format("MMMM D, YYYY, h:mm A") : null;
         setSelectedDate({
             work_authorization: {
@@ -128,13 +136,15 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                 document_type: "OPT RECEIPT", // The mv function is specific to the backend implementation, not relevant here
             };
 
-            // // Use the file details here, or log it to the console
+            // Use the file details here, or log it to the console
             setSelectedFile(fileDetails);
             const pdfBlob = new Blob([fileData], {
                 type: "application/pdf",
             });
+
             const pdfUrl = URL.createObjectURL(pdfBlob);
             console.log("url link", pdfUrl);
+
             const newFileList = [
                 {
                     uid: pdfFile.uid,
@@ -148,6 +158,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             setUploadedfileList(newFileList);
             onSuccess();
         };
+
         reader.onerror = () => {
             message.error("Failed to upload file.");
             onError();
@@ -158,38 +169,40 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
     const handleFileRemove = (file) => {
         const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
+        const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
         setUploadedfileList(newFileList);
     };
 
-    const handleSaveForm = (data) => {
-        const savedEmployee = { ...employee };
-        console.log("show data", data);
-        console.log("show employee", savedEmployee);
-        // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
-        const savedData = Object.assign({}, savedEmployee, data);
-        console.log("show saved data", savedData);
-        console.log("show selectedDate", selectedDate);
-        const finalData = {
-            ...savedData,
-            work_authorization: {
-                title: savedData.work_authorization.title,
-                start_date: selectedDate.work_authorization.start_date,
-                end_date: selectedDate.work_authorization.end_date,
-            },
-        };
-        console.log("show final data", finalData);
-        dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-        dispatch(
-            uploadDocumentAction({
-                id: employee?._id,
-                document: selectedFile,
-            }),
-        );
-        if (personalInfo) {
-            setIsDisable(true);
+    const handleSaveForm = async (data) => {
+        try {
+            const savedEmployee = { ...employee };
+            console.log("show data", data);
+            console.log("show employee", savedEmployee);
+            // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
+            const savedData = Object.assign({}, savedEmployee, data);
+            console.log("show saved data", savedData);
+            console.log("show selectedDate", selectedDate);
+            const finalData = {
+                ...savedData,
+                work_authorization: {
+                    title: savedData.work_authorization.title,
+                    start_date: selectedDate.work_authorization.start_date,
+                    end_date: selectedDate.work_authorization.end_date,
+                },
+            };
+            console.log("show final data", finalData);
+
+            await dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
+            if (!errMessage)
+                await dispatch(uploadDocumentAction({ id: employee?._id, document: selectedFile }));
+            if (personalInfo) {
+                setIsDisable(() => true);
+            }
+            message.success("employee data saved successfully!");
+            setSaved(() => true);
+        } catch (err) {
+            console.error(err);
         }
-        message.success("employee data saved successfully!");
-        setSaved(true);
     };
 
     const handleSubmit = () => {
@@ -285,8 +298,10 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                         <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Middle Name" name={["name", "middle_name"]}>
+                    <Form.Item label="Middle Name" name={["name", "middle_name"]}>
                         <Input disabled={isDisable} />
                     </Form.Item>
+                    <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
                     <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
                         <Input disabled={isDisable} />
                     </Form.Item>
@@ -301,6 +316,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
                     <Form.Item>
                         <img
+                            src={imageUrl ? imageUrl : employee?.profile_picture}
                             src={imageUrl ? imageUrl : employee?.profile_picture}
                             style={{
                                 width: "200px",
@@ -328,6 +344,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                         rules={[
                             {
                                 required: true,
+                                message: "Please enter your building or apt number",
                                 message: "Please enter your building or apt number",
                             },
                         ]}
@@ -382,6 +399,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                     >
                         <Input disabled={isDisable} />
                     </Form.Item>
+                    <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
                     <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
                         <Input disabled={isDisable} />
                     </Form.Item>
@@ -693,7 +711,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                             </List.Item>
                         )}
                     />
-                    {(onboardingStatus === "Never submitted" || onboardingStatus === "Rejected") &&
+                    {(onboardingStatus === "Never submitted" || onboardingStatus === "rejected") &&
                         !personalInfo && (
                             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                                 <Button type="primary" htmlType="submit">
