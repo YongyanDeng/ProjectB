@@ -1,15 +1,5 @@
 import React from "react";
-import {
-    Form,
-    Input,
-    Button,
-    Select,
-    Upload,
-    message,
-    Typography,
-    DatePicker,
-    List,
-} from "antd";
+import { Form, Input, Button, Select, Upload, message, Typography, DatePicker, List } from "antd";
 import dayjs from "dayjs";
 import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
@@ -22,13 +12,7 @@ import {
 } from "app/employeeSlice";
 import { useEffect, useState } from "react";
 const { Option } = Select;
-const OnboardingForm = ({
-    employee,
-    fields,
-    title,
-    onboardingStatus,
-    isDisabled,
-}) => {
+const OnboardingForm = ({ employee, title, onboardingStatus, isDisabled }) => {
     const dispatch = useDispatch();
     // const { employee } = useSelector((state) => state.employee);
     const [imageUrl, setImageUrl] = useState("");
@@ -54,7 +38,7 @@ const OnboardingForm = ({
             setOnboardingApplication({
                 ...employee,
                 usCitizen: value,
-            })
+            }),
         );
     };
 
@@ -68,15 +52,13 @@ const OnboardingForm = ({
                     ...employee.work_authorization,
                     title: value,
                 },
-            })
+            }),
         );
     };
     const handleDateChange = (date, name) => {
         // Update the onboardingApplication with the selected value for startDate
 
-        const dateString = date
-            ? dayjs(date).format("MMMM D, YYYY, h:mm A")
-            : null;
+        const dateString = date ? dayjs(date).format("MMMM D, YYYY, h:mm A") : null;
         setSelectedDate({
             work_authorization: {
                 ...selectedDate.work_authorization,
@@ -87,15 +69,13 @@ const OnboardingForm = ({
     const handleEndDateChange = (date) => {
         // Update the onboardingApplication with the selected value for startDate
 
-        const endDateString = date
-            ? dayjs(date).format("MMMM D, YYYY, h:mm A")
-            : null;
+        const endDateString = date ? dayjs(date).format("MMMM D, YYYY, h:mm A") : null;
 
         dispatch(
             setOnboardingApplication({
                 ...employee,
                 work_authorization: { end_date: endDateString },
-            })
+            }),
         );
     };
 
@@ -147,9 +127,7 @@ const OnboardingForm = ({
             // Get the file details
             const fileDetails = {
                 name: pdfFile.name,
-                content: btoa(
-                    String.fromCharCode.apply(null, uint8ArrayFileContent)
-                ), // Convert the ArrayBuffer to a Buffer
+                content: btoa(String.fromCharCode.apply(null, uint8ArrayFileContent)), // Convert the ArrayBuffer to a Buffer
                 size: pdfFile.size,
                 type: pdfFile.type,
                 lastModified: pdfFile.lastModified,
@@ -184,9 +162,7 @@ const OnboardingForm = ({
         reader.readAsArrayBuffer(pdfFile);
     };
     const handleFileRemove = (file) => {
-        const newFileList = uploadedfileList.filter(
-            (item) => item.uid !== file.uid
-        );
+        const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
         setUploadedfileList(newFileList);
     };
     const fullOuterJoinObjects = (obj1, obj2) => {
@@ -195,10 +171,7 @@ const OnboardingForm = ({
         // Merge properties from obj1
         for (const key in obj1) {
             if (obj1.hasOwnProperty(key)) {
-                if (
-                    typeof obj1[key] === "object" &&
-                    typeof obj2[key] === "object"
-                ) {
+                if (typeof obj1[key] === "object" && typeof obj2[key] === "object") {
                     // If both properties are objects, recursively merge the nested fields
                     result[key] = fullOuterJoinObjects(obj1[key], obj2[key]);
                 } else {
@@ -240,9 +213,7 @@ const OnboardingForm = ({
             },
         };
         console.log("show final data", finalData);
-        dispatch(
-            updateEmployeeAction({ id: employee._id, employee: finalData })
-        );
+        dispatch(updateEmployeeAction({ id: employee._id, employee: finalData }));
         message.success("Form data saved successfully!");
     };
 
@@ -251,13 +222,13 @@ const OnboardingForm = ({
             uploadDocumentAction({
                 id: employee._id,
                 document: selectedFile,
-            })
+            }),
         );
         dispatch(
             updateEmployeeAction({
                 id: employee._id,
                 employee: { onboarding_status: "Pending" },
-            })
+            }),
         );
     };
     // const inputStyles = {
@@ -356,16 +327,10 @@ const OnboardingForm = ({
                     >
                         <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item
-                        label="Middle Name"
-                        name={["name", "middle_name"]}
-                    >
+                    <Form.Item label="Middle Name" name={["name", "middle_name"]}>
                         <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item
-                        label="Preferred Name"
-                        name={["name", "preferred_name"]}
-                    >
+                    <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
                         <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item label="Profile Picture" name="profile_picture">
@@ -406,8 +371,7 @@ const OnboardingForm = ({
                         rules={[
                             {
                                 required: true,
-                                message:
-                                    "Please enter your building or apt number",
+                                message: "Please enter your building or apt number",
                             },
                         ]}
                     >
@@ -461,10 +425,7 @@ const OnboardingForm = ({
                     >
                         <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item
-                        label="Work Phone Number"
-                        name={["contact_info", "work_phone"]}
-                    >
+                    <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
                         <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item label="Email">
@@ -507,19 +468,11 @@ const OnboardingForm = ({
                         <Select disabled={isDisabled}>
                             <Option value="male">Male</Option>
                             <Option value="female">Female</Option>
-                            <Option value="other">
-                                I do not wish to answer
-                            </Option>
+                            <Option value="other">I do not wish to answer</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item
-                        label="Permanent resident or citizen of the U.S.?"
-                        name="usCitizen"
-                    >
-                        <Select
-                            onChange={handleUsCitizenChange}
-                            disabled={isDisabled}
-                        >
+                    <Form.Item label="Permanent resident or citizen of the U.S.?" name="usCitizen">
+                        <Select onChange={handleUsCitizenChange} disabled={isDisabled}>
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
                         </Select>
@@ -545,22 +498,16 @@ const OnboardingForm = ({
                                 label="What is your work authorization?"
                                 name={["work_authorization", "title"]}
                             >
-                                <Select
-                                    onChange={handleWorkAuthorization}
-                                    disabled={isDisabled}
-                                >
+                                <Select onChange={handleWorkAuthorization} disabled={isDisabled}>
                                     <Option value="H1-B">H1-B</Option>
                                     <Option value="L2">L2</Option>
-                                    <Option value="F1(CPT/OPT)">
-                                        F1(CPT/OPT)
-                                    </Option>
+                                    <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
                                     <Option value="H4">H4</Option>
                                     <Option value="Other">Other</Option>
                                 </Select>
                             </Form.Item>
 
-                            {employee.work_authorization?.title ===
-                                "F1(CPT/OPT)" && (
+                            {employee.work_authorization?.title === "F1(CPT/OPT)" && (
                                 <div>
                                     <Form.Item
                                         label="Upload PDF File"
@@ -570,8 +517,7 @@ const OnboardingForm = ({
                                                 return e;
                                             } else if (e && e.fileList) {
                                                 // Filter the fileList to contain only one file
-                                                const filteredFileList =
-                                                    e.fileList.slice(0, 0);
+                                                const filteredFileList = e.fileList.slice(0, 0);
                                                 return filteredFileList;
                                             }
                                             return [];
@@ -600,26 +546,17 @@ const OnboardingForm = ({
                                                     <InboxOutlined />
                                                 </p>
                                                 <p className="ant-upload-text">
-                                                    Click or drag a PDF file to
-                                                    this area to upload
+                                                    Click or drag a PDF file to this area to upload
                                                 </p>
                                                 <p className="ant-upload-hint">
-                                                    Support for a single or bulk
-                                                    upload.
+                                                    Support for a single or bulk upload.
                                                 </p>
                                             </Upload.Dragger>
                                             {uploadedfileList.map((file) => (
                                                 <div key={file.uid}>
-                                                    <a
-                                                        href={file.url}
-                                                        download={file.name}
-                                                    ></a>
+                                                    <a href={file.url} download={file.name}></a>
                                                     <DeleteOutlined
-                                                        onClick={() =>
-                                                            handleFileRemove(
-                                                                file
-                                                            )
-                                                        }
+                                                        onClick={() => handleFileRemove(file)}
                                                     />
                                                 </div>
                                             ))}
@@ -644,18 +581,11 @@ const OnboardingForm = ({
                                 <DatePicker
                                     disabled={isDisabled}
                                     value={
-                                        selectedDate.work_authorization
-                                            .start_date
-                                            ? dayjs(
-                                                  selectedDate
-                                                      .work_authorization
-                                                      .start_date
-                                              )
+                                        selectedDate.work_authorization.start_date
+                                            ? dayjs(selectedDate.work_authorization.start_date)
                                             : null
                                     }
-                                    onChange={(date) =>
-                                        handleDateChange(date, "start_date")
-                                    }
+                                    onChange={(date) => handleDateChange(date, "start_date")}
                                 />
                             </Form.Item>
 
@@ -667,16 +597,10 @@ const OnboardingForm = ({
                                     disabled={isDisabled}
                                     value={
                                         selectedDate.work_authorization.end_date
-                                            ? dayjs(
-                                                  selectedDate
-                                                      .work_authorization
-                                                      .end_date
-                                              )
+                                            ? dayjs(selectedDate.work_authorization.end_date)
                                             : null
                                     }
-                                    onChange={(date) =>
-                                        handleDateChange(date, "end_date")
-                                    }
+                                    onChange={(date) => handleDateChange(date, "end_date")}
                                     disabledDate={disabledEndDate}
                                 />
                             </Form.Item>
@@ -689,8 +613,7 @@ const OnboardingForm = ({
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        "Please enter your reference first name",
+                                    message: "Please enter your reference first name",
                                 },
                             ]}
                         >
@@ -702,8 +625,7 @@ const OnboardingForm = ({
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        "Please enter your reference last name",
+                                    message: "Please enter your reference last name",
                                 },
                             ]}
                         >
@@ -715,16 +637,10 @@ const OnboardingForm = ({
                         >
                             <Input />
                         </Form.Item>
-                        <Form.Item
-                            name={["reference", "referee_info", "phone"]}
-                            label="Phone"
-                        >
+                        <Form.Item name={["reference", "referee_info", "phone"]} label="Phone">
                             <Input />
                         </Form.Item>
-                        <Form.Item
-                            name={["reference", "referee_info", "email"]}
-                            label="Email"
-                        >
+                        <Form.Item name={["reference", "referee_info", "email"]} label="Email">
                             <Input disabled={isDisabled} />
                         </Form.Item>
                         <Form.Item
@@ -733,8 +649,7 @@ const OnboardingForm = ({
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        "Please enter your reference relationship",
+                                    message: "Please enter your reference relationship",
                                 },
                             ]}
                         >
@@ -744,73 +659,48 @@ const OnboardingForm = ({
                     {/* Emergency Contacts */}
                     <Form.Item label="Emergency Contact">
                         <Form.Item
-                            name={[
-                                "reference",
-                                "emergency_contact",
-                                "first_name",
-                            ]}
+                            name={["reference", "emergency_contact", "first_name"]}
                             label="First Name"
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        "Please enter your reference first name",
+                                    message: "Please enter your reference first name",
                                 },
                             ]}
                         >
                             <Input disabled={isDisabled} />
                         </Form.Item>
                         <Form.Item
-                            name={[
-                                "reference",
-                                "emergency_contact",
-                                "last_name",
-                            ]}
+                            name={["reference", "emergency_contact", "last_name"]}
                             label="Last Name"
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        "Please enter your reference last name",
+                                    message: "Please enter your reference last name",
                                 },
                             ]}
                         >
                             <Input disabled={isDisabled} />
                         </Form.Item>
                         <Form.Item
-                            name={[
-                                "reference",
-                                "emergency_contact",
-                                "middle_name",
-                            ]}
+                            name={["reference", "emergency_contact", "middle_name"]}
                             label="Middle Name"
                         >
                             <Input disabled={isDisabled} />
                         </Form.Item>
-                        <Form.Item
-                            name={["reference", "emergency_contact", "phone"]}
-                            label="Phone"
-                        >
+                        <Form.Item name={["reference", "emergency_contact", "phone"]} label="Phone">
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item name={["reference", "emergency_contact", "email"]} label="Email">
                             <Input disabled={isDisabled} />
                         </Form.Item>
                         <Form.Item
-                            name={["reference", "emergency_contact", "email"]}
-                            label="Email"
-                        >
-                            <Input disabled={isDisabled} />
-                        </Form.Item>
-                        <Form.Item
-                            name={[
-                                "reference",
-                                "emergency_contact",
-                                "relationship",
-                            ]}
+                            name={["reference", "emergency_contact", "relationship"]}
                             label="Relationship"
                             rules={[
                                 {
                                     required: true,
-                                    message:
-                                        "Please enter your emergency contact relationship",
+                                    message: "Please enter your emergency contact relationship",
                                 },
                             ]}
                         >
@@ -827,22 +717,14 @@ const OnboardingForm = ({
                         renderItem={(file) => (
                             <List.Item
                                 actions={[
-                                    <a
-                                        href={file.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
                                         Preview
                                     </a>,
                                     <a href={file.url} download={file.name}>
                                         Download
                                     </a>,
                                     !isDisabled && (
-                                        <DeleteOutlined
-                                            onClick={() =>
-                                                handleFileRemove(file)
-                                            }
-                                        />
+                                        <DeleteOutlined onClick={() => handleFileRemove(file)} />
                                     ),
                                 ]}
                             >
@@ -856,10 +738,7 @@ const OnboardingForm = ({
                             <Button type="primary" htmlType="submit">
                                 save
                             </Button>
-                            <Button
-                                style={{ marginLeft: 10 }}
-                                onClick={handleSubmit}
-                            >
+                            <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
                                 Submit
                             </Button>
                         </Form.Item>

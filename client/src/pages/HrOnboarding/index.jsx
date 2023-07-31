@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 import { getProfileDetail } from "app/hrSlice";
-import OnboardingForm from "pages/EmployeeOnboardingApplication/OnboardingForm";
 
 export default function HrOnboardingDetail() {
     const dispatch = useDispatch();
@@ -288,5 +287,9 @@ export default function HrOnboardingDetail() {
         },
     ];
 
-    return <OnboardingForm title={title} data={selectedEmployee} fields={fields} />;
+    return (
+        <>
+            <h1>HR- Onboarding Detail</h1>
+        </>
+    );
 }
