@@ -25,7 +25,7 @@ const OnboardingPage = () => {
                         personalInfo={false}
                         title={"Onboarding application"}
                         onboardingStatus={employee.onboarding_status}
-                        isDisabled={false}
+                        enableEdit={true}
                     />
                 );
 
@@ -36,7 +36,7 @@ const OnboardingPage = () => {
                         personalInfo={false}
                         title={"Resubmit for Rejected Onboarding application"}
                         onboardingStatus={employee.onboarding_status}
-                        isDisabled={false}
+                        enableEdit={true}
                     />
                 );
             case "Pending":
@@ -46,7 +46,7 @@ const OnboardingPage = () => {
                         personalInfo={false}
                         title={"Please wait for HR to review your application"}
                         onboardingStatus={employee.onboarding_status}
-                        isDisabled={true}
+                        enableEdit={false}
                     />
                 );
             case "Approved":

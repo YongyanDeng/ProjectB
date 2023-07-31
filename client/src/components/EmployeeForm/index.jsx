@@ -26,7 +26,13 @@ import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
-const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisabled }) => {
+const EmployeeForm = ({
+    employee,
+    personalInfo,
+    title,
+    onboardingStatus,
+    enableEdit,
+}) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [imageUrl, setImageUrl] = useState("");
@@ -35,7 +41,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadedfileList, setUploadedfileList] = useState([]);
-
+    const [isDisable, setIsDisable] = useState(!enableEdit);
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
     };
@@ -46,7 +52,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
             setOnboardingApplication({
                 ...employee,
                 usCitizen: value,
-            }),
+            })
         );
     };
 
@@ -60,14 +66,16 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                     ...employee?.work_authorization,
                     title: value,
                 },
-            }),
+            })
         );
     };
 
     const handleDateChange = (date, name) => {
         // Update the onboardingApplication with the selected value for Date
 
-        const dateString = date ? dayjs(date).format("MMMM D, YYYY, h:mm A") : null;
+        const dateString = date
+            ? dayjs(date).format("MMMM D, YYYY, h:mm A")
+            : null;
         setSelectedDate({
             work_authorization: {
                 ...selectedDate.work_authorization,
@@ -123,7 +131,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
             // Get the file details
             const fileDetails = {
                 name: pdfFile.name,
-                content: btoa(String.fromCharCode.apply(null, uint8ArrayFileContent)), // Convert the ArrayBuffer to a Buffer
+                content: btoa(
+                    String.fromCharCode.apply(null, uint8ArrayFileContent)
+                ), // Convert the ArrayBuffer to a Buffer
                 size: pdfFile.size,
                 type: pdfFile.type,
                 lastModified: pdfFile.lastModified,
@@ -159,7 +169,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
     };
 
     const handleFileRemove = (file) => {
-        const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
+        const newFileList = uploadedfileList.filter(
+            (item) => item.uid !== file.uid
+        );
         setUploadedfileList(newFileList);
     };
 
@@ -180,8 +192,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
             },
         };
         console.log("show final data", finalData);
-        dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-        message.success("Form data saved successfully!");
+        dispatch(
+            updateEmployeeAction({ id: employee?._id, employee: finalData })
+        );
+        if (personalInfo) {
+            setIsDisable(true);
+        }
+        message.success("employee data saved successfully!");
     };
 
     const handleSubmit = () => {
@@ -189,13 +206,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
             uploadDocumentAction({
                 id: employee?._id,
                 document: selectedFile,
-            }),
+            })
         );
         dispatch(
             updateEmployeeAction({
                 id: employee?._id,
                 employee: { onboarding_status: "Pending" },
-            }),
+            })
         );
     };
 
@@ -210,14 +227,19 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
     const handleConfirm = () => {
         // navigate to page before clicking edit
         // navigate("/");
-
-        message.success("Action confirmed");
+        setPopConfirmVisible(false);
+        setIsDisable(true);
+        message.success("cancel all personal information changes");
     };
 
     // Handler for canceling the action
     const handleCancel = () => {
         setPopConfirmVisible(false);
-        message.info("Action canceled");
+        message.info("undo cancel");
+    };
+
+    const handleEdit = () => {
+        setIsDisable(false);
     };
 
     return (
@@ -252,7 +274,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Last Name"
@@ -264,26 +286,34 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
-                    <Form.Item label="Middle Name" name={["name", "middle_name"]}>
-                        <Input disabled={isDisabled} />
+                    <Form.Item
+                        label="Middle Name"
+                        name={["name", "middle_name"]}
+                    >
+                        <Input disabled={isDisable} />
                     </Form.Item>
-                    <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
-                        <Input disabled={isDisabled} />
+                    <Form.Item
+                        label="Preferred Name"
+                        name={["name", "preferred_name"]}
+                    >
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Profile Picture" name="profile_picture">
                         <Input
                             id="image-link-input"
                             placeholder="Profile Picture"
                             onChange={handleImageLinkChange}
-                            disabled={isDisabled}
+                            disabled={isDisable}
                         />
                     </Form.Item>
 
                     <Form.Item>
                         <img
-                            src={imageUrl ? imageUrl : employee?.profile_picture}
+                            src={
+                                imageUrl ? imageUrl : employee?.profile_picture
+                            }
                             style={{
                                 width: "200px",
                                 height: "200px",
@@ -302,7 +332,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Building / Apt"
@@ -310,11 +340,12 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                         rules={[
                             {
                                 required: true,
-                                message: "Please enter your building or apt number",
+                                message:
+                                    "Please enter your building or apt number",
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="City"
@@ -326,7 +357,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="State"
@@ -338,7 +369,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="ZIP"
@@ -350,7 +381,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Cell Phone Number"
@@ -362,10 +393,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
-                    <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
-                        <Input disabled={isDisabled} />
+                    <Form.Item
+                        label="Work Phone Number"
+                        name={["contact_info", "work_phone"]}
+                    >
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Email">
                         <Input disabled value={employee?.email} />
@@ -380,7 +414,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Date of Birth"
@@ -392,7 +426,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Gender"
@@ -404,14 +438,22 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Select disabled={isDisabled}>
+                        <Select disabled={isDisable}>
                             <Option value="male">Male</Option>
                             <Option value="female">Female</Option>
-                            <Option value="other">I do not wish to answer</Option>
+                            <Option value="other">
+                                I do not wish to answer
+                            </Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Permanent resident or citizen of the U.S.?" name="usCitizen">
-                        <Select onChange={handleUsCitizenChange} disabled={isDisabled}>
+                    <Form.Item
+                        label="Permanent resident or citizen of the U.S.?"
+                        name="usCitizen"
+                    >
+                        <Select
+                            onChange={handleUsCitizenChange}
+                            disabled={isDisable}
+                        >
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
                         </Select>
@@ -424,7 +466,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             <Select
                                 value={employee?.work_authorization.title}
                                 onChange={handleWorkAuthorization}
-                                disabled={isDisabled}
+                                disabled={isDisable}
                             >
                                 <Option value="Green Card">Green Card</Option>
                                 <Option value="Citizen">Citizen</Option>
@@ -437,16 +479,22 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 label="What is your work authorization?"
                                 name={["work_authorization", "title"]}
                             >
-                                <Select onChange={handleWorkAuthorization} disabled={isDisabled}>
+                                <Select
+                                    onChange={handleWorkAuthorization}
+                                    disabled={isDisable}
+                                >
                                     <Option value="H1-B">H1-B</Option>
                                     <Option value="L2">L2</Option>
-                                    <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
+                                    <Option value="F1(CPT/OPT)">
+                                        F1(CPT/OPT)
+                                    </Option>
                                     <Option value="H4">H4</Option>
                                     <Option value="Other">Other</Option>
                                 </Select>
                             </Form.Item>
 
-                            {employee?.work_authorization?.title === "F1(CPT/OPT)" &&
+                            {employee?.work_authorization?.title ===
+                                "F1(CPT/OPT)" &&
                                 !personalInfo && (
                                     <div>
                                         <Form.Item
@@ -457,7 +505,8 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                                     return e;
                                                 } else if (e && e.fileList) {
                                                     // Filter the fileList to contain only one file
-                                                    const filteredFileList = e.fileList.slice(0, 0);
+                                                    const filteredFileList =
+                                                        e.fileList.slice(0, 0);
                                                     return filteredFileList;
                                                 }
                                                 return [];
@@ -478,7 +527,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                                     accept=".pdf"
                                                     multiple={false}
                                                     beforeUpload={beforeUpload}
-                                                    customRequest={handleFileUpload}
+                                                    customRequest={
+                                                        handleFileUpload
+                                                    }
                                                     fileList={uploadedfileList}
                                                     onChange={handleFileChange}
                                                 >
@@ -486,32 +537,45 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                                         <InboxOutlined />
                                                     </p>
                                                     <p className="ant-upload-text">
-                                                        Click or drag a PDF file to this area to
-                                                        upload
+                                                        Click or drag a PDF file
+                                                        to this area to upload
                                                     </p>
                                                     <p className="ant-upload-hint">
-                                                        Support for a single or bulk upload.
+                                                        Support for a single or
+                                                        bulk upload.
                                                     </p>
                                                 </Upload.Dragger>
-                                                {uploadedfileList.map((file) => (
-                                                    <div key={file.uid}>
-                                                        <a href={file.url} download={file.name}></a>
-                                                        <DeleteOutlined
-                                                            onClick={() => handleFileRemove(file)}
-                                                        />
-                                                    </div>
-                                                ))}
+                                                {uploadedfileList.map(
+                                                    (file) => (
+                                                        <div key={file.uid}>
+                                                            <a
+                                                                href={file.url}
+                                                                download={
+                                                                    file.name
+                                                                }
+                                                            ></a>
+                                                            <DeleteOutlined
+                                                                onClick={() =>
+                                                                    handleFileRemove(
+                                                                        file
+                                                                    )
+                                                                }
+                                                            />
+                                                        </div>
+                                                    )
+                                                )}
                                             </div>
                                         </Form.Item>
                                     </div>
                                 )}
 
-                            {employee?.work_authorization?.title === "Other" && (
+                            {employee?.work_authorization?.title ===
+                                "Other" && (
                                 <Form.Item
                                     label="Specify Visa Title"
                                     name={["work_authorization", "title"]}
                                 >
-                                    <Input disabled={isDisabled} />
+                                    <Input disabled={isDisable} />
                                 </Form.Item>
                             )}
 
@@ -520,13 +584,20 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 label="Start Date"
                             >
                                 <DatePicker
-                                    disabled={isDisabled}
+                                    disabled={isDisable}
                                     value={
-                                        selectedDate.work_authorization.start_date
-                                            ? dayjs(selectedDate.work_authorization.start_date)
+                                        selectedDate.work_authorization
+                                            .start_date
+                                            ? dayjs(
+                                                  selectedDate
+                                                      .work_authorization
+                                                      .start_date
+                                              )
                                             : null
                                     }
-                                    onChange={(date) => handleDateChange(date, "start_date")}
+                                    onChange={(date) =>
+                                        handleDateChange(date, "start_date")
+                                    }
                                 />
                             </Form.Item>
 
@@ -535,13 +606,19 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 // name={["work_authorization", "end_date"]}
                             >
                                 <DatePicker
-                                    disabled={isDisabled}
+                                    disabled={isDisable}
                                     value={
                                         selectedDate.work_authorization.end_date
-                                            ? dayjs(selectedDate.work_authorization.end_date)
+                                            ? dayjs(
+                                                  selectedDate
+                                                      .work_authorization
+                                                      .end_date
+                                              )
                                             : null
                                     }
-                                    onChange={(date) => handleDateChange(date, "end_date")}
+                                    onChange={(date) =>
+                                        handleDateChange(date, "end_date")
+                                    }
                                     disabledDate={disabledEndDate}
                                 />
                             </Form.Item>
@@ -550,104 +627,154 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                     {!personalInfo && (
                         <Form.Item label="Reference">
                             <Form.Item
-                                name={["reference", "referee_info", "first_name"]}
+                                name={[
+                                    "reference",
+                                    "referee_info",
+                                    "first_name",
+                                ]}
                                 label="First Name"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter your reference first name",
+                                        message:
+                                            "Please enter your reference first name",
                                     },
                                 ]}
                             >
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
-                                name={["reference", "referee_info", "last_name"]}
+                                name={[
+                                    "reference",
+                                    "referee_info",
+                                    "last_name",
+                                ]}
                                 label="Last Name"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter your reference last name",
+                                        message:
+                                            "Please enter your reference last name",
                                     },
                                 ]}
                             >
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
-                                name={["reference", "referee_info", "middle_name"]}
+                                name={[
+                                    "reference",
+                                    "referee_info",
+                                    "middle_name",
+                                ]}
                                 label="Middle Name"
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item name={["reference", "referee_info", "phone"]} label="Phone">
+                            <Form.Item
+                                name={["reference", "referee_info", "phone"]}
+                                label="Phone"
+                            >
                                 <Input />
                             </Form.Item>
-                            <Form.Item name={["reference", "referee_info", "email"]} label="Email">
-                                <Input disabled={isDisabled} />
+                            <Form.Item
+                                name={["reference", "referee_info", "email"]}
+                                label="Email"
+                            >
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
-                                name={["reference", "referee_info", "relationship"]}
+                                name={[
+                                    "reference",
+                                    "referee_info",
+                                    "relationship",
+                                ]}
                                 label="Relationship"
                                 rules={[
                                     {
                                         required: true,
-                                        message: "Please enter your reference relationship",
+                                        message:
+                                            "Please enter your reference relationship",
                                     },
                                 ]}
                             >
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                         </Form.Item>
                     )}
                     {/* Emergency Contacts */}
                     <Form.Item label="Emergency Contact">
                         <Form.Item
-                            name={["reference", "emergency_contact", "first_name"]}
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "first_name",
+                            ]}
                             label="First Name"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Please enter your reference first name",
+                                    message:
+                                        "Please enter your reference first name",
                                 },
                             ]}
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
-                            name={["reference", "emergency_contact", "last_name"]}
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "last_name",
+                            ]}
                             label="Last Name"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Please enter your reference last name",
+                                    message:
+                                        "Please enter your reference last name",
                                 },
                             ]}
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
-                            name={["reference", "emergency_contact", "middle_name"]}
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "middle_name",
+                            ]}
                             label="Middle Name"
                         >
-                            <Input disabled={isDisabled} />
-                        </Form.Item>
-                        <Form.Item name={["reference", "emergency_contact", "phone"]} label="Phone">
-                            <Input disabled={isDisabled} />
-                        </Form.Item>
-                        <Form.Item name={["reference", "emergency_contact", "email"]} label="Email">
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
-                            name={["reference", "emergency_contact", "relationship"]}
+                            name={["reference", "emergency_contact", "phone"]}
+                            label="Phone"
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            name={["reference", "emergency_contact", "email"]}
+                            label="Email"
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "relationship",
+                            ]}
                             label="Relationship"
                             rules={[
                                 {
                                     required: true,
-                                    message: "Please enter your emergency contact relationship",
+                                    message:
+                                        "Please enter your emergency contact relationship",
                                 },
                             ]}
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                     </Form.Item>
 
@@ -660,14 +787,22 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                         renderItem={(file) => (
                             <List.Item
                                 actions={[
-                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
                                         Preview
                                     </a>,
                                     <a href={file.url} download={file.name}>
                                         Download
                                     </a>,
-                                    !isDisabled && !personalInfo && (
-                                        <DeleteOutlined onClick={() => handleFileRemove(file)} />
+                                    !isDisable && !personalInfo && (
+                                        <DeleteOutlined
+                                            onClick={() =>
+                                                handleFileRemove(file)
+                                            }
+                                        />
                                     ),
                                 ]}
                             >
@@ -675,43 +810,60 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             </List.Item>
                         )}
                     />
-                    {(onboardingStatus === "Never submitted" || onboardingStatus === "rejected") &&
+                    {(onboardingStatus === "Never submitted" ||
+                        onboardingStatus === "rejected") &&
                         !personalInfo && (
                             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                                 <Button type="primary" htmlType="submit">
                                     save
                                 </Button>
-                                <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
+                                <Button
+                                    style={{ marginLeft: 10 }}
+                                    onClick={handleSubmit}
+                                >
                                     Submit
                                 </Button>
                             </Form.Item>
                         )}
 
-                    {personalInfo && (
+                    {personalInfo && isDisable && (
                         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                            <Button type="primary" htmlType="submit">
-                                save
-                            </Button>
-                            <Button style={{ marginLeft: 10 }} onClick={handleFirstCancelButton}>
-                                cancel
+                            <Button
+                                style={{ marginLeft: 10 }}
+                                onClick={handleEdit}
+                            >
+                                Edit
                             </Button>
                         </Form.Item>
                     )}
 
-                    {personalInfo && (
-                        <Form.Item>
-                            {/* The button or element that triggers the Popconfirm */}
-                            <Popconfirm
-                                title="Are you sure you want to perform this action?"
-                                visible={popConfirmVisible}
-                                onConfirm={handleConfirm}
-                                onCancel={handleCancel}
-                                okText="Yes"
-                                cancelText="No"
-                            >
-                                <button onClick={() => setPopConfirmVisible(true)}>Delete</button>
-                            </Popconfirm>
-                        </Form.Item>
+                    {personalInfo && !isDisable && (
+                        <div>
+                            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                                <Button type="primary" htmlType="submit">
+                                    save
+                                </Button>
+                                <Button
+                                    style={{ marginLeft: 10 }}
+                                    onClick={handleFirstCancelButton}
+                                >
+                                    cancel
+                                </Button>
+                            </Form.Item>
+
+                            <Form.Item>
+                                {/* The button or element that triggers the Popconfirm */}
+                                <Popconfirm
+                                    title="Are you sure you want to discard all of
+                                the changes?"
+                                    open={popConfirmVisible}
+                                    onConfirm={handleConfirm}
+                                    onCancel={handleCancel}
+                                    okText="Yes"
+                                    cancelText="No"
+                                ></Popconfirm>
+                            </Form.Item>
+                        </div>
                     )}
                 </Form>
             </div>

@@ -37,7 +37,7 @@ const PersonalInfoPage = () => {
                     personalInfo={true}
                     title={"Personal Information"}
                     onboardingStatus={detail.onboarding_status}
-                    isDisabled={true}
+                    enableEdit={false}
                 />
             ) : (
                 <h1>Loading..</h1>
