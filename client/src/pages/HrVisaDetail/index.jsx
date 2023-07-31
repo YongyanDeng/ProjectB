@@ -9,6 +9,8 @@ import emailjs from "@emailjs/browser";
 
 import { getVisaDetail, reviewVisa } from "app/hrSlice";
 
+const visaProcess = ["OPT Receipt", "OPT EAD", "I-983", "I-20"];
+
 export default function HrVisaDetail() {
     const dispatch = useDispatch();
     const { employeeId } = useParams();
@@ -17,7 +19,6 @@ export default function HrVisaDetail() {
     const [detail, setDetail] = useState(null);
     const [review, setReview] = useState("");
     const [feedback, setFeedback] = useState("");
-    const visaProcess = ["OPT Receipt", "OPT EAD", "I-983", "I-20"];
 
     useEffect(() => {
         emailjs.init(process.env.REACT_APP_EMAILJS_PUBLIC_KEY);
