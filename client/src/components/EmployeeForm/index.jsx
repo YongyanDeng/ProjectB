@@ -1,10 +1,4 @@
-import style from "./style.module.css";
-
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import dayjs from "dayjs";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import React from "react";
 import {
     Form,
     Input,
@@ -17,13 +11,17 @@ import {
     List,
     Popconfirm,
 } from "antd";
-
+import dayjs from "dayjs";
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useSelector, useDispatch } from "react-redux";
+import style from "./style.module.css";
 import {
     fetchEmployeeAction,
     updateEmployeeAction,
     setOnboardingApplication,
     uploadDocumentAction,
 } from "app/employeeSlice";
+import { useEffect, useState } from "react";
 
 const { Option } = Select;
 
@@ -34,10 +32,15 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const [selectedDate, setSelectedDate] = useState({
         work_authorization: { start_date: "", end_date: "" },
     });
+    const { message: errMessage } = useSelector((state) => state.error);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
     const [saved, setSaved] = useState(false);
+
+    // useEffect(() => {
+
+    // }, [])
 
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
@@ -130,13 +133,15 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                 document_type: "OPT RECEIPT", // The mv function is specific to the backend implementation, not relevant here
             };
 
-            // // Use the file details here, or log it to the console
+            // Use the file details here, or log it to the console
             setSelectedFile(fileDetails);
             const pdfBlob = new Blob([fileData], {
                 type: "application/pdf",
             });
+
             const pdfUrl = URL.createObjectURL(pdfBlob);
             console.log("url link", pdfUrl);
+
             const newFileList = [
                 {
                     uid: pdfFile.uid,
@@ -150,6 +155,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             setUploadedfileList(newFileList);
             onSuccess();
         };
+
         reader.onerror = () => {
             message.error("Failed to upload file.");
             onError();
@@ -163,35 +169,36 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         setUploadedfileList(newFileList);
     };
 
-    const handleSaveForm = (data) => {
-        const savedEmployee = { ...employee };
-        console.log("show data", data);
-        console.log("show employee", savedEmployee);
-        // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
-        const savedData = Object.assign({}, savedEmployee, data);
-        console.log("show saved data", savedData);
-        console.log("show selectedDate", selectedDate);
-        const finalData = {
-            ...savedData,
-            work_authorization: {
-                title: savedData.work_authorization.title,
-                start_date: selectedDate.work_authorization.start_date,
-                end_date: selectedDate.work_authorization.end_date,
-            },
-        };
-        console.log("show final data", finalData);
-        dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-        dispatch(
-            uploadDocumentAction({
-                id: employee?._id,
-                document: selectedFile,
-            }),
-        );
-        if (personalInfo) {
-            setIsDisable(true);
+    const handleSaveForm = async (data) => {
+        try {
+            const savedEmployee = { ...employee };
+            console.log("show data", data);
+            console.log("show employee", savedEmployee);
+            // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
+            const savedData = Object.assign({}, savedEmployee, data);
+            console.log("show saved data", savedData);
+            console.log("show selectedDate", selectedDate);
+            const finalData = {
+                ...savedData,
+                work_authorization: {
+                    title: savedData.work_authorization.title,
+                    start_date: selectedDate.work_authorization.start_date,
+                    end_date: selectedDate.work_authorization.end_date,
+                },
+            };
+            console.log("show final data", finalData);
+
+            await dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
+            if (!errMessage)
+                await dispatch(uploadDocumentAction({ id: employee?._id, document: selectedFile }));
+            if (personalInfo) {
+                setIsDisable(() => true);
+            }
+            message.success("employee data saved successfully!");
+            setSaved(() => true);
+        } catch (err) {
+            console.error(err);
         }
-        message.success("employee data saved successfully!");
-        setSaved(true);
     };
 
     const handleSubmit = () => {
@@ -430,7 +437,11 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                             <Option value="other">I do not wish to answer</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item label="Permanent resident or citizen of the U.S.?" name="usCitizen">
+                    <Form.Item
+                        label="Permanent resident or citizen of the U.S.?"
+                        name="usCitizen"
+                        rules={[{ required: true }]}
+                    >
                         <Select onChange={handleUsCitizenChange} disabled={isDisable}>
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
