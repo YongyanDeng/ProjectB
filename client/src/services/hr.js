@@ -49,6 +49,15 @@ export const fetchAllOBApplication = async function ({ id }) {
     return res;
 };
 
+export const uploadOBApplicationReview = async function ({ id, employeeId, review, feedback }) {
+    const res = await apiCall({
+        url: `/api/hr/${id}/applications/${employeeId}`,
+        method: "PUT",
+        data: { review, feedback },
+    });
+    return res;
+};
+
 export const fetchVisaDetail = async function ({ id, employeeId }) {
     const res = await apiCall({
         url: `/api/hr/${id}/visa/${employeeId}`,
