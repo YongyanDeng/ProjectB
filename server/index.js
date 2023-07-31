@@ -20,7 +20,7 @@ app.use(fileUpload());
 
 // register/signin/signup/update password
 app.use("/api/auth", authRouter);
-app.use("/api/employees/:id", loginVerify, userVerify, employeeRouter);
+app.use("/api/employee/:id", loginVerify, userVerify, employeeRouter);
 app.use("/api/hr/:id", loginVerify, userVerify, hrVerify, hrRouter);
 
 // Wrong url matching

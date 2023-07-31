@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { signup, signin, updatePassword } from "services/auth";
+
+import { signup, signin, updatePassword, register } from "services/auth";
 import {
     fetchEmployee,
     updateEmployee,
@@ -13,7 +14,6 @@ import { addError, removeError } from "./errorSlice";
 const initialState = {
     isAuthenticated: false,
     employee: {},
-    documents: [],
     status: "idle",
 };
 
@@ -60,6 +60,22 @@ export const updateEmployeePassword = createAsyncThunk(
     }
 );
 
+
+// Check if register token expired or not
+export const registerCheck = createAsyncThunk(
+    "currentEmployee/registerTokenCheck",
+    async (data, thunkAPI) => {
+        try {
+            const res = await register(data);
+            thunkAPI.dispatch(removeError());
+            return res;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
+
 export const fetchEmployeeAction = createAsyncThunk(
     "currentEmployee/fetchEmployeeInfo",
     async (data, thunkAPI) => {
@@ -67,7 +83,7 @@ export const fetchEmployeeAction = createAsyncThunk(
             const employee = await fetchEmployee(data);
             thunkAPI.dispatch(removeError());
             return employee;
-        } catch (err) {
+         } catch (err) {
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
@@ -172,12 +188,12 @@ const currentEmployeeSlice = createSlice({
         // },
     },
     extraReducers: (builder) => {
-        // Sign in
+       // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
-            const { id, username, role, name, ducoments, feedback } =
-                action.payload;
-            state.employee = action.payload;
+            state.cart = action.payload.cart;
+            const { id, username, role, name, ducoments, feedback } = action.payload;
+            state.employee = { id, username, role, name, ducoments, feedback };
             state.status = "successed";
         });
         builder.addCase(signInEmployee.rejected, (state, action) => {
@@ -208,6 +224,17 @@ const currentEmployeeSlice = createSlice({
             state.status = "failed";
         });
         builder.addCase(updateEmployeePassword.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Register
+        builder.addCase(registerCheck.fulfilled, (state, action) => {
+            state.status = "successed";
+        });
+        builder.addCase(registerCheck.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(registerCheck.pending, (state, action) => {
             state.status = "pending";
         });
 
@@ -282,11 +309,5 @@ const currentEmployeeSlice = createSlice({
     },
 });
 
-export const {
-    setCurrentEmployee,
-    logOut,
-    setOnboardingApplication,
-    // addOnboardingDocuments,
-    // removeOnboardingDocuments,
-} = currentEmployeeSlice.actions;
+export const { setCurrentEmployee, logOut, setOnboardingApplication } = currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;
