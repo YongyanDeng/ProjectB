@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { getProfileList } from "app/hrSlice";
 import EmployeeTable from "components/EmployeeTable";
 
-export default function Profiles() {
+export default function HrProfiles() {
     const dispatch = useDispatch();
     const { employee } = useSelector((state) => state.employee);
     const { employees } = useSelector((state) => state.hr);

@@ -58,14 +58,14 @@ export default function Navbar() {
                       link: "/",
                   },
                   {
-                      name: "Visa Status Management",
-                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
-                      link: "/hr/visas",
+                      name: "Personal Information",
+                      icon: <UserOutlined style={{ fontSize: "20px" }} />,
+                      link: `/employee/${employee.id}/profile`,
                   },
                   {
-                      name: "Hiring Management",
-                      icon: <AuditOutlined style={{ fontSize: "20px" }} />,
-                      link: "/hr/hiringManagement",
+                      name: "Visa Status Management",
+                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
+                      link: `/employee/${employee.id}/visa`,
                   },
               ]);
     }, [employee]);

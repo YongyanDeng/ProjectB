@@ -55,9 +55,6 @@ export default function HiringManagement() {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            render: (text, application) => (
-                <Link to={`/applicationDetail/${application.id}`}>{text}</Link>
-            ),
         },
         {
             title: "Email",
@@ -65,10 +62,10 @@ export default function HiringManagement() {
             key: "email",
         },
         {
-            title: "",
+            title: "Onboarding Status",
             key: "View Application",
-            render: (text, application) => (
-                <Link to={`/applicationDetail/${application.id}`}>View Application</Link>
+            render: (application) => (
+                <Link to={`/hr/hiringManagement/${application.id}`}>View Application</Link>
             ),
         },
     ];
