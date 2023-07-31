@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 
 const registerTokenSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-    },
     token: {
         type: String,
         required: true,
@@ -13,15 +9,9 @@ const registerTokenSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    status: {
-        type: String,
-        default: "pending",
-    },
 });
+// Setup TTL
+registerTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const RegisterToken = mongoose.model("RegisterToken", registerTokenSchema);
 module.exports = RegisterToken;

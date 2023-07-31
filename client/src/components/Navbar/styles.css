@@ -38,27 +38,21 @@
     cursor: pointer;
 }
 
-.DrawerContent {
+.ant-popover-title {
+    margin: 0 !important;
+}
+
+.ant-popover-inner {
+    padding: 0 !important;
+}
+
+.ant-popover-inner-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-
-.ant-drawer-header {
-    background-color: #111827;
-    height: 48px;
-}
-
-.ant-drawer-title {
-    color: #ffffff !important;
-}
-
-.ant-list-item {
-    justify-content: space-between !important;
-}
-
-li.ant-list-item:hover {
-    color: #448ff7;
+    width: 600px;
+    max-height: 650px;
+    overflow: auto;
+    padding: 0px 10px;
 }
 
 /* small screen responsive design */

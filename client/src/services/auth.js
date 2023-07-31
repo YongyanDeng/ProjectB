@@ -26,11 +26,3 @@ export const updatePassword = async (data) => {
     });
     return res;
 };
-
-export const register = async ({ hashToken }) => {
-    const res = await apiCall({
-        url: `api/auth/register/${hashToken}`,
-        method: "GET",
-    });
-    return res;
-};
