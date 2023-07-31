@@ -1,6 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+
 import { signup, signin, updatePassword, register } from "services/auth";
+import {
+    fetchEmployee,
+    updateEmployee,
+    uploadDocument,
+    fetchDocuments,
+    deleteDocument,
+} from "services/employee";
 import { addError, removeError } from "./errorSlice";
 
 const initialState = {
@@ -20,7 +28,7 @@ export const signUpEmployee = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    },
+    }
 );
 
 export const signInEmployee = createAsyncThunk(
@@ -35,7 +43,7 @@ export const signInEmployee = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    },
+    }
 );
 
 export const updateEmployeePassword = createAsyncThunk(
@@ -49,8 +57,9 @@ export const updateEmployeePassword = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    },
+    }
 );
+
 
 // Check if register token expired or not
 export const registerCheck = createAsyncThunk(
@@ -64,7 +73,91 @@ export const registerCheck = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    },
+    }
+);
+
+export const fetchEmployeeAction = createAsyncThunk(
+    "currentEmployee/fetchEmployeeInfo",
+    async (data, thunkAPI) => {
+        try {
+            const employee = await fetchEmployee(data);
+            thunkAPI.dispatch(removeError());
+            return employee;
+         } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
+
+export const updateEmployeeAction = createAsyncThunk(
+    "currentEmployee/updateEmployeeInfo",
+    async (data, thunkAPI) => {
+        try {
+            const employee = await updateEmployee(data);
+            thunkAPI.dispatch(removeError());
+            return employee;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
+
+export const fetchDocumentsAction = createAsyncThunk(
+    "currentEmployee/fetchDocuments",
+    async (data, thunkAPI) => {
+        try {
+            const documents = await fetchDocuments(data);
+            thunkAPI.dispatch(removeError());
+            return documents;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
+
+// export const fetchOneDocumentAction = createAsyncThunk(
+//     "currentEmployee/fetchDocuments",
+//     async (data, thunkAPI) => {
+//         try {
+//             const document = await fetchOneDocument(data);
+//             thunkAPI.dispatch(removeError());
+//             return document;
+//         } catch (err) {
+//             thunkAPI.dispatch(addError(err.message));
+//             return thunkAPI.rejectWithValue(err.message);
+//         }
+//     }
+// );
+
+export const uploadDocumentAction = createAsyncThunk(
+    "currentEmployee/uploadDocument",
+    async (data, thunkAPI) => {
+        try {
+            const uploadedDocument = await uploadDocument(data);
+            thunkAPI.dispatch(removeError());
+            return uploadedDocument;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
+
+export const deleteDocumentAction = createAsyncThunk(
+    "currentEmployee/fetchDocuments",
+    async (data, thunkAPI) => {
+        try {
+            const Document = await deleteDocument(data);
+            thunkAPI.dispatch(removeError());
+            return Document;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
 );
 
 const currentEmployeeSlice = createSlice({
@@ -81,9 +174,21 @@ const currentEmployeeSlice = createSlice({
             state.status = "idle";
             localStorage.removeItem("token");
         },
+        setOnboardingApplication: (state, action) => {
+            state.employee = action.payload;
+        },
+        // addOnboardingDocuments: (state, action) => {
+        //     state.documents.push(action.payload);
+        // },
+        // removeOnboardingDocuments: (state, action) => {
+        //     const newFileList = state.documents.filter(
+        //         (item) => item.uid !== action.payload.uid
+        //     );
+        //     state.documents = newFileList;
+        // },
     },
     extraReducers: (builder) => {
-        // Sign in
+       // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
             state.cart = action.payload.cart;
@@ -132,8 +237,77 @@ const currentEmployeeSlice = createSlice({
         builder.addCase(registerCheck.pending, (state, action) => {
             state.status = "pending";
         });
+
+        //get employee info
+        builder.addCase(fetchEmployeeAction.fulfilled, (state, action) => {
+            state.employee = action.payload;
+            state.status = "successed";
+        });
+        builder.addCase(fetchEmployeeAction.rejected, (state, action) => {
+            state.employee = state.status = "failed";
+        });
+        builder.addCase(fetchEmployeeAction.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        //update employee info
+        builder.addCase(updateEmployeeAction.fulfilled, (state, action) => {
+            state.status = "successed";
+            state.employee = action.payload;
+        });
+        builder.addCase(updateEmployeeAction.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(updateEmployeeAction.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        //upload document
+        builder.addCase(uploadDocumentAction.fulfilled, (state, action) => {
+            state.status = "successed";
+        });
+        builder.addCase(uploadDocumentAction.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(uploadDocumentAction.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        //get docuemnts info
+        builder.addCase(fetchDocumentsAction.fulfilled, (state, action) => {
+            state.status = "successed";
+            state.documents = action.payload;
+        });
+        builder.addCase(fetchDocumentsAction.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(fetchDocumentsAction.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // //remove seleted document
+        // builder.addCase(deleteDocumentAction.fulfilled, (state, action) => {
+        //     state.status = "successed";
+        // });
+        // builder.addCase(deleteDocumentAction.rejected, (state, action) => {
+        //     state.status = "failed";
+        // });
+        // builder.addCase(deleteDocumentAction.pending, (state, action) => {
+        //     state.status = "pending";
+        // });
+
+        // //get employee info
+        // builder.addCase(updateEmployeePassword.fulfilled, (state, action) => {
+        //     state.status = "successed";
+        // });
+        // builder.addCase(updateEmployeePassword.rejected, (state, action) => {
+        //     state.status = "failed";
+        // });
+        // builder.addCase(updateEmployeePassword.pending, (state, action) => {
+        //     state.status = "pending";
+        // });
     },
 });
 
-export const { setCurrentEmployee, logOut } = currentEmployeeSlice.actions;
+export const { setCurrentEmployee, logOut, setOnboardingApplication } = currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;
