@@ -43,12 +43,13 @@ export default function MainLayout() {
         () => ({
             display: "flex",
             width: !isMobile ? "100%" : "392px",
-            minHeight: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
-            padding: !isMobile ? "20px 0px" : "0px 6px",
+            height: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
+            // padding: !isMobile ? "0px 0px" : "0px 6px",
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "#F9FAFB",
             overflow: "auto",
+            // margin: !isMobile ? "48px 0px 85px 0px" : "0px 6px",
         }),
         [isMobile],
     );

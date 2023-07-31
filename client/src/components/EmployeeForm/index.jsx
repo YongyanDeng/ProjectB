@@ -1,4 +1,10 @@
-import React from "react";
+import style from "./style.module.css";
+
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
     Form,
     Input,
@@ -11,18 +17,13 @@ import {
     List,
     Popconfirm,
 } from "antd";
-import dayjs from "dayjs";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useSelector, useDispatch } from "react-redux";
-import style from "./style.module.css";
+
 import {
     fetchEmployeeAction,
     updateEmployeeAction,
     setOnboardingApplication,
     uploadDocumentAction,
 } from "app/employeeSlice";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 

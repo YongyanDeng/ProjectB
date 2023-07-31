@@ -17,7 +17,7 @@ import HrVisaDetail from "pages/HrVisaDetail";
 
 import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
-import HrOnboardingDetail from "pages/HrOnboarding";
+import HrOnboardingDetail from "pages/HrOnboardingDetail";
 
 import PersonalInfoPage from "pages/EmployeePersonalInfo";
 import EmployeeVisa from "pages/EmployeeVisa";

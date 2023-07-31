@@ -9,7 +9,7 @@ export default function HrProfiles() {
     const dispatch = useDispatch();
     const { employee } = useSelector((state) => state.employee);
     const { employees } = useSelector((state) => state.hr);
-    const [list, setList] = useState([]);
+    const [list, setList] = useState(null);
     const [searchInput, setSearchInput] = useState("");
     const title = "Employee Profiles";
 
@@ -91,13 +91,19 @@ export default function HrProfiles() {
     };
 
     return (
-        <EmployeeTable
-            title={title}
-            searchInput={searchInput}
-            placeholder="Search by name.."
-            lists={[{ name: "Profile", list }]}
-            columns={columns}
-            handleSearchChange={handleSearchChange}
-        />
+        <div>
+            {list && employees ? (
+                <EmployeeTable
+                    title={title}
+                    searchInput={searchInput}
+                    placeholder="Search by name.."
+                    lists={[{ name: "Profile", list }]}
+                    columns={columns}
+                    handleSearchChange={handleSearchChange}
+                />
+            ) : (
+                <h1>Loading...</h1>
+            )}
+        </div>
     );
 }

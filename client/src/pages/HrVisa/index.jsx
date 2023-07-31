@@ -9,8 +9,8 @@ export default function Visa() {
     const dispatch = useDispatch();
     const { employee } = useSelector((state) => state.employee);
     const { employees, inProgress } = useSelector((state) => state.hr);
-    const [list, setList] = useState([]);
-    const [inProgressList, setInProgressList] = useState([]);
+    const [list, setList] = useState(null);
+    const [inProgressList, setInProgressList] = useState(null);
     const [searchInput, setSearchInput] = useState("");
     const title = "Visa Profiles";
 
@@ -113,16 +113,22 @@ export default function Visa() {
     };
 
     return (
-        <EmployeeTable
-            title={title}
-            placeholder="Search by name.."
-            searchInput={searchInput}
-            lists={[
-                { name: "All", list },
-                { name: "In Progress", list: inProgressList },
-            ]}
-            columns={columns}
-            handleSearchChange={handleSearchChange}
-        />
+        <>
+            {list && inProgressList ? (
+                <EmployeeTable
+                    title={title}
+                    placeholder="Search by name.."
+                    searchInput={searchInput}
+                    lists={[
+                        { name: "All", list },
+                        { name: "In Progress", list: inProgressList },
+                    ]}
+                    columns={columns}
+                    handleSearchChange={handleSearchChange}
+                />
+            ) : (
+                <h1>Loading...</h1>
+            )}
+        </>
     );
 }

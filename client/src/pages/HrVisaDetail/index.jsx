@@ -16,6 +16,7 @@ export default function HrVisaDetail() {
     const { employeeId } = useParams();
     const { employee } = useSelector((state) => state.employee);
     const { selectedEmployee, status } = useSelector((state) => state.hr);
+    const { error: errMessage } = useSelector((state) => state.error);
     const [detail, setDetail] = useState(null);
     const [review, setReview] = useState("");
     const [feedback, setFeedback] = useState("");
@@ -40,7 +41,7 @@ export default function HrVisaDetail() {
             let next_step = null;
             const last = selectedEmployee.documents[selectedEmployee.documents.length - 1];
             if (last?.document_status !== "approved") {
-                next_step = visaProcess[selectedEmployee.documents.length - 1];
+                next_step = visaProcess[Math.min(3, selectedEmployee.documents.length - 1)];
             } else if (selectedEmployee.documents.length < 4) {
                 next_step = visaProcess[selectedEmployee.documents.length];
             }
@@ -126,94 +127,108 @@ export default function HrVisaDetail() {
 
     const handleFormSubmit = () => {
         // Update file review & feedback
-        dispatch(reviewVisa({ id: employee.id, employeeId, review, feedback })).then(() =>
-            message.success("Reviewed"),
-        );
+        dispatch(reviewVisa({ id: employee.id, employeeId, review, feedback }))
+            .then(() => message.success("Reviewed"))
+            .catch((err) => {
+                message.error(errMessage);
+            });
     };
 
     return (
-        <div className="detail">
-            <Form onFinish={handleFormSubmit} labelAlign="left" labelCol={{ span: 10 }}>
-                <Form.Item label="Name">
-                    <Input value={detail?.name} disabled={true} />
-                </Form.Item>
-                <Form.Item label="Work Authorization">
-                    <Input value={detail?.work_authorization.title} disabled={true} />
-                </Form.Item>
-                <Form.Item label="Start Date">
-                    <Input
-                        value={new Date(detail?.work_authorization.start_date).toLocaleString(
-                            "en-US",
-                            {
-                                month: "numeric",
-                                day: "numeric",
-                                year: "numeric",
-                            },
-                        )}
-                        disabled={true}
-                    />
-                </Form.Item>
-                <Form.Item label="End Date">
-                    <Input
-                        value={new Date(detail?.work_authorization.end_date).toLocaleString(
-                            "en-US",
-                            {
-                                month: "numeric",
-                                day: "numeric",
-                                year: "numeric",
-                            },
-                        )}
-                        disabled={true}
-                    />
-                </Form.Item>
-                <Form.Item label="Remaining">
-                    <Input
-                        value={detail?.work_authorization.remaining_days}
-                        disabled={true}
-                        suffix="days"
-                    />
-                </Form.Item>
-                <Form.Item>
-                    <Table dataSource={detail?.documents} columns={columns} />
-                </Form.Item>
-                {detail?.next_step ? (
-                    <Form.Item label="Review">
-                        <Select
-                            placeholder="HR Review"
-                            options={[
-                                { value: "approved", label: "Approve" },
-                                { value: "rejected", label: "Reject" },
-                            ]}
-                            onChange={handleOptionChange}
-                        />
-                    </Form.Item>
-                ) : null}
-                {review === "rejected" ? (
-                    <Form.Item label="Feedback">
-                        <Input.TextArea
-                            rows={4}
-                            placeholder="Write your feedback here."
-                            value={feedback}
-                            onChange={handleFeedback}
-                        />
-                    </Form.Item>
-                ) : null}
-                {!!detail?.next_step ? (
-                    <Form.Item label="Next Step">
-                        <Space.Compact>
-                            <Input value={detail.next_step} />
-                            <Button type="primary" onClick={handleNotification}>
-                                <MailOutlined />
+        <>
+            {detail ? (
+                <div className="detail">
+                    <Form onFinish={handleFormSubmit} labelAlign="left" labelCol={{ span: 10 }}>
+                        <Form.Item label="Name">
+                            <Input value={detail.name} disabled={true} />
+                        </Form.Item>
+                        <Form.Item label="Work Authorization">
+                            <Input value={detail.work_authorization.title} disabled={true} />
+                        </Form.Item>
+                        <Form.Item label="Start Date">
+                            <Input
+                                value={
+                                    detail.work_authorization.start_date
+                                        ? new Date(
+                                              detail.work_authorization.start_date,
+                                          ).toLocaleString("en-US", {
+                                              month: "numeric",
+                                              day: "numeric",
+                                              year: "numeric",
+                                          })
+                                        : null
+                                }
+                                disabled={true}
+                            />
+                        </Form.Item>
+                        <Form.Item label="End Date">
+                            <Input
+                                value={
+                                    detail.work_authorization.end_date
+                                        ? new Date(
+                                              detail.work_authorization.end_date,
+                                          ).toLocaleString("en-US", {
+                                              month: "numeric",
+                                              day: "numeric",
+                                              year: "numeric",
+                                          })
+                                        : null
+                                }
+                                disabled={true}
+                            />
+                        </Form.Item>
+                        <Form.Item label="Remaining">
+                            <Input
+                                value={detail?.work_authorization.remaining_days}
+                                disabled={true}
+                                suffix="days"
+                            />
+                        </Form.Item>
+                        <Form.Item>
+                            <Table dataSource={detail?.documents} columns={columns} />
+                        </Form.Item>
+                        {detail.next_step ? (
+                            <Form.Item label="Review">
+                                <Select
+                                    placeholder="HR Review"
+                                    options={[
+                                        { value: "approved", label: "Approve" },
+                                        { value: "rejected", label: "Reject" },
+                                    ]}
+                                    onChange={handleOptionChange}
+                                />
+                            </Form.Item>
+                        ) : null}
+                        {review === "rejected" ? (
+                            <Form.Item label="Feedback">
+                                <Input.TextArea
+                                    rows={4}
+                                    placeholder="Write your feedback here."
+                                    value={feedback}
+                                    onChange={handleFeedback}
+                                />
+                            </Form.Item>
+                        ) : null}
+                        {detail.next_step ? (
+                            <Form.Item label="Next Step">
+                                <Space.Compact>
+                                    <Input value={detail.next_step} />
+                                    <Button type="primary" onClick={handleNotification}>
+                                        <MailOutlined />
+                                    </Button>
+                                </Space.Compact>
+                            </Form.Item>
+                        ) : null}
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit">
+                                Submit
                             </Button>
-                        </Space.Compact>
-                    </Form.Item>
-                ) : null}
-                <Form.Item>
-                    <Button type="primary" htmlType="submit">
-                        Submit
-                    </Button>
-                </Form.Item>
-            </Form>
-        </div>
+                        </Form.Item>
+                    </Form>
+                </div>
+            ) : (
+                <h1>Loading..</h1>
+            )}
+        </>
     );
 }

@@ -12,7 +12,7 @@ export default function HiringManagement() {
     const dispatch = useDispatch();
     const { employee } = useSelector((state) => state.employee);
     const { obApplications } = useSelector((state) => state.hr);
-    const [list, setList] = useState([]);
+    const [list, setList] = useState(null);
     const [searchInput, setSearchInput] = useState("");
     const title = "Hiring Management";
 
@@ -80,15 +80,18 @@ export default function HiringManagement() {
                 <EmailSender />
                 <Link to="/hr/emailHistory">Email History</Link>
             </div>
-
-            <EmployeeTable
-                title={title}
-                searchInput={searchInput}
-                placeholder="Search by name.."
-                lists={[{ name: "Onboarding Applications", list }]}
-                columns={columns}
-                handleSearchChange={handleSearchChange}
-            />
+            {list && obApplications ? (
+                <EmployeeTable
+                    title={title}
+                    searchInput={searchInput}
+                    placeholder="Search by name.."
+                    lists={[{ name: "Onboarding Applications", list }]}
+                    columns={columns}
+                    handleSearchChange={handleSearchChange}
+                />
+            ) : (
+                <h1>Loading..</h1>
+            )}
         </div>
     );
 }
