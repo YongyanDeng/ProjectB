@@ -44,7 +44,17 @@ export default function SignUp() {
             rules: [
                 {
                     required: true,
-                    message: "Invalid Password Input",
+                    message: "Password Cannot be Empty",
+                },
+            ],
+        },
+        {
+            name: "Username",
+            type: "text",
+            rules: [
+                {
+                    required: true,
+                    message: "Username Cannot be Empty",
                 },
             ],
         },
@@ -53,8 +63,8 @@ export default function SignUp() {
     const onSubmit = (data) => {
         setSubmitted(true);
         // Convert to lowercase to match database's property
-        const { Email: email, Password: password } = data;
-        dispatch(signUpEmployee({ email, password }));
+        const { Email: email, Password: password, Username: username } = data;
+        dispatch(signUpEmployee({ email, password, username }));
     };
 
     return (

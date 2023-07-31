@@ -2,15 +2,17 @@ const db = require("../models");
 const bcrypt = require("bcrypt");
 
 // Generate a random token with bcrypt, then upload to db
+
 exports.uploadRegisterToken = async function (req, res, next) {
     try {
-        const { hashToken } = req.body;
+        const { email, hashToken } = req.body;
         // Set expiration as 3 hours later
         const expirationTime = new Date();
-        expirationTime.setMinutes(expirationTime.getMinutes() + 2);
+        expirationTime.setMinutes(expirationTime.getMinutes() + 1);
 
         // Upload to db
         const createdToken = await db.RegisterToken.create({
+            email,
             token: hashToken,
             expiresAt: expirationTime,
         });
@@ -29,15 +31,39 @@ exports.uploadRegisterToken = async function (req, res, next) {
 
 exports.registerTokenCheck = async function (req, res, next) {
     try {
-        const foundToken = await db.RegisterToken.findOne({ token: req.params.hashToken });
+        const decodedToken = decodeURIComponent(req.params.hashToken);
+        const foundToken = await db.RegisterToken.findOne({ token: decodedToken });
+        if (!foundToken) return res.status(401).json({ error: { message: "Token not exist" } });
 
-        if (!foundToken) return res.status(401).json({ error: "Registration token expired" });
+        // Check token's status
+        if (foundToken.status === "pending") {
+            foundToken.status = "activated";
+            await foundToken.save();
+        } else {
+            return res
+                .status(401)
+                .json({ error: { message: `Your register token is ${foundToken.status}!` } });
+        }
 
-        // redirect to signup process
         return res.status(200).json({
             foundToken,
         });
     } catch (err) {
-        return next(err);
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+exports.getAllToken = async function (req, res, next) {
+    try {
+        const tokens = await db.RegisterToken.find();
+        return res.status(200).json(tokens);
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
     }
 };
