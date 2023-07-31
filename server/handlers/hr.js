@@ -51,13 +51,6 @@ exports.getAllApplications = async function (req, res, next) {
 
         const output = employees?.reduce((acc, employee) => {
             const { id, email, name, role, onboarding_status } = employee;
-            // if (onboarding_status !== "Never submitted") {
-            //     acc.push({
-            //         id,
-            //         email,
-            //         name,
-            //     });
-            // }
             acc.push({
                 id,
                 email,
@@ -89,6 +82,7 @@ exports.getAnApplicaton = async function (req, res, next) {
 
         const {
             id,
+            email,
             username,
             name,
             role,
@@ -106,11 +100,26 @@ exports.getAnApplicaton = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            const { _id, document_name, document_status } = document;
-            docs.push({
+            docs.push(document);
+        }
+
+        // Corner case
+        if (!work_authorization.title) {
+            return res.status(200).json({
                 id,
-                document_name,
-                document_status,
+                email,
+                username,
+                name,
+                role,
+                address,
+                profile_picture,
+                contact_Info,
+                identification_info,
+                work_authorization,
+                reference,
+                onboarding_status,
+                documents: docs,
+                feedback,
             });
         }
 
@@ -126,6 +135,7 @@ exports.getAnApplicaton = async function (req, res, next) {
         // Output
         return res.status(200).json({
             id,
+            email,
             username,
             name,
             role,
