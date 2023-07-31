@@ -22,7 +22,6 @@ import {
     uploadDocumentAction,
 } from "app/employeeSlice";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -34,7 +33,7 @@ const EmployeeForm = ({
     enableEdit,
 }) => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+
     const [imageUrl, setImageUrl] = useState("");
     const [selectedDate, setSelectedDate] = useState({
         work_authorization: { start_date: "", end_date: "" },
@@ -42,6 +41,8 @@ const EmployeeForm = ({
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
+    const [saved, setSaved] = useState(false);
+
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
     };
@@ -110,9 +111,6 @@ const EmployeeForm = ({
             message.error(`${info.file.name} file upload failed.`);
         }
     };
-    // const handleFileChange = (event) => {
-    //   setSelectedFile(event.target.files[0]);
-    // };
 
     const handleFileUpload = ({ file, onSuccess, onError }) => {
         console.log("file", file.name);
@@ -195,25 +193,39 @@ const EmployeeForm = ({
         dispatch(
             updateEmployeeAction({ id: employee?._id, employee: finalData })
         );
-        if (personalInfo) {
-            setIsDisable(true);
-        }
-        message.success("employee data saved successfully!");
-    };
-
-    const handleSubmit = () => {
         dispatch(
             uploadDocumentAction({
                 id: employee?._id,
                 document: selectedFile,
             })
         );
-        dispatch(
-            updateEmployeeAction({
-                id: employee?._id,
-                employee: { onboarding_status: "Pending" },
-            })
-        );
+        if (personalInfo) {
+            setIsDisable(true);
+        }
+        message.success("employee data saved successfully!");
+        setSaved(true);
+    };
+
+    const handleSubmit = () => {
+        if (saved) {
+            dispatch(
+                uploadDocumentAction({
+                    id: employee?._id,
+                    document: selectedFile,
+                })
+            );
+            dispatch(
+                updateEmployeeAction({
+                    id: employee?._id,
+                    employee: { onboarding_status: "Pending" },
+                })
+            );
+            setIsDisable(true);
+        } else {
+            message.error(
+                "please save onboarding application before clicking submit"
+            );
+        }
     };
 
     //for personal info
@@ -498,7 +510,7 @@ const EmployeeForm = ({
                                 !personalInfo && (
                                     <div>
                                         <Form.Item
-                                            label="Upload PDF File"
+                                            label="Upload OPT RECEIPT File"
                                             name="pdfFile"
                                             getValueFromEvent={(e) => {
                                                 if (Array.isArray(e)) {
@@ -526,6 +538,7 @@ const EmployeeForm = ({
                                                     name="pdfFile"
                                                     accept=".pdf"
                                                     multiple={false}
+                                                    disabled={isDisable}
                                                     beforeUpload={beforeUpload}
                                                     customRequest={
                                                         handleFileUpload
@@ -537,12 +550,12 @@ const EmployeeForm = ({
                                                         <InboxOutlined />
                                                     </p>
                                                     <p className="ant-upload-text">
-                                                        Click or drag a PDF file
-                                                        to this area to upload
+                                                        please upload OPT
+                                                        RECEIPT file
                                                     </p>
                                                     <p className="ant-upload-hint">
-                                                        Support for a single or
-                                                        bulk upload.
+                                                        Support for a single
+                                                        upload.
                                                     </p>
                                                 </Upload.Dragger>
                                                 {uploadedfileList.map(
@@ -668,13 +681,13 @@ const EmployeeForm = ({
                                 ]}
                                 label="Middle Name"
                             >
-                                <Input />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
                                 name={["reference", "referee_info", "phone"]}
                                 label="Phone"
                             >
-                                <Input />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
                                 name={["reference", "referee_info", "email"]}
