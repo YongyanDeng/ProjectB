@@ -180,9 +180,8 @@ const currentEmployeeSlice = createSlice({
         // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
-            state.cart = action.payload.cart;
-            const { id, username, role, name, ducoments, feedback } = action.payload;
-            state.employee = { id, username, role, name, ducoments, feedback };
+            const { id, username, role, name, documents, feedback } = action.payload;
+            state.employee = { id, username, role, name, documents, feedback };
             state.status = "successed";
         });
         builder.addCase(signInEmployee.rejected, (state, action) => {
