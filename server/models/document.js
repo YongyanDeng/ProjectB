@@ -37,7 +37,6 @@ const documentSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
-    uid: { type: String },
 });
 
 documentSchema.pre("deleteOne", { document: true }, async function (next) {
