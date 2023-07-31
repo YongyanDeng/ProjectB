@@ -10,14 +10,6 @@ const PersonalInfoPage = () => {
     const { employee, status } = useSelector((state) => state.employee);
     const [detail, setDetail] = useState(null);
 
-    // useEffect(() => {
-    //     if (status === "successed" && submitted) {
-    //         navigate("/");
-    //     } else if (status === "failed" && submitted) {
-    //         message.error(`${error}`);
-    //     }
-    // }, [submitted, status]);
-
     useEffect(() => {
         dispatch(fetchEmployeeAction(employee.id));
         // dispatch(fetchDocumentsAction(employee.id));
@@ -37,7 +29,7 @@ const PersonalInfoPage = () => {
                     personalInfo={true}
                     title={"Personal Information"}
                     onboardingStatus={detail.onboarding_status}
-                    isDisabled={true}
+                    enableEdit={false}
                 />
             ) : (
                 <h1>Loading..</h1>

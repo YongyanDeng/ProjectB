@@ -19,12 +19,10 @@ import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
 import HrOnboardingDetail from "pages/HrOnboardingDetail";
 
-import PersonalInfoPage from "pages/EmployeePersonalInfo";
-import EmployeeVisa from "pages/EmployeeVisa";
-
 import NotFound from "pages/NotFound";
-
+import PersonalInfoPage from "pages/EmployeePersonalInfo";
 import OnboardingPage from "pages/EmployeeOnboardingApplication";
+import EmployeeVisa from "pages/EmployeeVisa";
 
 function App() {
     return (
@@ -51,8 +49,11 @@ function App() {
                             />
                             <Route path="visaDetail/:employeeId" element={<HrVisaDetail />} />
                         </Route>
-                        <Route path="/employee/onboarding" element={<OnboardingPage />} />
-                        <Route path="/employee/:id/profile" element={<PersonalInfoPage />} />
+                        <Route path="/employee/:id/OnboardingPage" element={<OnboardingPage />} />
+                        <Route
+                            path="/employee/:id/PersonalInfoPage"
+                            element={<PersonalInfoPage />}
+                        />
                         <Route path="/employee/:id/visa" element={<EmployeeVisa />} />
                     </Route>
                     <Route path="*" element={<NotFound />} />

@@ -27,15 +27,17 @@ import {
 
 const { Option } = Select;
 
-const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisabled }) => {
+const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableEdit }) => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+
     const [imageUrl, setImageUrl] = useState("");
     const [selectedDate, setSelectedDate] = useState({
         work_authorization: { start_date: "", end_date: "" },
     });
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadedfileList, setUploadedfileList] = useState([]);
+    const [isDisable, setIsDisable] = useState(!enableEdit);
+    const [saved, setSaved] = useState(false);
 
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
@@ -103,9 +105,6 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
             message.error(`${info.file.name} file upload failed.`);
         }
     };
-    // const handleFileChange = (event) => {
-    //   setSelectedFile(event.target.files[0]);
-    // };
 
     const handleFileUpload = ({ file, onSuccess, onError }) => {
         console.log("file", file.name);
@@ -182,22 +181,37 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
         };
         console.log("show final data", finalData);
         dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-        message.success("Form data saved successfully!");
-    };
-
-    const handleSubmit = () => {
         dispatch(
             uploadDocumentAction({
                 id: employee?._id,
                 document: selectedFile,
             }),
         );
-        dispatch(
-            updateEmployeeAction({
-                id: employee?._id,
-                employee: { onboarding_status: "Pending" },
-            }),
-        );
+        if (personalInfo) {
+            setIsDisable(true);
+        }
+        message.success("employee data saved successfully!");
+        setSaved(true);
+    };
+
+    const handleSubmit = () => {
+        if (saved) {
+            dispatch(
+                uploadDocumentAction({
+                    id: employee?._id,
+                    document: selectedFile,
+                }),
+            );
+            dispatch(
+                updateEmployeeAction({
+                    id: employee?._id,
+                    employee: { onboarding_status: "Pending" },
+                }),
+            );
+            setIsDisable(true);
+        } else {
+            message.error("please save onboarding application before clicking submit");
+        }
     };
 
     //for personal info
@@ -211,14 +225,19 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
     const handleConfirm = () => {
         // navigate to page before clicking edit
         // navigate("/");
-
-        message.success("Action confirmed");
+        setPopConfirmVisible(false);
+        setIsDisable(true);
+        message.success("cancel all personal information changes");
     };
 
     // Handler for canceling the action
     const handleCancel = () => {
         setPopConfirmVisible(false);
-        message.info("Action canceled");
+        message.info("undo cancel");
+    };
+
+    const handleEdit = () => {
+        setIsDisable(false);
     };
 
     return (
@@ -253,7 +272,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Last Name"
@@ -265,20 +284,20 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Middle Name" name={["name", "middle_name"]}>
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Profile Picture" name="profile_picture">
                         <Input
                             id="image-link-input"
                             placeholder="Profile Picture"
                             onChange={handleImageLinkChange}
-                            disabled={isDisabled}
+                            disabled={isDisable}
                         />
                     </Form.Item>
 
@@ -303,7 +322,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Building / Apt"
@@ -315,7 +334,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="City"
@@ -327,7 +346,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="State"
@@ -339,7 +358,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="ZIP"
@@ -351,7 +370,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Cell Phone Number"
@@ -363,10 +382,10 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item label="Email">
                         <Input disabled value={employee?.email} />
@@ -381,7 +400,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Date of Birth"
@@ -393,7 +412,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Input disabled={isDisabled} />
+                        <Input disabled={isDisable} />
                     </Form.Item>
                     <Form.Item
                         label="Gender"
@@ -405,14 +424,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             },
                         ]}
                     >
-                        <Select disabled={isDisabled}>
+                        <Select disabled={isDisable}>
                             <Option value="male">Male</Option>
                             <Option value="female">Female</Option>
                             <Option value="other">I do not wish to answer</Option>
                         </Select>
                     </Form.Item>
                     <Form.Item label="Permanent resident or citizen of the U.S.?" name="usCitizen">
-                        <Select onChange={handleUsCitizenChange} disabled={isDisabled}>
+                        <Select onChange={handleUsCitizenChange} disabled={isDisable}>
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
                         </Select>
@@ -425,7 +444,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             <Select
                                 value={employee?.work_authorization.title}
                                 onChange={handleWorkAuthorization}
-                                disabled={isDisabled}
+                                disabled={isDisable}
                             >
                                 <Option value="Green Card">Green Card</Option>
                                 <Option value="Citizen">Citizen</Option>
@@ -438,7 +457,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 label="What is your work authorization?"
                                 name={["work_authorization", "title"]}
                             >
-                                <Select onChange={handleWorkAuthorization} disabled={isDisabled}>
+                                <Select onChange={handleWorkAuthorization} disabled={isDisable}>
                                     <Option value="H1-B">H1-B</Option>
                                     <Option value="L2">L2</Option>
                                     <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
@@ -451,7 +470,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 !personalInfo && (
                                     <div>
                                         <Form.Item
-                                            label="Upload PDF File"
+                                            label="Upload OPT RECEIPT File"
                                             name="pdfFile"
                                             getValueFromEvent={(e) => {
                                                 if (Array.isArray(e)) {
@@ -478,6 +497,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                                     name="pdfFile"
                                                     accept=".pdf"
                                                     multiple={false}
+                                                    disabled={isDisable}
                                                     beforeUpload={beforeUpload}
                                                     customRequest={handleFileUpload}
                                                     fileList={uploadedfileList}
@@ -487,11 +507,10 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                                         <InboxOutlined />
                                                     </p>
                                                     <p className="ant-upload-text">
-                                                        Click or drag a PDF file to this area to
-                                                        upload
+                                                        please upload OPT RECEIPT file
                                                     </p>
                                                     <p className="ant-upload-hint">
-                                                        Support for a single or bulk upload.
+                                                        Support for a single upload.
                                                     </p>
                                                 </Upload.Dragger>
                                                 {uploadedfileList.map((file) => (
@@ -512,7 +531,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                     label="Specify Visa Title"
                                     name={["work_authorization", "title"]}
                                 >
-                                    <Input disabled={isDisabled} />
+                                    <Input disabled={isDisable} />
                                 </Form.Item>
                             )}
 
@@ -521,7 +540,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 label="Start Date"
                             >
                                 <DatePicker
-                                    disabled={isDisabled}
+                                    disabled={isDisable}
                                     value={
                                         selectedDate.work_authorization.start_date
                                             ? dayjs(selectedDate.work_authorization.start_date)
@@ -536,7 +555,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 // name={["work_authorization", "end_date"]}
                             >
                                 <DatePicker
-                                    disabled={isDisabled}
+                                    disabled={isDisable}
                                     value={
                                         selectedDate.work_authorization.end_date
                                             ? dayjs(selectedDate.work_authorization.end_date)
@@ -560,7 +579,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                     },
                                 ]}
                             >
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
                                 name={["reference", "referee_info", "last_name"]}
@@ -572,19 +591,19 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                     },
                                 ]}
                             >
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
                                 name={["reference", "referee_info", "middle_name"]}
                                 label="Middle Name"
                             >
-                                <Input />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item name={["reference", "referee_info", "phone"]} label="Phone">
-                                <Input />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item name={["reference", "referee_info", "email"]} label="Email">
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                             <Form.Item
                                 name={["reference", "referee_info", "relationship"]}
@@ -596,7 +615,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                     },
                                 ]}
                             >
-                                <Input disabled={isDisabled} />
+                                <Input disabled={isDisable} />
                             </Form.Item>
                         </Form.Item>
                     )}
@@ -612,7 +631,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 },
                             ]}
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
                             name={["reference", "emergency_contact", "last_name"]}
@@ -624,19 +643,19 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 },
                             ]}
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
                             name={["reference", "emergency_contact", "middle_name"]}
                             label="Middle Name"
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item name={["reference", "emergency_contact", "phone"]} label="Phone">
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item name={["reference", "emergency_contact", "email"]} label="Email">
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
                             name={["reference", "emergency_contact", "relationship"]}
@@ -648,7 +667,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                 },
                             ]}
                         >
-                            <Input disabled={isDisabled} />
+                            <Input disabled={isDisable} />
                         </Form.Item>
                     </Form.Item>
 
@@ -667,7 +686,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                                     <a href={file.url} download={file.name}>
                                         Download
                                     </a>,
-                                    !isDisabled && !personalInfo && (
+                                    !isDisable && !personalInfo && (
                                         <DeleteOutlined onClick={() => handleFileRemove(file)} />
                                     ),
                                 ]}
@@ -688,31 +707,41 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, isDisab
                             </Form.Item>
                         )}
 
-                    {personalInfo && (
+                    {personalInfo && isDisable && (
                         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                            <Button type="primary" htmlType="submit">
-                                save
-                            </Button>
-                            <Button style={{ marginLeft: 10 }} onClick={handleFirstCancelButton}>
-                                cancel
+                            <Button style={{ marginLeft: 10 }} onClick={handleEdit}>
+                                Edit
                             </Button>
                         </Form.Item>
                     )}
 
-                    {personalInfo && (
-                        <Form.Item>
-                            {/* The button or element that triggers the Popconfirm */}
-                            <Popconfirm
-                                title="Are you sure you want to perform this action?"
-                                visible={popConfirmVisible}
-                                onConfirm={handleConfirm}
-                                onCancel={handleCancel}
-                                okText="Yes"
-                                cancelText="No"
-                            >
-                                <button onClick={() => setPopConfirmVisible(true)}>Delete</button>
-                            </Popconfirm>
-                        </Form.Item>
+                    {personalInfo && !isDisable && (
+                        <div>
+                            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                                <Button type="primary" htmlType="submit">
+                                    save
+                                </Button>
+                                <Button
+                                    style={{ marginLeft: 10 }}
+                                    onClick={handleFirstCancelButton}
+                                >
+                                    cancel
+                                </Button>
+                            </Form.Item>
+
+                            <Form.Item>
+                                {/* The button or element that triggers the Popconfirm */}
+                                <Popconfirm
+                                    title="Are you sure you want to discard all of
+                                the changes?"
+                                    open={popConfirmVisible}
+                                    onConfirm={handleConfirm}
+                                    onCancel={handleCancel}
+                                    okText="Yes"
+                                    cancelText="No"
+                                ></Popconfirm>
+                            </Form.Item>
+                        </div>
                     )}
                 </Form>
             </div>

@@ -23,7 +23,9 @@ export default function Navbar() {
     const { pathname: location } = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { isAuthenticated, employee } = useSelector((state) => state.employee);
+    const { isAuthenticated, employee } = useSelector(
+        (state) => state.employee
+    );
     const [open, setOpen] = useState(false);
     const [features, setFeatures] = useState([]);
 
@@ -42,7 +44,11 @@ export default function Navbar() {
                   },
                   {
                       name: "Visa Status Management",
-                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
+                      icon: (
+                          <SafetyCertificateOutlined
+                              style={{ fontSize: "20px" }}
+                          />
+                      ),
                       link: "/hr/visas",
                   },
                   {
@@ -58,13 +64,22 @@ export default function Navbar() {
                       link: "/",
                   },
                   {
+                      name: "Onboarding Application",
+                      icon: <UserOutlined style={{ fontSize: "20px" }} />,
+                      link: `/employee/${employee.id}/OnboardingPage`,
+                  },
+                  {
                       name: "Personal Information",
                       icon: <UserOutlined style={{ fontSize: "20px" }} />,
-                      link: `/employee/${employee.id}/profile`,
+                      link: `/employee/${employee.id}/PersonalInfoPage`,
                   },
                   {
                       name: "Visa Status Management",
-                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
+                      icon: (
+                          <SafetyCertificateOutlined
+                              style={{ fontSize: "20px" }}
+                          />
+                      ),
                       link: `/employee/${employee.id}/visa`,
                   },
               ]);
@@ -96,7 +111,13 @@ export default function Navbar() {
             <div className="left-menu">
                 <div className="menu">
                     <Button onClick={handleMenuClick}>
-                        <Space style={{ color: "#FFF", fontFamily: "Inter", fontSize: "15px" }}>
+                        <Space
+                            style={{
+                                color: "#FFF",
+                                fontFamily: "Inter",
+                                fontSize: "15px",
+                            }}
+                        >
                             <MenuOutlined style={{ fontSize: "20px" }} />
                         </Space>
                     </Button>
@@ -112,7 +133,13 @@ export default function Navbar() {
             <div className="right-menu">
                 <div className="menu">
                     <Button onClick={handleSignoutBtnClick}>
-                        <Space style={{ color: "#FFF", fontFamily: "Inter", fontSize: "15px" }}>
+                        <Space
+                            style={{
+                                color: "#FFF",
+                                fontFamily: "Inter",
+                                fontSize: "15px",
+                            }}
+                        >
                             <UserOutlined style={{ fontSize: "20px" }} />
                             {isAuthenticated ? `Sign Out` : `Sign In`}
                         </Space>
