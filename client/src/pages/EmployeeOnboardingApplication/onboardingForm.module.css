@@ -7,7 +7,7 @@
     padding: 0px 20px;
     border-radius: 10px;
     box-shadow: 0px 5px 16px 1px rgba(229, 229, 229, 0.8);
-    margin-top: 6px;
+    margin-top: 100px;
 }
 .title {
     text-align: center;
@@ -21,6 +21,11 @@
     padding-top: 10% !important;
     flex-direction: column;
 }
+/* styles.css */
+.ant-input[disabled]::before {
+    color: red;
+}
+
 @media screen and (max-width: 392px) {
     .FormBox {
         display: flex;

@@ -5,6 +5,8 @@ import {
     fetchEmployee,
     updateEmployee,
     uploadDocument,
+    fetchDocuments,
+    deleteDocument,
 } from "services/employee";
 import { addError, removeError } from "./errorSlice";
 
@@ -86,19 +88,19 @@ export const updateEmployeeAction = createAsyncThunk(
     }
 );
 
-// export const fetchDocumentsAction = createAsyncThunk(
-//     "currentEmployee/fetchDocuments",
-//     async (data, thunkAPI) => {
-//         try {
-//             const documents = await fetchDocuments(data);
-//             thunkAPI.dispatch(removeError());
-//             return documents;
-//         } catch (err) {
-//             thunkAPI.dispatch(addError(err.message));
-//             return thunkAPI.rejectWithValue(err.message);
-//         }
-//     }
-// );
+export const fetchDocumentsAction = createAsyncThunk(
+    "currentEmployee/fetchDocuments",
+    async (data, thunkAPI) => {
+        try {
+            const documents = await fetchDocuments(data);
+            thunkAPI.dispatch(removeError());
+            return documents;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
 
 // export const fetchOneDocumentAction = createAsyncThunk(
 //     "currentEmployee/fetchDocuments",
@@ -115,7 +117,7 @@ export const updateEmployeeAction = createAsyncThunk(
 // );
 
 export const uploadDocumentAction = createAsyncThunk(
-    "currentEmployee/fetchDocuments",
+    "currentEmployee/uploadDocument",
     async (data, thunkAPI) => {
         try {
             const uploadedDocument = await uploadDocument(data);
@@ -128,19 +130,19 @@ export const uploadDocumentAction = createAsyncThunk(
     }
 );
 
-// export const deleteDocumentAction = createAsyncThunk(
-//     "currentEmployee/fetchDocuments",
-//     async (data, thunkAPI) => {
-//         try {
-//             const Document = await deleteDocument(data);
-//             thunkAPI.dispatch(removeError());
-//             return Document;
-//         } catch (err) {
-//             thunkAPI.dispatch(addError(err.message));
-//             return thunkAPI.rejectWithValue(err.message);
-//         }
-//     }
-// );
+export const deleteDocumentAction = createAsyncThunk(
+    "currentEmployee/fetchDocuments",
+    async (data, thunkAPI) => {
+        try {
+            const Document = await deleteDocument(data);
+            thunkAPI.dispatch(removeError());
+            return Document;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    }
+);
 
 const currentEmployeeSlice = createSlice({
     name: "currentEmployee",
@@ -159,6 +161,15 @@ const currentEmployeeSlice = createSlice({
         setOnboardingApplication: (state, action) => {
             state.employee = action.payload;
         },
+        // addOnboardingDocuments: (state, action) => {
+        //     state.documents.push(action.payload);
+        // },
+        // removeOnboardingDocuments: (state, action) => {
+        //     const newFileList = state.documents.filter(
+        //         (item) => item.uid !== action.payload.uid
+        //     );
+        //     state.documents = newFileList;
+        // },
     },
     extraReducers: (builder) => {
         // Sign in
@@ -215,6 +226,7 @@ const currentEmployeeSlice = createSlice({
         //update employee info
         builder.addCase(updateEmployeeAction.fulfilled, (state, action) => {
             state.status = "successed";
+            state.employee = action.payload;
         });
         builder.addCase(updateEmployeeAction.rejected, (state, action) => {
             state.status = "failed";
@@ -223,9 +235,8 @@ const currentEmployeeSlice = createSlice({
             state.status = "pending";
         });
 
-        //upload documents
+        //upload document
         builder.addCase(uploadDocumentAction.fulfilled, (state, action) => {
-            state.documents.push(action.payload);
             state.status = "successed";
         });
         builder.addCase(uploadDocumentAction.rejected, (state, action) => {
@@ -235,25 +246,26 @@ const currentEmployeeSlice = createSlice({
             state.status = "pending";
         });
 
-        // //get employee info
-        // builder.addCase(updateEmployeePassword.fulfilled, (state, action) => {
-        //     state.status = "successed";
-        // });
-        // builder.addCase(updateEmployeePassword.rejected, (state, action) => {
-        //     state.status = "failed";
-        // });
-        // builder.addCase(updateEmployeePassword.pending, (state, action) => {
-        //     state.status = "pending";
-        // });
+        //get docuemnts info
+        builder.addCase(fetchDocumentsAction.fulfilled, (state, action) => {
+            state.status = "successed";
+            state.documents = action.payload;
+        });
+        builder.addCase(fetchDocumentsAction.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(fetchDocumentsAction.pending, (state, action) => {
+            state.status = "pending";
+        });
 
-        // //get employee info
-        // builder.addCase(updateEmployeePassword.fulfilled, (state, action) => {
+        // //remove seleted document
+        // builder.addCase(deleteDocumentAction.fulfilled, (state, action) => {
         //     state.status = "successed";
         // });
-        // builder.addCase(updateEmployeePassword.rejected, (state, action) => {
+        // builder.addCase(deleteDocumentAction.rejected, (state, action) => {
         //     state.status = "failed";
         // });
-        // builder.addCase(updateEmployeePassword.pending, (state, action) => {
+        // builder.addCase(deleteDocumentAction.pending, (state, action) => {
         //     state.status = "pending";
         // });
 
@@ -270,6 +282,11 @@ const currentEmployeeSlice = createSlice({
     },
 });
 
-export const { setCurrentEmployee, logOut, setOnboardingApplication } =
-    currentEmployeeSlice.actions;
+export const {
+    setCurrentEmployee,
+    logOut,
+    setOnboardingApplication,
+    // addOnboardingDocuments,
+    // removeOnboardingDocuments,
+} = currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;

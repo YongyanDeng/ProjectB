@@ -10,6 +10,7 @@ import {
     DatePicker,
     List,
 } from "antd";
+import dayjs from "dayjs";
 import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import style from "./onboardingForm.module.css";
@@ -21,21 +22,24 @@ import {
 } from "app/employeeSlice";
 import { useEffect, useState } from "react";
 const { Option } = Select;
-const OnboardingForm = () => {
+const OnboardingForm = ({ title, onboardingStatus, isDisabled }) => {
     const dispatch = useDispatch();
     const { employee } = useSelector((state) => state.employee);
-    const [savedonboardingApplication, setSavedonboardingApplication] =
-        useState(null);
-    const [uploadedFileUrl, setUploadedFileUrl] = useState(null);
+    const [imageUrl, setImageUrl] = useState("");
+    const [selectedDate, setSelectedDate] = useState({
+        work_authorization: { start_date: "", end_date: "" },
+    });
 
     // useEffect(() => {
-    //     dispatch(fetchEmployeeAction(employee.id));
+    //     if (
+    //         onboardingStatus !== "Never submitted" &&
+    //         onboardingStatus !== "rejected"
+    //     ) {
+    //         setIsDisabled(true);
+    //     }
     // }, []);
-
-    const onFinish = (values) => {
-        // dispatch(fetchEmployeeAction(values));
-        // dispatch(setOnboardingStatus("pending"));
-        message.success("Application submitted successfully!");
+    const handleImageLinkChange = (e) => {
+        setImageUrl(e.target.value);
     };
 
     const handleUsCitizenChange = (value) => {
@@ -54,83 +58,79 @@ const OnboardingForm = () => {
         dispatch(
             setOnboardingApplication({
                 ...employee,
-                work_authorization: { title: value },
+                work_authorization: {
+                    ...employee.work_authorization,
+                    title: value,
+                },
             })
         );
     };
-    // const handleStartDateChange = (date) => {
-    //     // Update the onboardingApplication with the selected value for startDate
-    //     console.log("show start date", date);
-    //     dispatch(
-    //         setOnboardingApplication({
-    //             ...employee,
-    //             startDate: date,
-    //         })
-    //     );
-    // };
+    const handleDateChange = (date, name) => {
+        // Update the onboardingApplication with the selected value for startDate
 
-    const handleChange = (value, name) => {
-        if (Array.isArray(name)) {
-            // Clone the previous form data to avoid mutating it directly
-            const formDataCopy = JSON.parse(JSON.stringify(employee));
-            // Traverse the nested keys to update the corresponding value
-            let result = null;
-            if (typeof value === "object") {
-                const {
-                    $y: year,
-                    $M: month,
-                    $D: day,
-                    $H: hour,
-                    $m: minute,
-                    $s: second,
-                    $ms: millisecond,
-                } = value;
-
-                // Create a new Date object using the extracted components
-                const date = new Date(
-                    year,
-                    month - 1,
-                    day,
-                    hour,
-                    minute,
-                    second,
-                    millisecond
-                );
-
-                // // Get the ISO 8601 date string
-                // result = date.toISOString();
-                result = "";
-            } else {
-                result = value;
-            }
-            let tempObj = formDataCopy;
-            for (let i = 0; i < name.length - 1; i++) {
-                if (!tempObj[name[i]]) {
-                    tempObj[name[i]] = {};
-                }
-                tempObj = tempObj[name[i]];
-            }
-            // Update the value of the last key in the nested structure
-            tempObj[name[name.length - 1]] = result;
-            dispatch(setOnboardingApplication(formDataCopy));
-        }
-        // If the name is a single string (no nested keys)
-        else {
-            dispatch(
-                setOnboardingApplication({
-                    ...employee,
-                    [name]: value,
-                })
-            );
-        }
+        const dateString = date
+            ? dayjs(date).format("MMMM D, YYYY, h:mm A")
+            : null;
+        setSelectedDate({
+            work_authorization: {
+                ...selectedDate.work_authorization,
+                [name]: dateString,
+            },
+        });
     };
+    const handleEndDateChange = (date) => {
+        // Update the onboardingApplication with the selected value for startDate
+
+        const endDateString = date
+            ? dayjs(date).format("MMMM D, YYYY, h:mm A")
+            : null;
+
+        dispatch(
+            setOnboardingApplication({
+                ...employee,
+                work_authorization: { end_date: endDateString },
+            })
+        );
+    };
+
+    // const handleChange = (value, name) => {
+    //     console.log("show datapicker date", value);
+    //     if (Array.isArray(name)) {
+    //         // Clone the previous form data to avoid mutating it directly
+    //         const formDataCopy = employee;
+    //         // Traverse the nested keys to update the corresponding value
+    //         let result = null;
+
+    //         let tempObj = formDataCopy;
+    //         for (let i = 0; i < name.length - 1; i++) {
+    //             if (!tempObj[name[i]]) {
+    //                 tempObj[name[i]] = {};
+    //             }
+    //             tempObj = tempObj[name[i]];
+    //         }
+    //         // Update the value of the last key in the nested structure
+    //         tempObj[name[name.length - 1]] = result;
+    //         dispatch(setOnboardingApplication(formDataCopy));
+    //     }
+    //     // If the name is a single string (no nested keys)
+    //     else {
+    //         dispatch(
+    //             setOnboardingApplication({
+    //                 ...employee,
+    //                 [name]: value,
+    //             })
+    //         );
+    //     }
+    // };
     // Function to disable dates earlier than the start date
     const disabledEndDate = (current) => {
-        const startDate = employee.startDate;
+        const startDate = selectedDate.work_authorization.start_date;
         if (!current || !startDate) {
             return false;
         }
-        return current < startDate;
+        const currentString = dayjs(current).format("MMMM D, YYYY, h:mm A");
+
+        return dayjs(currentString).isBefore(startDate);
     };
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -181,7 +181,7 @@ const OnboardingForm = () => {
             };
 
             // // Use the file details here, or log it to the console
-            // setSelectedFile(fileDetails);
+            setSelectedFile(fileDetails);
             const pdfBlob = new Blob([fileData], {
                 type: "application/pdf",
             });
@@ -213,58 +213,59 @@ const OnboardingForm = () => {
         );
         setUploadedfileList(newFileList);
     };
+    const fullOuterJoinObjects = (obj1, obj2) => {
+        const result = {};
 
+        // Merge properties from obj1
+        for (const key in obj1) {
+            if (obj1.hasOwnProperty(key)) {
+                if (
+                    typeof obj1[key] === "object" &&
+                    typeof obj2[key] === "object"
+                ) {
+                    // If both properties are objects, recursively merge the nested fields
+                    result[key] = fullOuterJoinObjects(obj1[key], obj2[key]);
+                } else {
+                    // Otherwise, use the property from obj1
+                    result[key] = obj1[key];
+                }
+            }
+        }
+
+        // Merge properties from obj2, overwriting properties from obj1
+        for (const key in obj2) {
+            if (obj2.hasOwnProperty(key)) {
+                if (typeof obj2[key] === "object") {
+                    // If obj2[key] is an object and obj1[key] is not, set it directly
+                    result[key] = obj2[key];
+                } else if (!obj1.hasOwnProperty(key)) {
+                    // If obj1 doesn't have the property, set it from obj2
+                    result[key] = obj2[key];
+                }
+            }
+        }
+
+        return result;
+    };
     const handleSaveForm = (data) => {
-        // // Save the form data to the local state
-        // const onSubmit = (data) => {
-        //     setSubmitted(true);
-        //     const {
-        //         productName: name,
-        //         productDescription: description,
-        //         price: price,
-        //         category: category,
-        //         inStockQuantity: stockNum,
-        //         addImageLink: imageUrl,
-        //     } = data;
-        //     const product = { ...oneProduct };
-        //     product.name = name;
-        //     product.description = description;
-        //     product.price = price;
-        //     product.category = category;
-        //     product.stockNum = stockNum;
-        //     product.imageUrl = imageUrl;
-        //     dispatch(updateProductAction({ id, productId, product: product }));
-        // };
-        // setSavedonboardingApplication(employee);
-        // const start_date = data.work_authorization.start_date;
-        // const year = start_date.$y;
-        // const month = start_date.$M + 1; // Month starts from 0 (January) in JavaScript, so we add 1
-        // const day = start_date.$D;
-
-        // // Creating the "year-month-day" format
-        // const formattedDate = `${year}-${month
-        //     .toString()
-        //     .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-        // employee.work_authorization.start_date = formattedDate;
-        if (
-            data.work_authorization?.start_date &&
-            data.work_authorization?.start_date instanceof Date
-        ) {
-            // data.work_authorization.start_date =
-            //     data.work_authorization.start_date.toISOString();
-        }
-        if (
-            data.work_authorization?.end_date &&
-            data.work_authorization?.start_date instanceof Date
-        ) {
-            // data.work_authorization.end_date =
-            //     data.work_authorization.end_date.toISOString();
-        }
+        const savedEmployee = { ...employee };
         console.log("show data", data);
+        console.log("show employee", savedEmployee);
         // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
-        const savedData = Object.assign({}, employee, data);
+        const savedData = Object.assign({}, savedEmployee, data);
+        console.log("show saved data", savedData);
+        console.log("show selectedDate", selectedDate);
+        const finalData = {
+            ...savedData,
+            work_authorization: {
+                title: savedData.work_authorization.title,
+                start_date: selectedDate.work_authorization.start_date,
+                end_date: selectedDate.work_authorization.end_date,
+            },
+        };
+        console.log("show final data", finalData);
         dispatch(
-            updateEmployeeAction({ id: employee._id, employee: savedData })
+            updateEmployeeAction({ id: employee._id, employee: finalData })
         );
         message.success("Form data saved successfully!");
     };
@@ -273,15 +274,24 @@ const OnboardingForm = () => {
         dispatch(
             uploadDocumentAction({
                 id: employee._id,
-                document: setSelectedFile,
+                document: selectedFile,
+            })
+        );
+        dispatch(
+            updateEmployeeAction({
+                id: employee._id,
+                employee: { onboarding_status: "Pending" },
             })
         );
     };
+    // const inputStyles = {
+    //     color: isDisabled ? "red" : "black",
+    // };
     return (
         <div className={style.FormBox}>
             <div className={style.topContent}>
                 <Typography.Title level={2} className={style.title}>
-                    Onboarding application
+                    {title}
                 </Typography.Title>
             </div>
             <div
@@ -309,7 +319,7 @@ const OnboardingForm = () => {
                             },
                         ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Last Name"
@@ -321,41 +331,39 @@ const OnboardingForm = () => {
                             },
                         ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Middle Name"
                         name={["name", "middle_name"]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Preferred Name"
                         name={["name", "preferred_name"]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item
-                        label="Profile Picture"
-                        valuePropName="fileList"
-                        getValueFromEvent={(e) => {
-                            if (Array.isArray(e)) {
-                                return e;
-                            }
-                            return e && e.fileList;
-                        }}
-                    >
-                        <Upload.Dragger name="files">
-                            <p className="ant-upload-drag-icon">
-                                <InboxOutlined />
-                            </p>
-                            <p className="ant-upload-text">
-                                Click or drag file to this area to upload
-                            </p>
-                            <p className="ant-upload-hint">
-                                Support for a single or bulk upload.
-                            </p>
-                        </Upload.Dragger>
+                    <Form.Item label="Profile Picture" name="profile_picture">
+                        <Input
+                            id="image-link-input"
+                            placeholder="Profile Picture"
+                            onChange={handleImageLinkChange}
+                            disabled={isDisabled}
+                        />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <img
+                            src={imageUrl ? imageUrl : employee.profile_picture}
+                            style={{
+                                width: "200px",
+                                height: "200px",
+                                objectFit: "cover",
+                            }}
+                            alt="Image"
+                        />
                     </Form.Item>
                     <Form.Item
                         label="Street Name"
@@ -367,7 +375,7 @@ const OnboardingForm = () => {
                             },
                         ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Building / Apt"
@@ -380,16 +388,43 @@ const OnboardingForm = () => {
                             },
                         ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item label="City" name={["address", "city"]}>
-                        <Input />
+                    <Form.Item
+                        label="City"
+                        name={["address", "city"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter the city",
+                            },
+                        ]}
+                    >
+                        <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item label="State" name={["address", "state"]}>
-                        <Input />
+                    <Form.Item
+                        label="State"
+                        name={["address", "state"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter the state",
+                            },
+                        ]}
+                    >
+                        <Input disabled={isDisabled} />
                     </Form.Item>
-                    <Form.Item label="ZIP" name={["address", "zip"]}>
-                        <Input />
+                    <Form.Item
+                        label="ZIP"
+                        name={["address", "zip"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter the ZIP",
+                            },
+                        ]}
+                    >
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Cell Phone Number"
@@ -401,13 +436,13 @@ const OnboardingForm = () => {
                             },
                         ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Work Phone Number"
                         name={["contact_info", "work_phone"]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item label="Email">
                         <Input disabled value={employee.email} />
@@ -415,20 +450,38 @@ const OnboardingForm = () => {
                     <Form.Item
                         label="SSN"
                         name={["identification_info", "SSN"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter your SSN",
+                            },
+                        ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Date of Birth"
                         name={["identification_info", "date_of_birth"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter your date of birth",
+                            },
+                        ]}
                     >
-                        <Input />
+                        <Input disabled={isDisabled} />
                     </Form.Item>
                     <Form.Item
                         label="Gender"
                         name={["identification_info", "gender"]}
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please enter your gender",
+                            },
+                        ]}
                     >
-                        <Select>
+                        <Select disabled={isDisabled}>
                             <Option value="male">Male</Option>
                             <Option value="female">Female</Option>
                             <Option value="other">
@@ -440,14 +493,24 @@ const OnboardingForm = () => {
                         label="Permanent resident or citizen of the U.S.?"
                         name="usCitizen"
                     >
-                        <Select onChange={handleUsCitizenChange}>
+                        <Select
+                            onChange={handleUsCitizenChange}
+                            disabled={isDisabled}
+                        >
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
                         </Select>
                     </Form.Item>
                     {employee.usCitizen === "yes" && (
-                        <Form.Item label="What is your work authorization?">
-                            <Select onChange={handleWorkAuthorization}>
+                        <Form.Item
+                            label="What is your work authorization?"
+                            name={["work_authorization", "title"]}
+                        >
+                            <Select
+                                value={employee.work_authorization.title}
+                                onChange={handleWorkAuthorization}
+                                disabled={isDisabled}
+                            >
                                 <Option value="Green Card">Green Card</Option>
                                 <Option value="Citizen">Citizen</Option>
                             </Select>
@@ -455,8 +518,14 @@ const OnboardingForm = () => {
                     )}
                     {employee.usCitizen === "no" && (
                         <div>
-                            <Form.Item label="What is your work authorization?">
-                                <Select onChange={handleWorkAuthorization}>
+                            <Form.Item
+                                label="What is your work authorization?"
+                                name={["work_authorization", "title"]}
+                            >
+                                <Select
+                                    onChange={handleWorkAuthorization}
+                                    disabled={isDisabled}
+                                >
                                     <Option value="H1-B">H1-B</Option>
                                     <Option value="L2">L2</Option>
                                     <Option value="F1(CPT/OPT)">
@@ -484,13 +553,13 @@ const OnboardingForm = () => {
                                             }
                                             return [];
                                         }}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message:
-                                                    "Please upload a PDF file",
-                                            },
-                                        ]}
+                                        // rules={[
+                                        //     {
+                                        //         required: true,
+                                        //         message:
+                                        //             "Please upload a PDF file",
+                                        //     },
+                                        // ]}
                                     >
                                         <div>
                                             {" "}
@@ -533,57 +602,58 @@ const OnboardingForm = () => {
                                             ))}
                                         </div>
                                     </Form.Item>
-
-                                    {/* <div>
-                                        <input
-                                            type="file"
-                                            accept=".pdf"
-                                            onChange={handleFileChange}
-                                        />
-                                        <button onClick={handleFileUpload}>
-                                            Upload PDF
-                                        </button>
-                                    </div> */}
-                                    {/* <Form.Item>
-                                        {employee.pdfFileUrl && (
-                                            <Button
-                                                onClick={handleDownloadFile}
-                                                type="primary"
-                                            >
-                                                Download Uploaded File
-                                            </Button>
-                                        )}
-                                    </Form.Item> */}
                                 </div>
                             )}
 
                             {employee.work_authorization?.title === "Other" && (
-                                <Form.Item label="Specify Visa Title">
-                                    <Input />
+                                <Form.Item
+                                    label="Specify Visa Title"
+                                    name={["work_authorization", "title"]}
+                                >
+                                    <Input disabled={isDisabled} />
                                 </Form.Item>
                             )}
 
                             <Form.Item
-                                name={["work_authorization", "start_date"]}
+                                // name={["work_authorization", "start_date"]}
                                 label="Start Date"
                             >
                                 <DatePicker
-                                    onChange={(value) =>
-                                        handleChange(value, [
-                                            "work_authorization",
-                                            "start_date",
-                                        ])
+                                    disabled={isDisabled}
+                                    value={
+                                        selectedDate.work_authorization
+                                            .start_date
+                                            ? dayjs(
+                                                  selectedDate
+                                                      .work_authorization
+                                                      .start_date
+                                              )
+                                            : null
+                                    }
+                                    onChange={(date) =>
+                                        handleDateChange(date, "start_date")
                                     }
                                 />
                             </Form.Item>
 
                             <Form.Item
                                 label="End Date"
-                                name={["work_authorization", "end_date"]}
+                                // name={["work_authorization", "end_date"]}
                             >
                                 <DatePicker
-                                    // value={employee.work_authorization.end_date}
-                                    // onChange={handleChange}
+                                    disabled={isDisabled}
+                                    value={
+                                        selectedDate.work_authorization.end_date
+                                            ? dayjs(
+                                                  selectedDate
+                                                      .work_authorization
+                                                      .end_date
+                                              )
+                                            : null
+                                    }
+                                    onChange={(date) =>
+                                        handleDateChange(date, "end_date")
+                                    }
                                     disabledDate={disabledEndDate}
                                 />
                             </Form.Item>
@@ -591,117 +661,140 @@ const OnboardingForm = () => {
                     )}
                     <Form.Item label="Reference">
                         <Form.Item
-                            name={["reference", "first_name"]}
+                            name={["reference", "referee_info", "first_name"]}
                             label="First Name"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter your reference first name",
+                                },
+                            ]}
                         >
-                            <Input />
+                            <Input disabled={isDisabled} />
                         </Form.Item>
                         <Form.Item
-                            name={["reference", "last_name"]}
+                            name={["reference", "referee_info", "last_name"]}
                             label="Last Name"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter your reference last name",
+                                },
+                            ]}
                         >
-                            <Input />
+                            <Input disabled={isDisabled} />
                         </Form.Item>
                         <Form.Item
-                            name={["reference", "middle_name"]}
+                            name={["reference", "referee_info", "middle_name"]}
                             label="Middle Name"
                         >
                             <Input />
                         </Form.Item>
-                        <Form.Item name={["reference", "phone"]} label="Phone">
-                            <Input />
-                        </Form.Item>
-                        <Form.Item name={["reference", "email"]} label="Email">
-                            <Input />
-                        </Form.Item>
                         <Form.Item
-                            name={["reference", "relationship"]}
-                            label="Relationship"
+                            name={["reference", "referee_info", "phone"]}
+                            label="Phone"
                         >
                             <Input />
                         </Form.Item>
+                        <Form.Item
+                            name={["reference", "referee_info", "email"]}
+                            label="Email"
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item
+                            name={["reference", "referee_info", "relationship"]}
+                            label="Relationship"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter your reference relationship",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
                     </Form.Item>
                     {/* Emergency Contacts */}
-                    <Form.List name="emergency_contacts">
-                        {(fields, { add, remove }) => (
-                            <>
-                                {fields.map((field, index) => (
-                                    <div key={field.key}>
-                                        <Form.Item
-                                            label={`Emergency Contact ${
-                                                index + 1
-                                            }`}
-                                        >
-                                            <Form.Item
-                                                name={[
-                                                    field.name,
-                                                    "first_name",
-                                                ]}
-                                                label="First Name"
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[field.name, "last_name"]}
-                                                label="Last Name"
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[
-                                                    field.name,
-                                                    "middle_name",
-                                                ]}
-                                                label="Middle Name"
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[field.name, "phone"]}
-                                                label="Phone"
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[field.name, "email"]}
-                                                label="Email"
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            <Form.Item
-                                                name={[
-                                                    field.name,
-                                                    "relationship",
-                                                ]}
-                                                label="Relationship"
-                                            >
-                                                <Input />
-                                            </Form.Item>
-                                            {fields.length > 1 && (
-                                                <Button
-                                                    onClick={() =>
-                                                        remove(field.name)
-                                                    }
-                                                >
-                                                    Remove
-                                                </Button>
-                                            )}
-                                        </Form.Item>
-                                    </div>
-                                ))}
-                                <Button
-                                    onClick={() => add()}
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "left",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    Add Emergency Contact
-                                </Button>
-                            </>
-                        )}
-                    </Form.List>
+                    <Form.Item label="Emergency Contact">
+                        <Form.Item
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "first_name",
+                            ]}
+                            label="First Name"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter your reference first name",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "last_name",
+                            ]}
+                            label="Last Name"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter your reference last name",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "middle_name",
+                            ]}
+                            label="Middle Name"
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item
+                            name={["reference", "emergency_contact", "phone"]}
+                            label="Phone"
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item
+                            name={["reference", "emergency_contact", "email"]}
+                            label="Email"
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                        <Form.Item
+                            name={[
+                                "reference",
+                                "emergency_contact",
+                                "relationship",
+                            ]}
+                            label="Relationship"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter your emergency contact relationship",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisabled} />
+                        </Form.Item>
+                    </Form.Item>
+
                     {/* Add summary of uploaded files or documents */}
                     {/* ... */}
                     <List
@@ -711,29 +804,43 @@ const OnboardingForm = () => {
                         renderItem={(file) => (
                             <List.Item
                                 actions={[
+                                    <a
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Preview
+                                    </a>,
                                     <a href={file.url} download={file.name}>
                                         Download
                                     </a>,
-                                    <DeleteOutlined
-                                        onClick={() => handleFileRemove(file)}
-                                    />,
+                                    !isDisabled && (
+                                        <DeleteOutlined
+                                            onClick={() =>
+                                                handleFileRemove(file)
+                                            }
+                                        />
+                                    ),
                                 ]}
                             >
                                 {file.name}
                             </List.Item>
                         )}
                     />
-                    <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                        <Button type="primary" htmlType="submit">
-                            save
-                        </Button>
-                        {/* <Button
-                            style={{ marginLeft: 10 }}
-                            onClick={handleSaveForm}
-                        >
-                            Save
-                        </Button> */}
-                    </Form.Item>
+                    {(onboardingStatus === "Never submitted" ||
+                        onboardingStatus === "rejected") && (
+                        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                            <Button type="primary" htmlType="submit">
+                                save
+                            </Button>
+                            <Button
+                                style={{ marginLeft: 10 }}
+                                onClick={handleSubmit}
+                            >
+                                Submit
+                            </Button>
+                        </Form.Item>
+                    )}
                 </Form>
             </div>
         </div>
