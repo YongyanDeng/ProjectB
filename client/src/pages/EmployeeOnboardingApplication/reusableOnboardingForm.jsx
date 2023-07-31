@@ -22,9 +22,15 @@ import {
 } from "app/employeeSlice";
 import { useEffect, useState } from "react";
 const { Option } = Select;
-const OnboardingForm = ({ title, onboardingStatus, isDisabled }) => {
+const OnboardingForm = ({
+    employee,
+    fields,
+    title,
+    onboardingStatus,
+    isDisabled,
+}) => {
     const dispatch = useDispatch();
-    const { employee } = useSelector((state) => state.employee);
+    // const { employee } = useSelector((state) => state.employee);
     const [imageUrl, setImageUrl] = useState("");
     const [selectedDate, setSelectedDate] = useState({
         work_authorization: { start_date: "", end_date: "" },
@@ -93,36 +99,6 @@ const OnboardingForm = ({ title, onboardingStatus, isDisabled }) => {
         );
     };
 
-    // const handleChange = (value, name) => {
-    //     console.log("show datapicker date", value);
-    //     if (Array.isArray(name)) {
-    //         // Clone the previous form data to avoid mutating it directly
-    //         const formDataCopy = employee;
-    //         // Traverse the nested keys to update the corresponding value
-    //         let result = null;
-
-    //         let tempObj = formDataCopy;
-    //         for (let i = 0; i < name.length - 1; i++) {
-    //             if (!tempObj[name[i]]) {
-    //                 tempObj[name[i]] = {};
-    //             }
-    //             tempObj = tempObj[name[i]];
-    //         }
-    //         // Update the value of the last key in the nested structure
-    //         tempObj[name[name.length - 1]] = result;
-    //         dispatch(setOnboardingApplication(formDataCopy));
-    //     }
-    //     // If the name is a single string (no nested keys)
-    //     else {
-    //         dispatch(
-    //             setOnboardingApplication({
-    //                 ...employee,
-    //                 [name]: value,
-    //             })
-    //         );
-    //     }
-    // };
-    // Function to disable dates earlier than the start date
     const disabledEndDate = (current) => {
         const startDate = selectedDate.work_authorization.start_date;
         if (!current || !startDate) {
@@ -287,6 +263,53 @@ const OnboardingForm = ({ title, onboardingStatus, isDisabled }) => {
     // const inputStyles = {
     //     color: isDisabled ? "red" : "black",
     // };
+
+    const fields = [
+        {
+            label: "First Name",
+            name: ["name", "first_name"],
+            type: "input text",
+            rules: [
+                {
+                    required: true,
+                    message: "Please enter your first name",
+                },
+            ],
+        },
+        {
+            label: "Last Name",
+            name: ["name", "last_name"],
+            type: "input text",
+            rules: [
+                {
+                    required: true,
+                    message: "Please enter your first name",
+                },
+            ],
+        },
+        {
+            label: "Last Name",
+            name: ["name", "last_name"],
+            type: "input text",
+            rules: [
+                {
+                    required: true,
+                    message: "Please enter your last name",
+                },
+            ],
+        },
+        {
+            label: "Middle Name",
+            name: ["name", "middle_name"],
+            type: "input text",
+        },
+        {
+            label: "Profile Picture",
+            name: ["name", "profile_picture"],
+            type: "input text",
+        },
+    ];
+
     return (
         <div className={style.FormBox}>
             <div className={style.topContent}>
@@ -848,3 +871,5 @@ const OnboardingForm = ({ title, onboardingStatus, isDisabled }) => {
 };
 
 export default OnboardingForm;
+
+<OnboardingForm />;

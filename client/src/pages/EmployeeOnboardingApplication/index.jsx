@@ -1,5 +1,5 @@
 import React from "react";
-import OnboardingForm from "./onboardingForm";
+import EmployeeForm from "components/EmployeeForm";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchEmployeeAction, fetchDocumentsAction } from "app/employeeSlice";
@@ -18,15 +18,20 @@ const OnboardingPage = () => {
             case "Never submitted":
                 // return <div>never submitted</div>;
                 return (
-                    <OnboardingForm
+                    <EmployeeForm
+                        employee={employee}
+                        personalInfo={false}
                         title={"Onboarding application"}
                         onboardingStatus={employee.onboarding_status}
                         isDisabled={false}
                     />
                 );
+
             case "Rejected":
                 return (
-                    <OnboardingForm
+                    <EmployeeForm
+                        employee={employee}
+                        personalInfo={false}
                         title={"Resubmit for Rejected Onboarding application"}
                         onboardingStatus={employee.onboarding_status}
                         isDisabled={false}
@@ -34,7 +39,9 @@ const OnboardingPage = () => {
                 );
             case "Pending":
                 return (
-                    <OnboardingForm
+                    <EmployeeForm
+                        employee={employee}
+                        personalInfo={false}
                         title={"Please wait for HR to review your application"}
                         onboardingStatus={employee.onboarding_status}
                         isDisabled={true}
