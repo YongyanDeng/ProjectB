@@ -17,14 +17,12 @@ import HrVisaDetail from "pages/HrVisaDetail";
 
 import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
-import HrOnboardingDetail from "pages/HrOnboarding";
-
-import PersonalInfoPage from "pages/EmployeePersonalInfo";
-import EmployeeVisa from "pages/EmployeeVisa";
+import HrOnboardingDetail from "pages/HrOnboardingDetail";
 
 import NotFound from "pages/NotFound";
-
+import PersonalInfoPage from "pages/EmployeePersonalInfo";
 import OnboardingPage from "pages/EmployeeOnboardingApplication";
+import EmployeeVisa from "pages/EmployeeVisa";
 
 function App() {
     return (
@@ -36,24 +34,48 @@ function App() {
                     <Route element={<AuthProtectLayout />}>
                         <Route path="signup" element={<SignUp />} />
                         <Route path="signin" element={<SignIn />} />
-                        <Route path="updatePassword" element={<UpdatePassword />} />
+                        <Route
+                            path="updatePassword"
+                            element={<UpdatePassword />}
+                        />
                     </Route>
                     <Route element={<ProtectLayout />}>
                         <Route path="/hr" element={<HRProtectLayout />}>
                             <Route path="profiles" element={<HrProfiles />} />
-                            <Route path="profiles/:employeeId" element={<HrProfileDetail />} />
+                            <Route
+                                path="profiles/:employeeId"
+                                element={<HrProfileDetail />}
+                            />
                             <Route path="visas" element={<Visa />} />
-                            <Route path="emailHistory" element={<EmailHistory />} />
-                            <Route path="hiringManagement" element={<HiringManagement />} />
+                            <Route
+                                path="emailHistory"
+                                element={<EmailHistory />}
+                            />
+                            <Route
+                                path="hiringManagement"
+                                element={<HiringManagement />}
+                            />
                             <Route
                                 path="hiringManagement/:employeeId"
                                 element={<HrOnboardingDetail />}
                             />
-                            <Route path="visaDetail/:employeeId" element={<HrVisaDetail />} />
+                            <Route
+                                path="visaDetail/:employeeId"
+                                element={<HrVisaDetail />}
+                            />
                         </Route>
-                        <Route path="/employee/onboarding" element={<OnboardingPage />} />
-                        <Route path="/employee/:id/profile" element={<PersonalInfoPage />} />
-                        <Route path="/employee/:id/visa" element={<EmployeeVisa />} />
+                        <Route
+                            path="/employee/:id/OnboardingPage"
+                            element={<OnboardingPage />}
+                        />
+                        <Route
+                            path="/employee/:id/PersonalInfoPage"
+                            element={<PersonalInfoPage />}
+                        />
+                        <Route
+                            path="/employee/:id/visa"
+                            element={<EmployeeVisa />}
+                        />
                     </Route>
                     <Route path="*" element={<NotFound />} />
                 </Route>
