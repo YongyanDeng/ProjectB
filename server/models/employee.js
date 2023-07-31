@@ -120,7 +120,7 @@ const employeeSchema = new mongoose.Schema({
                 type: String,
             },
         },
-        Emergency_contact: {
+        emergency_contact: {
             first_name: {
                 type: String,
             },
@@ -153,6 +153,9 @@ const employeeSchema = new mongoose.Schema({
         },
     ],
     feedback: {
+        type: String,
+    },
+    usCitizen: {
         type: String,
     },
 });

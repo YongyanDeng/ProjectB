@@ -13,6 +13,7 @@ import { addError, removeError } from "./errorSlice";
 const initialState = {
     isAuthenticated: false,
     employee: {},
+    documents: [],
     status: "idle",
 };
 
