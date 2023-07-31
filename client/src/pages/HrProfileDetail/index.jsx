@@ -5,7 +5,6 @@ import { Form, Input, Table, Button, Select, Space, message } from "antd";
 import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 
 import { getProfileDetail } from "app/hrSlice";
-import OnboardingForm from "pages/EmployeeOnboardingApplication/OnboardingForm";
 
 const visaProcess = ["OPT Receipt", "OPT EAD", "I-983", "I-20"];
 

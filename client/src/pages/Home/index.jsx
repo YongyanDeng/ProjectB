@@ -6,7 +6,12 @@ import { Navigate } from "react-router-dom";
 export default function Home() {
     const { isAuthenticated } = useSelector((state) => state.employee);
 
-    if (!isAuthenticated)
-        return <Navigate to="/signin" state={{ from: "/" }} />;
-    return <PersonalInfoPage />;
+    if (!isAuthenticated) return <Navigate to="/signin" state={{ from: "/" }} />;
+
+    // return <PersonalInfoPage />;
+    return (
+        <>
+            <h1>Home</h1>
+        </>
+    );
 }

@@ -1,8 +1,10 @@
 import React from "react";
-import EmployeeForm from "components/EmployeeForm";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+
 import { fetchEmployeeAction, fetchDocumentsAction } from "app/employeeSlice";
+import EmployeeForm from "components/EmployeeForm";
+
 const OnboardingPage = () => {
     const { employee, status } = useSelector((state) => state.employee);
     // useEffect(() => {
