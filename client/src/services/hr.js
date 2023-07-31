@@ -9,9 +9,17 @@ export const uploadRegisterToken = async function ({ id, hashToken, email }) {
     return res;
 };
 
-export const fetchAllApplications = async function ({ id }) {
+export const fetchAllProfiles = async function ({ id }) {
     const res = await apiCall({
         url: `/api/hr/${id}/profiles`,
+        method: "GET",
+    });
+    return res;
+};
+
+export const fetchProfileDetail = async function ({ id, employeeId }) {
+    const res = await apiCall({
+        url: `/api/hr/${id}/applications/${employeeId}`,
         method: "GET",
     });
     return res;

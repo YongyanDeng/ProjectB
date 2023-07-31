@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { getApplicationList } from "app/hrSlice";
+import { getProfileList } from "app/hrSlice";
 import EmployeeTable from "components/EmployeeTable";
 
 export default function Profiles() {
@@ -15,7 +15,7 @@ export default function Profiles() {
 
     useEffect(() => {
         // Get profiles list
-        dispatch(getApplicationList({ id: employee.id }));
+        dispatch(getProfileList({ id: employee.id }));
     }, []);
 
     useEffect(() => {
@@ -62,7 +62,7 @@ export default function Profiles() {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            render: (text, employee) => <Link to={`/profileDetail/${employee.id}`}>{text}</Link>,
+            render: (text, employee) => <Link to={`/hr/profiles/${employee.id}`}>{text}</Link>,
         },
         {
             title: "SSN",

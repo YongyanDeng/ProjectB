@@ -17,6 +17,7 @@ import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
 
 import NotFound from "pages/NotFound";
+import HrProfileDetail from "pages/HrProfileDetail";
 
 function App() {
     return (
@@ -33,6 +34,7 @@ function App() {
                     <Route element={<ProtectLayout />}>
                         <Route path="/hr" element={<HRProtectLayout />}>
                             <Route path="profiles" element={<Profiles />} />
+                            <Route path="profiles/:employeeId" element={<HrProfileDetail />} />
                             <Route path="visas" element={<Visa />} />
                             <Route path="emailHistory" element={<EmailHistory />} />
                             <Route path="hiringManagement" element={<HiringManagement />} />

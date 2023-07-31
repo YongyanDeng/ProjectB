@@ -2,7 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import {
     uploadRegisterToken,
-    fetchAllApplications,
+    fetchAllProfiles,
+    fetchProfileDetail,
     fetchAllVisas,
     fetchEmailHistory,
     fetchAllOBApplication,
@@ -34,23 +35,9 @@ export const sendRegisterToken = createAsyncThunk(
     },
 );
 
-export const getApplicationList = createAsyncThunk(
-    "hr/getApplicationList",
-    async (data, thunkAPI) => {
-        try {
-            const res = await fetchAllApplications(data);
-            thunkAPI.dispatch(removeError());
-            return res;
-        } catch (err) {
-            thunkAPI.dispatch(addError(err.message));
-            return thunkAPI.rejectWithValue(err.message);
-        }
-    },
-);
-
-export const getVisaList = createAsyncThunk("hr/getVisaList", async (data, thunkAPI) => {
+export const getProfileList = createAsyncThunk("hr/getProfileList", async (data, thunkAPI) => {
     try {
-        const res = await fetchAllVisas(data);
+        const res = await fetchAllProfiles(data);
         thunkAPI.dispatch(removeError());
         return res;
     } catch (err) {
@@ -59,6 +46,18 @@ export const getVisaList = createAsyncThunk("hr/getVisaList", async (data, thunk
     }
 });
 
+export const getProfileDetail = createAsyncThunk("hr/getProfileDetail", async (data, thunkAPI) => {
+    try {
+        const res = await fetchProfileDetail(data);
+        thunkAPI.dispatch(removeError());
+        return res;
+    } catch (err) {
+        thunkAPI.dispatch(addError(err.message));
+        return thunkAPI.rejectWithValue(err.message);
+    }
+});
+
+// Onboarding application section
 export const getEmailHistory = createAsyncThunk("hr/getEmailHistory", async (data, thunkAPI) => {
     try {
         const res = await fetchEmailHistory(data);
@@ -83,6 +82,18 @@ export const getAllOBApplication = createAsyncThunk(
         }
     },
 );
+
+// Visa section
+export const getVisaList = createAsyncThunk("hr/getVisaList", async (data, thunkAPI) => {
+    try {
+        const res = await fetchAllVisas(data);
+        thunkAPI.dispatch(removeError());
+        return res;
+    } catch (err) {
+        thunkAPI.dispatch(addError(err.message));
+        return thunkAPI.rejectWithValue(err.message);
+    }
+});
 
 export const getVisaDetail = createAsyncThunk("hr/getVisaDetail", async (data, thunkAPI) => {
     try {
@@ -122,15 +133,26 @@ const hrSlice = createSlice({
             state.status = "pending";
         });
 
-        // Fetch all applications
-        builder.addCase(getApplicationList.fulfilled, (state, action) => {
+        // Fetch all profils
+        builder.addCase(getProfileList.fulfilled, (state, action) => {
             state.employees = action.payload;
             state.status = "successed";
         });
-        builder.addCase(getApplicationList.rejected, (state, action) => {
+        builder.addCase(getProfileList.rejected, (state, action) => {
             state.status = "failed";
         });
-        builder.addCase(getApplicationList.pending, (state, action) => {
+        builder.addCase(getProfileList.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        builder.addCase(getProfileDetail.fulfilled, (state, action) => {
+            state.selectedEmployee = action.payload;
+            state.status = "successed";
+        });
+        builder.addCase(getProfileDetail.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(getProfileDetail.pending, (state, action) => {
             state.status = "pending";
         });
 
