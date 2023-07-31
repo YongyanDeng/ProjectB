@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { signup, signin, updatePassword } from "services/auth";
+import { signup, signin, updatePassword, register } from "services/auth";
 import {
     fetchEmployee,
     updateEmployee,
@@ -28,7 +28,7 @@ export const signUpEmployee = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const signInEmployee = createAsyncThunk(
@@ -43,7 +43,7 @@ export const signInEmployee = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const updateEmployeePassword = createAsyncThunk(
@@ -57,7 +57,7 @@ export const updateEmployeePassword = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const fetchEmployeeAction = createAsyncThunk(
@@ -71,7 +71,7 @@ export const fetchEmployeeAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const updateEmployeeAction = createAsyncThunk(
@@ -85,7 +85,7 @@ export const updateEmployeeAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const fetchDocumentsAction = createAsyncThunk(
@@ -99,7 +99,7 @@ export const fetchDocumentsAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 // export const fetchOneDocumentAction = createAsyncThunk(
@@ -127,7 +127,7 @@ export const uploadDocumentAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const deleteDocumentAction = createAsyncThunk(
@@ -141,7 +141,22 @@ export const deleteDocumentAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
+);
+
+// Check if register token expired or not
+export const registerCheck = createAsyncThunk(
+    "currentEmployee/registerTokenCheck",
+    async (data, thunkAPI) => {
+        try {
+            const res = await register(data);
+            thunkAPI.dispatch(removeError());
+            return res;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
 );
 
 const currentEmployeeSlice = createSlice({
@@ -175,8 +190,7 @@ const currentEmployeeSlice = createSlice({
         // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
-            const { id, username, role, name, ducoments, feedback } =
-                action.payload;
+            const { id, username, role, name, ducoments, feedback } = action.payload;
             state.employee = action.payload;
             state.status = "successed";
         });
@@ -210,75 +224,6 @@ const currentEmployeeSlice = createSlice({
         builder.addCase(updateEmployeePassword.pending, (state, action) => {
             state.status = "pending";
         });
-
-        //get employee info
-        builder.addCase(fetchEmployeeAction.fulfilled, (state, action) => {
-            state.employee = action.payload;
-            state.status = "successed";
-        });
-        builder.addCase(fetchEmployeeAction.rejected, (state, action) => {
-            state.employee = state.status = "failed";
-        });
-        builder.addCase(fetchEmployeeAction.pending, (state, action) => {
-            state.status = "pending";
-        });
-
-        //update employee info
-        builder.addCase(updateEmployeeAction.fulfilled, (state, action) => {
-            state.status = "successed";
-            state.employee = action.payload;
-        });
-        builder.addCase(updateEmployeeAction.rejected, (state, action) => {
-            state.status = "failed";
-        });
-        builder.addCase(updateEmployeeAction.pending, (state, action) => {
-            state.status = "pending";
-        });
-
-        //upload document
-        builder.addCase(uploadDocumentAction.fulfilled, (state, action) => {
-            state.status = "successed";
-        });
-        builder.addCase(uploadDocumentAction.rejected, (state, action) => {
-            state.status = "failed";
-        });
-        builder.addCase(uploadDocumentAction.pending, (state, action) => {
-            state.status = "pending";
-        });
-
-        //get docuemnts info
-        builder.addCase(fetchDocumentsAction.fulfilled, (state, action) => {
-            state.status = "successed";
-            state.documents = action.payload;
-        });
-        builder.addCase(fetchDocumentsAction.rejected, (state, action) => {
-            state.status = "failed";
-        });
-        builder.addCase(fetchDocumentsAction.pending, (state, action) => {
-            state.status = "pending";
-        });
-
-        // //remove seleted document
-        // builder.addCase(deleteDocumentAction.fulfilled, (state, action) => {
-        //     state.status = "successed";
-        // });
-        // builder.addCase(deleteDocumentAction.rejected, (state, action) => {
-        //     state.status = "failed";
-        // });
-        // builder.addCase(deleteDocumentAction.pending, (state, action) => {
-        //     state.status = "pending";
-        // });
-
-        // //get employee info
-        // builder.addCase(updateEmployeePassword.fulfilled, (state, action) => {
-        //     state.status = "successed";
-        // });
-        // builder.addCase(updateEmployeePassword.rejected, (state, action) => {
-        //     state.status = "failed";
-        // });
-        // builder.addCase(updateEmployeePassword.pending, (state, action) => {
-        //     state.status = "pending";
-        // });
     },
 });
 

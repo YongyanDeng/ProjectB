@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
-import { Layout } from "antd";
+import { Layout, Menu } from "antd";
 import { Outlet } from "react-router-dom";
+import { useMediaQuery } from "hooks/useMediaQuery";
+
 import Navbar from "components/Navbar";
 import Footbar from "components/Footbar";
-// import ErrorToast from "components/ErrorToast";
-import { useMediaQuery } from "hooks/useMediaQuery";
 
 const { Header, Content, Footer } = Layout;
 
@@ -43,8 +43,8 @@ export default function MainLayout() {
         () => ({
             display: "flex",
             width: !isMobile ? "100%" : "392px",
-            height: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
-            padding: !isMobile ? "0 50px" : "0 6px",
+            minHeight: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
+            padding: !isMobile ? "20px 0px" : "0px 6px",
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "#F9FAFB",

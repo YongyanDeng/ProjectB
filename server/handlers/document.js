@@ -3,6 +3,7 @@ const express = require("express");
 const fs = require("fs");
 const app = express();
 
+// Get all documents of one employee
 const getAllDocuments = async (req, res, next) => {
     try {
         const employeeId = req.params.id;
