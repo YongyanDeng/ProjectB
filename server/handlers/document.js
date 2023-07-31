@@ -41,10 +41,15 @@ const getDocument = async (req, res, next) => {
 
         // check if the document was uploaded by the employee
         if (document.employee.toString() !== employeeId) {
-            return res.status(401).json({ error: "Unauthorized to get this document" });
+            return res
+                .status(401)
+                .json({ error: "Unauthorized to get this document" });
         }
 
-        res.setHeader("Content-Disposition", `attachment; filename="${document.document_name}"`);
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${document.document_name}"`
+        );
         res.setHeader("Content-Type", "application/pdf");
 
         res.send(document.content);
@@ -57,26 +62,32 @@ const getDocument = async (req, res, next) => {
 const uploadDocument = async (req, res, next) => {
     try {
         const employeeId = req.params.id;
-        if (!req.files || Object.keys(req.files).length === 0) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
+        // if (!req.files || Object.keys(req.files).length === 0) {
+        //     return res.status(400).json({ error: "No file uploaded" });
+        // }
+        const pdfFile = req.body;
+        pdfFile.content = Uint8Array.from(
+            Buffer.from(pdfFile.content, "base64")
+        );
 
-        const pdfFile = req.files.pdf;
+        console.log("pdfFile", pdfFile);
 
         // Assuming you have a directory named 'uploads' to store the PDF files
-        const uploadPath = "./documents/" + pdfFile.name;
-
-        // Use the mv() method to place the PDF file on the server
-        await pdfFile.mv(uploadPath);
+        // const uploadPath = "./documents/" + pdfFile.name;
+        // console.log("pdffile", pdfFile);
+        // // Use the mv() method to place the PDF file on the server
+        // await pdfFile.mv(uploadPath);
 
         // Create a new document object
+        console.log("pdfFile", pdfFile);
         const newDocument = new db.Document({
-            document_type: req.body.document_type, // Set the document type as 'PDF'
+            document_type: pdfFile.document_type, // Set the document type as 'PDF'
             document_name: pdfFile.name,
-            contentType: pdfFile.mimetype,
-            content: fs.readFileSync(uploadPath), // Read the PDF file content
+            contentType: pdfFile.type,
+            content: Buffer.from(pdfFile.content), // Read the PDF file content
             document_status: "pending",
             employee: employeeId,
+            // documentUrl: uploadPath,
         });
 
         const employee = await db.Employee.findById(employeeId);
@@ -108,7 +119,9 @@ const deleteDocument = async (req, res, next) => {
         }
         // verify if this document belongs to employee who wants to delete this doc
         if (deletedDocument.employee.toString() !== req.params.id) {
-            return res.status(401).json({ error: "Unauthorized to delete this document" });
+            return res
+                .status(401)
+                .json({ error: "Unauthorized to delete this document" });
         }
         // // Remove the document from the collection
         // await db.Document.findByIdAndRemove(documentId);

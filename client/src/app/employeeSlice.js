@@ -1,11 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { signup, signin, updatePassword, register } from "services/auth";
+import {
+    fetchEmployee,
+    updateEmployee,
+    uploadDocument,
+    fetchDocuments,
+    deleteDocument,
+} from "services/employee";
 import { addError, removeError } from "./errorSlice";
 
 const initialState = {
     isAuthenticated: false,
     employee: {},
+    documents: [],
     status: "idle",
 };
 
@@ -52,6 +60,90 @@ export const updateEmployeePassword = createAsyncThunk(
     },
 );
 
+export const fetchEmployeeAction = createAsyncThunk(
+    "currentEmployee/fetchEmployeeInfo",
+    async (data, thunkAPI) => {
+        try {
+            const employee = await fetchEmployee(data);
+            thunkAPI.dispatch(removeError());
+            return employee;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
+export const updateEmployeeAction = createAsyncThunk(
+    "currentEmployee/updateEmployeeInfo",
+    async (data, thunkAPI) => {
+        try {
+            const employee = await updateEmployee(data);
+            thunkAPI.dispatch(removeError());
+            return employee;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
+export const fetchDocumentsAction = createAsyncThunk(
+    "currentEmployee/fetchDocuments",
+    async (data, thunkAPI) => {
+        try {
+            const documents = await fetchDocuments(data);
+            thunkAPI.dispatch(removeError());
+            return documents;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
+// export const fetchOneDocumentAction = createAsyncThunk(
+//     "currentEmployee/fetchDocuments",
+//     async (data, thunkAPI) => {
+//         try {
+//             const document = await fetchOneDocument(data);
+//             thunkAPI.dispatch(removeError());
+//             return document;
+//         } catch (err) {
+//             thunkAPI.dispatch(addError(err.message));
+//             return thunkAPI.rejectWithValue(err.message);
+//         }
+//     }
+// );
+
+export const uploadDocumentAction = createAsyncThunk(
+    "currentEmployee/uploadDocument",
+    async (data, thunkAPI) => {
+        try {
+            const uploadedDocument = await uploadDocument(data);
+            thunkAPI.dispatch(removeError());
+            return uploadedDocument;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
+export const deleteDocumentAction = createAsyncThunk(
+    "currentEmployee/fetchDocuments",
+    async (data, thunkAPI) => {
+        try {
+            const Document = await deleteDocument(data);
+            thunkAPI.dispatch(removeError());
+            return Document;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
+);
+
 // Check if register token expired or not
 export const registerCheck = createAsyncThunk(
     "currentEmployee/registerTokenCheck",
@@ -81,14 +173,25 @@ const currentEmployeeSlice = createSlice({
             state.status = "idle";
             localStorage.removeItem("token");
         },
+        setOnboardingApplication: (state, action) => {
+            state.employee = action.payload;
+        },
+        // addOnboardingDocuments: (state, action) => {
+        //     state.documents.push(action.payload);
+        // },
+        // removeOnboardingDocuments: (state, action) => {
+        //     const newFileList = state.documents.filter(
+        //         (item) => item.uid !== action.payload.uid
+        //     );
+        //     state.documents = newFileList;
+        // },
     },
     extraReducers: (builder) => {
         // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
-            state.cart = action.payload.cart;
             const { id, username, role, name, ducoments, feedback } = action.payload;
-            state.employee = { id, username, role, name, ducoments, feedback };
+            state.employee = action.payload;
             state.status = "successed";
         });
         builder.addCase(signInEmployee.rejected, (state, action) => {
@@ -121,19 +224,14 @@ const currentEmployeeSlice = createSlice({
         builder.addCase(updateEmployeePassword.pending, (state, action) => {
             state.status = "pending";
         });
-
-        // Register
-        builder.addCase(registerCheck.fulfilled, (state, action) => {
-            state.status = "successed";
-        });
-        builder.addCase(registerCheck.rejected, (state, action) => {
-            state.status = "failed";
-        });
-        builder.addCase(registerCheck.pending, (state, action) => {
-            state.status = "pending";
-        });
     },
 });
 
-export const { setCurrentEmployee, logOut } = currentEmployeeSlice.actions;
+export const {
+    setCurrentEmployee,
+    logOut,
+    setOnboardingApplication,
+    // addOnboardingDocuments,
+    // removeOnboardingDocuments,
+} = currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;
