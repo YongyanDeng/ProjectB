@@ -7,7 +7,7 @@ import ProtectLayout from "components/Layout/ProtectLayout";
 import AuthProtectLayout from "components/Layout/AuthProtectLayout";
 import UpdatePassword from "pages/UpdatePassword";
 import NotFound from "pages/NotFound";
-
+import PersonalInfoPage from "pages/EmployeePersonalInfo";
 function App() {
     return (
         <BrowserRouter>
@@ -17,9 +17,20 @@ function App() {
                     <Route element={<AuthProtectLayout />}>
                         <Route path="signup" element={<SignUp />} />
                         <Route path="signin" element={<SignIn />} />
-                        <Route path="updatePassword" element={<UpdatePassword />} />
+                        <Route
+                            path="updatePassword"
+                            element={<UpdatePassword />}
+                        />
                     </Route>
                     <Route element={<ProtectLayout />}></Route>
+                    <Route
+                        path="/employee/:id/profile"
+                        element={<PersonalInfoPage />}
+                    />
+                    {/* <Route
+                        path="/employee/:id/visa"
+                        element={<EmployeeVisa />}
+                    /> */}
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>

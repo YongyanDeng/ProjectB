@@ -1,5 +1,5 @@
 import React from "react";
-import EmployeeOnboardingApplication from "pages/EmployeeOnboardingApplication";
+import PersonalInfoPage from "pages/EmployeePersonalInfo";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
@@ -8,5 +8,5 @@ export default function Home() {
 
     if (!isAuthenticated)
         return <Navigate to="/signin" state={{ from: "/" }} />;
-    return <EmployeeOnboardingApplication />;
+    return <PersonalInfoPage />;
 }
