@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-import { signup, signin, updatePassword } from "services/auth";
+import { signup, signin, updatePassword, register } from "services/auth";
 import {
     fetchEmployee,
     updateEmployee,
@@ -28,7 +28,7 @@ export const signUpEmployee = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const signInEmployee = createAsyncThunk(
@@ -43,7 +43,7 @@ export const signInEmployee = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const updateEmployeePassword = createAsyncThunk(
@@ -57,7 +57,22 @@ export const updateEmployeePassword = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
+);
+
+// Check if register token expired or not
+export const registerCheck = createAsyncThunk(
+    "currentEmployee/registerTokenCheck",
+    async (data, thunkAPI) => {
+        try {
+            const res = await register(data);
+            thunkAPI.dispatch(removeError());
+            return res;
+        } catch (err) {
+            thunkAPI.dispatch(addError(err.message));
+            return thunkAPI.rejectWithValue(err.message);
+        }
+    },
 );
 
 export const fetchEmployeeAction = createAsyncThunk(
@@ -71,7 +86,7 @@ export const fetchEmployeeAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const updateEmployeeAction = createAsyncThunk(
@@ -85,7 +100,7 @@ export const updateEmployeeAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const fetchDocumentsAction = createAsyncThunk(
@@ -99,7 +114,7 @@ export const fetchDocumentsAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 // export const fetchOneDocumentAction = createAsyncThunk(
@@ -127,7 +142,7 @@ export const uploadDocumentAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 export const deleteDocumentAction = createAsyncThunk(
@@ -141,7 +156,7 @@ export const deleteDocumentAction = createAsyncThunk(
             thunkAPI.dispatch(addError(err.message));
             return thunkAPI.rejectWithValue(err.message);
         }
-    }
+    },
 );
 
 const currentEmployeeSlice = createSlice({
@@ -161,23 +176,13 @@ const currentEmployeeSlice = createSlice({
         setOnboardingApplication: (state, action) => {
             state.employee = action.payload;
         },
-        // addOnboardingDocuments: (state, action) => {
-        //     state.documents.push(action.payload);
-        // },
-        // removeOnboardingDocuments: (state, action) => {
-        //     const newFileList = state.documents.filter(
-        //         (item) => item.uid !== action.payload.uid
-        //     );
-        //     state.documents = newFileList;
-        // },
     },
     extraReducers: (builder) => {
         // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
-            const { id, username, role, name, ducoments, feedback } =
-                action.payload;
-            state.employee = action.payload;
+            const { id, username, role, name, documents, feedback } = action.payload;
+            state.employee = { id, username, role, name, documents, feedback };
             state.status = "successed";
         });
         builder.addCase(signInEmployee.rejected, (state, action) => {
@@ -208,6 +213,17 @@ const currentEmployeeSlice = createSlice({
             state.status = "failed";
         });
         builder.addCase(updateEmployeePassword.pending, (state, action) => {
+            state.status = "pending";
+        });
+
+        // Register
+        builder.addCase(registerCheck.fulfilled, (state, action) => {
+            state.status = "successed";
+        });
+        builder.addCase(registerCheck.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(registerCheck.pending, (state, action) => {
             state.status = "pending";
         });
 
@@ -282,12 +298,7 @@ const currentEmployeeSlice = createSlice({
     },
 });
 
-export const {
-    setCurrentEmployee,
-    logOut,
-    setOnboardingApplication,
-    // addOnboardingDocuments,
-    // removeOnboardingDocuments,
-} = currentEmployeeSlice.actions;
+export const { setCurrentEmployee, logOut, setOnboardingApplication } =
+    currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;
 //

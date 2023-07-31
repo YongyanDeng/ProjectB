@@ -5,6 +5,40 @@ require("dotenv").config();
 const visaProcess = ["OPT Receipt", "OPT EAD", "I-983", "I-20"];
 
 /**
+ * Get all employee profiles besides himself/herself as list
+ * @param {*} req
+ * @param {[brief info of each application]} res
+ * @param {*} next
+ * @returns
+ */
+exports.getAllProfiles = async function (req, res, next) {
+    try {
+        const employees = await db.Employee.find({ _id: { $ne: req.params.id } });
+
+        const output = employees?.reduce((acc, employee) => {
+            const { id, email, name, contact_info, identification_info, work_authorization } =
+                employee;
+
+            acc.push({
+                id,
+                email,
+                name,
+                contact_info,
+                identification_info,
+                work_authorization,
+            });
+            return acc;
+        }, []);
+        return res.status(200).json(output);
+    } catch (err) {
+        return next({
+            status: 500,
+            message: err.message,
+        });
+    }
+};
+
+/**
  * Get all applications besides himself/herself as list
  * @param {*} req
  * @param {[brief info of each application]} res
@@ -17,16 +51,15 @@ exports.getAllApplications = async function (req, res, next) {
 
         const output = employees?.reduce((acc, employee) => {
             const { id, email, name, role, onboarding_status } = employee;
-
             acc.push({
                 id,
                 email,
                 name,
-                role,
-                onboarding_status,
             });
             return acc;
         }, []);
+
+        // Output
         return res.status(200).json(output);
     } catch (err) {
         return next({
@@ -49,6 +82,7 @@ exports.getAnApplicaton = async function (req, res, next) {
 
         const {
             id,
+            email,
             username,
             name,
             role,
@@ -66,11 +100,26 @@ exports.getAnApplicaton = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            const { _id, document_name, document_status } = document;
-            docs.push({
+            docs.push(document);
+        }
+
+        // Corner case
+        if (!work_authorization.title) {
+            return res.status(200).json({
                 id,
-                document_name,
-                document_status,
+                email,
+                username,
+                name,
+                role,
+                address,
+                profile_picture,
+                contact_Info,
+                identification_info,
+                work_authorization,
+                reference,
+                onboarding_status,
+                documents: docs,
+                feedback,
             });
         }
 
@@ -86,6 +135,7 @@ exports.getAnApplicaton = async function (req, res, next) {
         // Output
         return res.status(200).json({
             id,
+            email,
             username,
             name,
             role,
@@ -176,19 +226,22 @@ exports.getVisaList = async function (req, res, next) {
         const employees = await db.Employee.find({ _id: { $ne: req.params.id } });
 
         const inProgress = [];
+        const all = [];
         for (const employee of employees) {
-            const { documents } = employee;
-            if (documents.length < 4) inProgress.push(employee);
+            const { id, email, name, work_authorization, documents } = employee;
+            if (documents.length < 4) inProgress.push({ id, email, name, work_authorization });
             else {
                 const lastDoc = await db.Document.findById(documents[documents.length - 1]);
-                if (lastDoc.document_status !== "approved") inProgress.push(employee);
+                if (lastDoc.document_status !== "approved")
+                    inProgress.push({ id, email, name, work_authorization });
             }
+            all.push({ id, email, name, work_authorization });
         }
 
         // Output
         return res.status(200).json({
             inProgress,
-            all: employees,
+            all,
         });
     } catch (err) {
         return next({
@@ -215,11 +268,18 @@ exports.getOneVisa = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            const { id, document_name, document_status } = document;
-            docs.push({
+            docs.push(document);
+        }
+
+        // Corner case
+        if (!work_authorization.title) {
+            return res.status(200).json({
                 id,
-                document_name,
-                document_status,
+                email,
+                name,
+                role,
+                work_authorization,
+                documents: docs,
             });
         }
 
@@ -272,11 +332,18 @@ exports.reviewOneVisa = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            const { id, document_name, document_status } = document;
-            docs.push({
+            docs.push(document);
+        }
+
+        // Corner case
+        if (!work_authorization.title) {
+            return res.status(200).json({
                 id,
-                document_name,
-                document_status,
+                email,
+                name,
+                role,
+                work_authorization,
+                documents: docs,
             });
         }
 

@@ -1,9 +1,5 @@
 const express = require("express");
-const {
-    getAllEmployee,
-    updateEmployee,
-    getEmployee,
-} = require("../handlers/employee");
+const { getAllEmployee, updateEmployee, getEmployee } = require("../handlers/employee");
 const {
     getAllDocuments,
     getDocument,
@@ -13,7 +9,7 @@ const {
 const router = express.Router({ mergeParams: true });
 const { loginVerify, userVerify, vendorVerify } = require("../middleware/auth");
 
-//  prefix: /api/employees/:id"
+//  prefix: /api/employees/:employeeId"
 router.get("/", getEmployee);
 router.put("/", updateEmployee);
 

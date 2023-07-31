@@ -2,6 +2,11 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Dependencies
+
+1. dotenv - npm install dotenv --save-dev
+2. env-cmd - npm install env-cmd --save-dev
+
 ## Available Scripts
 
 In the project directory, you can run:
