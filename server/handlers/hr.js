@@ -332,7 +332,7 @@ exports.reviewOneVisa = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            docs.push(document);
+            if (document) docs.push(document);
         }
 
         // Corner case
