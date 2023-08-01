@@ -1,11 +1,10 @@
 .profile-container {
-    width: 1000px;
-    background-color: #ffffff;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    box-sizing: border-box;
+    margin-top: 1800px;
+    width: 50%;
+    background-color: #ffffff;
 }
