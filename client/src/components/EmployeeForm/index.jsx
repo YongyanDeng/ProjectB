@@ -1,4 +1,6 @@
-import React from "react";
+import style from "./style.module.css";
+
+import React, { useEffect, useState } from "react";
 import {
     Form,
     Input,
@@ -14,7 +16,7 @@ import {
 import dayjs from "dayjs";
 import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
-import style from "./style.module.css";
+
 import {
     fetchEmployeeAction,
     updateEmployeeAction,
@@ -22,7 +24,6 @@ import {
     uploadDocumentAction,
     fetchDocumentsAction,
 } from "app/employeeSlice";
-import { useEffect, useState } from "react";
 import { fetchDocuments } from "services/employee";
 
 const { Option } = Select;

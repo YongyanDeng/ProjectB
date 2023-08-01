@@ -3,7 +3,7 @@ import "./styles.css";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Form, Input, Table, Button, Select, Space, message } from "antd";
+import { Form, Input, Table, Button, Select, Space, message, Spin } from "antd";
 import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 import emailjs from "@emailjs/browser";
 
@@ -27,16 +27,19 @@ export default function HrVisaDetail() {
     }, []);
 
     useEffect(() => {
-        if (status === "successed" && !!Object.keys(selectedEmployee).length) {
-            const docs = selectedEmployee.documents.map((document, index) => {
-                return {
-                    key: index + 1,
-                    name: document.document_name,
-                    content: document.content.data,
-                    type: document.document_type,
-                    status: document.document_status,
-                };
-            });
+        if (status === "successed" && selectedEmployee.id === employeeId) {
+            let docs = [];
+            if (selectedEmployee.documents?.length) {
+                docs = selectedEmployee.documents.map((document, index) => {
+                    return {
+                        key: index + 1,
+                        name: document.document_name,
+                        content: document.content.data,
+                        type: document.document_type,
+                        status: document.document_status,
+                    };
+                });
+            }
 
             let next_step = null;
             const last = selectedEmployee.documents[selectedEmployee.documents.length - 1];
@@ -227,7 +230,7 @@ export default function HrVisaDetail() {
                     </Form>
                 </div>
             ) : (
-                <h1>Loading..</h1>
+                <Spin size="large" />
             )}
         </>
     );

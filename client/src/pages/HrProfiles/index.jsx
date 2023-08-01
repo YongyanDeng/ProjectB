@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { Spin } from "antd";
 
 import { getProfileList } from "app/hrSlice";
 import EmployeeTable from "components/EmployeeTable";
@@ -102,7 +103,7 @@ export default function HrProfiles() {
                     handleSearchChange={handleSearchChange}
                 />
             ) : (
-                <h1>Loading...</h1>
+                <Spin size="large" />
             )}
         </div>
     );
