@@ -29,7 +29,7 @@ export default function HrProfileDetail() {
     }, [selectedEmployee]);
 
     return (
-        <div className="profile-container">
+        <div className="center-wrapper">
             {detail ? (
                 <EmployeeForm
                     employee={detail}

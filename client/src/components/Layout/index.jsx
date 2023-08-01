@@ -49,6 +49,7 @@ export default function MainLayout() {
             alignItems: "center",
             backgroundColor: "#F9FAFB",
             overflow: "auto",
+            position: "relative",
         }),
         [isMobile],
     );
