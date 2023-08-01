@@ -41,4 +41,3 @@ export const deleteDocument = async ({ id, documentId }) => {
         method: "DELETE",
     });
 };
-//
