@@ -40,15 +40,10 @@ const getDocument = async (req, res, next) => {
 
         // check if the document was uploaded by the employee
         if (document.employee.toString() !== employeeId) {
-            return res
-                .status(401)
-                .json({ error: "Unauthorized to get this document" });
+            return res.status(401).json({ error: "Unauthorized to get this document" });
         }
 
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${document.document_name}"`
-        );
+        res.setHeader("Content-Disposition", `attachment; filename="${document.document_name}"`);
         res.setHeader("Content-Type", "application/pdf");
 
         res.send(document.content);
@@ -65,9 +60,7 @@ const uploadDocument = async (req, res, next) => {
         //     return res.status(400).json({ error: "No file uploaded" });
         // }
         const pdfFile = req.body;
-        pdfFile.content = Uint8Array.from(
-            Buffer.from(pdfFile.content, "base64")
-        );
+        pdfFile.content = Uint8Array.from(Buffer.from(pdfFile.content, "base64"));
 
         console.log("pdfFile", pdfFile);
 
@@ -86,6 +79,7 @@ const uploadDocument = async (req, res, next) => {
             content: Buffer.from(pdfFile.content), // Read the PDF file content
             document_status: "pending",
             employee: employeeId,
+            uid: pdfFile.uid,
             // documentUrl: uploadPath,
         });
 
@@ -119,14 +113,12 @@ const deleteDocument = async (req, res, next) => {
         }
         // verify if this document belongs to employee who wants to delete this doc
         if (deletedDocument.employee.toString() !== req.params.id) {
-            return res
-                .status(401)
-                .json({ error: "Unauthorized to delete this document" });
+            return res.status(401).json({ error: "Unauthorized to delete this document" });
         }
         // // Remove the document from the collection
         // await db.Document.findByIdAndRemove(documentId);
         await deletedDocument.deleteOne();
-        res.status(201).json({ message: "Document is deleted successfully" });
+        res.status(204).json({ message: "Document is deleted successfully" });
     } catch (err) {
         return next({
             status: 500,

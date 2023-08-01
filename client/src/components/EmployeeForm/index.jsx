@@ -23,6 +23,7 @@ import {
     setOnboardingApplication,
     uploadDocumentAction,
     fetchDocumentsAction,
+    deleteDocumentAction,
 } from "app/employeeSlice";
 import { fetchDocuments } from "services/employee";
 
@@ -37,11 +38,10 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     });
     const { documents } = useSelector((state) => state.employee);
     const { message: errMessage } = useSelector((state) => state.error);
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedFile, setSelectedFile] = useState({ uid: "" });
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
     const [saved, setSaved] = useState(false);
-
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
     };
@@ -94,7 +94,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
     const beforeUpload = (file) => {
         // Check if the number of uploaded files has reached the limit (e.g., 1 in this example)
-        if (uploadedfileList.length >= 1) {
+        if (Object.keys(selectedFile).length > 1) {
             message.error("You can only upload one file.");
             return false; // Prevent further file upload
         }
@@ -130,7 +130,8 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                 size: pdfFile.size,
                 type: pdfFile.type,
                 lastModified: pdfFile.lastModified,
-                document_type: "OPT RECEIPT", // The mv function is specific to the backend implementation, not relevant here
+                document_type: "OPT RECEIPT",
+                uid: pdfFile.uid, // The mv function is specific to the backend implementation, not relevant here
             };
 
             // Use the file details here, or log it to the console
@@ -149,7 +150,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                     status: "done",
                     file_url: pdfUrl, // Use the uploaded file URL here
                     thumbUrl: pdfUrl,
-                    details: fileDetails,
+                    document_type: "OPT RECEIPT",
+                    contentType: pdfFile.type,
+                    fromDocuments: "no",
                 },
             ];
             setUploadedfileList((uploadedfileList) => [...uploadedfileList, ...newFileList]);
@@ -167,6 +170,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const handleFileRemove = (file) => {
         const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
         setUploadedfileList(newFileList);
+        if (file.fromDocuments === "yes") {
+            dispatch(deleteDocumentAction({ id: employee._id, documentId: file.id }));
+        }
     };
 
     const handleSaveForm = async (data) => {
@@ -245,6 +251,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
     const handleEdit = () => {
         setIsDisable(false);
+        // setSaved(false);
     };
 
     const pdfUrlTransfer = (document) => {
@@ -253,12 +260,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         const pdfUrl = URL.createObjectURL(blob);
 
         const urlFile = {
-            uid: document._id,
+            id: document._id,
+            uid: document.uid,
             name: document.document_name,
             document_type: document.document_type,
             contentType: document.contentType,
             file_url: pdfUrl, // Use the uploaded file URL here
             thumbUrl: pdfUrl,
+            fromDocuments: "yes",
         };
         return urlFile;
     };
@@ -272,11 +281,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     }, [employee]);
 
     useEffect(() => {
-        setUploadedfileList(() =>
-            documents.map((document) => {
-                return pdfUrlTransfer(document);
-            }),
-        );
+        if (documents.length >= 1) {
+            setUploadedfileList(() =>
+                documents.map((document) => {
+                    return pdfUrlTransfer(document);
+                }),
+            );
+        }
     }, [documents]);
 
     return (
@@ -538,14 +549,17 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                     disabled={isDisable}
                                                     beforeUpload={beforeUpload}
                                                     customRequest={handleFileUpload}
-                                                    fileList={uploadedfileList}
+                                                    fileList={[selectedFile]}
                                                     onChange={handleFileChange}
                                                     onRemove={(file) => {
-                                                        setUploadedfileList(
-                                                            uploadedfileList.filter(
-                                                                (cur) => cur.uid !== file.uid,
-                                                            ),
-                                                        );
+                                                        if (file) {
+                                                            setUploadedfileList(
+                                                                uploadedfileList.filter(
+                                                                    (cur) => cur.uid !== file?.uid,
+                                                                ),
+                                                            );
+                                                        }
+                                                        setSelectedFile({ uid: "" });
                                                     }}
                                                 >
                                                     <p className="ant-upload-drag-icon">
@@ -750,12 +764,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                             </List.Item>
                         )}
                     />
+
                     {(onboardingStatus === "Never submitted" || onboardingStatus === "rejected") &&
                         !personalInfo && (
                             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                                 <Button type="primary" htmlType="submit">
-                                    save
+                                    Save
                                 </Button>
+
                                 <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
                                     Submit
                                 </Button>
