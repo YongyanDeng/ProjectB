@@ -22,7 +22,9 @@ import {
     updateEmployeeAction,
     setOnboardingApplication,
     uploadDocumentAction,
+    fetchDocumentsAction,
 } from "app/employeeSlice";
+import { fetchDocuments } from "services/employee";
 
 const { Option } = Select;
 
@@ -33,6 +35,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const [selectedDate, setSelectedDate] = useState({
         work_authorization: { start_date: "", end_date: "" },
     });
+    const { documents } = useSelector((state) => state.employee);
     const { message: errMessage } = useSelector((state) => state.error);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadedfileList, setUploadedfileList] = useState([]);
@@ -136,7 +139,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
             // Use the file details here, or log it to the console
             setSelectedFile(fileDetails);
-            const pdfBlob = new Blob([fileData], {
+            const pdfBlob = new Blob([uint8ArrayFileContent], {
                 type: "application/pdf",
             });
 
@@ -146,14 +149,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             const newFileList = [
                 {
                     uid: pdfFile.uid,
-                    name: pdfFile.name,
-                    status: "done",
-                    url: pdfUrl, // Use the uploaded file URL here
+                    document_name: pdfFile.name,
+                    file_url: pdfUrl, // Use the uploaded file URL here
                     thumbUrl: pdfUrl,
-                    details: fileDetails,
+                    contentType: pdfFile.type,
+                    document_type: "OPT RECEIPT",
                 },
             ];
-            setUploadedfileList(newFileList);
+            setUploadedfileList((uploadedfileList) => [...uploadedfileList, ...newFileList]);
             onSuccess();
         };
 
@@ -190,7 +193,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             console.log("show final data", finalData);
 
             await dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-            if (!errMessage)
+            if (!errMessage && selectedFile.length >= 1)
                 await dispatch(uploadDocumentAction({ id: employee?._id, document: selectedFile }));
             if (personalInfo) {
                 setIsDisable(() => true);
@@ -248,6 +251,39 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         setIsDisable(false);
     };
 
+    const pdfUrlTransfer = (document) => {
+        const pdfBlob = new Blob([document.content], {
+            type: "application/pdf",
+        });
+
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        console.log("url link", pdfUrl);
+
+        const urlFile = {
+            uid: document.uid,
+            document_name: document.document_name,
+            document_type: document.document_type,
+            contentType: document.contentType,
+            file_url: pdfUrl, // Use the uploaded file URL here
+            thumbUrl: pdfUrl,
+        };
+        return urlFile;
+    };
+
+    useEffect(() => {
+        if (employee?._id) {
+            dispatch(fetchDocumentsAction(employee._id));
+        } else {
+            console.log("employee._id does not exist");
+        }
+    }, [employee]);
+
+    useEffect(() => {
+        setUploadedfileList((uploadedfileList) => [
+            ...uploadedfileList,
+            ...documents.map((document) => pdfUrlTransfer(document)),
+        ]);
+    }, [documents]);
     return (
         <div className={style.FormBox}>
             <div className={style.topContent}>
@@ -438,11 +474,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                             <Option value="other">I do not wish to answer</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item
-                        label="Permanent resident or citizen of the U.S.?"
-                        name="usCitizen"
-                        rules={[{ required: true }]}
-                    >
+                    <Form.Item label="Permanent resident or citizen of the U.S.?" name="usCitizen">
                         <Select onChange={handleUsCitizenChange} disabled={isDisable}>
                             <Option value="yes">Yes</Option>
                             <Option value="no">No</Option>
@@ -527,7 +559,10 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                 </Upload.Dragger>
                                                 {uploadedfileList.map((file) => (
                                                     <div key={file.uid}>
-                                                        <a href={file.url} download={file.name}></a>
+                                                        <a
+                                                            href={file.file_url}
+                                                            download={file.document_name}
+                                                        ></a>
                                                         <DeleteOutlined
                                                             onClick={() => handleFileRemove(file)}
                                                         />
@@ -547,16 +582,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                 </Form.Item>
                             )}
 
-                            <Form.Item
-                                // name={["work_authorization", "start_date"]}
-                                label="Start Date"
-                            >
+                            <Form.Item label="Start Date">
                                 <DatePicker
                                     disabled={isDisable}
                                     value={
                                         selectedDate.work_authorization.start_date
                                             ? dayjs(selectedDate.work_authorization.start_date)
-                                            : null
+                                            : dayjs(employee?.work_authorization?.start_date)
                                     }
                                     onChange={(date) => handleDateChange(date, "start_date")}
                                 />
@@ -571,7 +603,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                     value={
                                         selectedDate.work_authorization.end_date
                                             ? dayjs(selectedDate.work_authorization.end_date)
-                                            : null
+                                            : dayjs(employee?.work_authorization?.end_date)
                                     }
                                     onChange={(date) => handleDateChange(date, "end_date")}
                                     disabledDate={disabledEndDate}
@@ -692,10 +724,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                         renderItem={(file) => (
                             <List.Item
                                 actions={[
-                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                        href={file.file_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
                                         Preview
                                     </a>,
-                                    <a href={file.url} download={file.name}>
+                                    <a href={file.file_url} download={file.document_name}>
                                         Download
                                     </a>,
                                     !isDisable && !personalInfo && (
