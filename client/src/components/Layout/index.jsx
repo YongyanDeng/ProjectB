@@ -14,13 +14,13 @@ export default function MainLayout() {
     const headerStyle = useMemo(
         () => ({
             display: "flex",
+            flexDirection: !isMobile ? "row" : "column",
             justifyContent: "space-between",
             alignItems: !isMobile ? null : "center",
             width: !isMobile ? "100%" : "392px",
             height: !isMobile ? "48px" : "auto",
             backgroundColor: "#111827",
             padding: "8px 64px",
-            flexDirection: !isMobile ? "row" : "column",
         }),
         [isMobile],
     );
@@ -28,13 +28,13 @@ export default function MainLayout() {
     const footerStyle = useMemo(
         () => ({
             display: "flex",
+            flexDirection: !isMobile ? "row" : "column",
             justifyContent: "space-between",
             alignItems: "center",
             width: !isMobile ? "100%" : "392px",
             height: !isMobile ? "85px" : "auto",
             color: "#FFFFFF",
             backgroundColor: "#111827",
-            flexDirection: !isMobile ? "row" : "column",
         }),
         [isMobile],
     );
@@ -44,12 +44,11 @@ export default function MainLayout() {
             display: "flex",
             width: !isMobile ? "100%" : "392px",
             height: !isMobile ? "calc(100vh - 48px - 85px)" : "auto",
-            // padding: !isMobile ? "0px 0px" : "0px 6px",
+            padding: !isMobile ? "20px 10px" : "0px 6px",
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: "#F9FAFB",
             overflow: "auto",
-            // margin: !isMobile ? "48px 0px 85px 0px" : "0px 6px",
         }),
         [isMobile],
     );

@@ -1,7 +1,9 @@
+import "./styles.css";
+
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Form, Input, Table, Button, Select, Space, message } from "antd";
+import { Spin } from "antd";
 import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 
 import { getProfileDetail } from "app/hrSlice";
@@ -27,7 +29,7 @@ export default function HrProfileDetail() {
     }, [selectedEmployee]);
 
     return (
-        <div>
+        <div className="profile-container">
             {detail ? (
                 <EmployeeForm
                     employee={detail}
@@ -37,7 +39,7 @@ export default function HrProfileDetail() {
                     isDisabled={true}
                 />
             ) : (
-                <h1>Loading...</h1>
+                <Spin size="large" />
             )}
         </div>
     );
