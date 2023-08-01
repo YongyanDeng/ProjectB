@@ -34,7 +34,7 @@ export default function HrVisaDetail() {
                     return {
                         key: index + 1,
                         name: document.document_name,
-                        content: document.content.data,
+                        contentData: document.content.data,
                         type: document.document_type,
                         status: document.document_status,
                     };
@@ -76,11 +76,11 @@ export default function HrVisaDetail() {
         },
         {
             title: "",
-            dataIndex: "content",
+            dataIndex: "contentData",
             key: "url",
-            render: (content) => {
+            render: (contentData) => {
                 return (
-                    <Button type="link" onClick={() => handlePreview(content)}>
+                    <Button type="link" onClick={() => handlePreview(contentData)}>
                         <FilePdfOutlined style={{ fontSize: "25px", color: "red" }} />
                     </Button>
                 );
@@ -89,9 +89,9 @@ export default function HrVisaDetail() {
     ];
 
     // handle pdf preview in new window
-    const handlePreview = (content) => {
+    const handlePreview = (contentData) => {
         // Data transfer: Buffer -> Blob
-        const uint8Array = new Uint8Array(content);
+        const uint8Array = new Uint8Array(contentData);
         const pdfBlob = new Blob([uint8Array], { type: "application/pdf" });
 
         // Open the PDF in a new window or tab

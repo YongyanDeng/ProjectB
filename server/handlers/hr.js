@@ -232,7 +232,7 @@ exports.getVisaList = async function (req, res, next) {
             if (documents.length < 4) inProgress.push({ id, email, name, work_authorization });
             else {
                 const lastDoc = await db.Document.findById(documents[documents.length - 1]);
-                if (lastDoc.document_status !== "approved")
+                if (lastDoc && lastDoc.document_status !== "approved")
                     inProgress.push({ id, email, name, work_authorization });
             }
             all.push({ id, email, name, work_authorization });
@@ -268,7 +268,7 @@ exports.getOneVisa = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            docs.push(document);
+            if (document) docs.push(document);
         }
 
         // Corner case
@@ -332,7 +332,7 @@ exports.reviewOneVisa = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            docs.push(document);
+            if (document) docs.push(document);
         }
 
         // Corner case
