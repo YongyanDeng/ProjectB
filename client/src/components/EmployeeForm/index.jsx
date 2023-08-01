@@ -14,7 +14,7 @@ import {
     Popconfirm,
 } from "antd";
 import dayjs from "dayjs";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined, DownloadOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 
 import {
@@ -41,10 +41,6 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
     const [saved, setSaved] = useState(false);
-
-    // useEffect(() => {
-
-    // }, [])
 
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
@@ -139,7 +135,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
             // Use the file details here, or log it to the console
             setSelectedFile(fileDetails);
-            const pdfBlob = new Blob([uint8ArrayFileContent], {
+            const pdfBlob = new Blob([fileData], {
                 type: "application/pdf",
             });
 
@@ -149,11 +145,11 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             const newFileList = [
                 {
                     uid: pdfFile.uid,
-                    document_name: pdfFile.name,
+                    name: pdfFile.name,
+                    status: "done",
                     file_url: pdfUrl, // Use the uploaded file URL here
                     thumbUrl: pdfUrl,
-                    contentType: pdfFile.type,
-                    document_type: "OPT RECEIPT",
+                    details: fileDetails,
                 },
             ];
             setUploadedfileList((uploadedfileList) => [...uploadedfileList, ...newFileList]);
@@ -193,7 +189,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             console.log("show final data", finalData);
 
             await dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-            if (!errMessage && selectedFile.length >= 1)
+            if (!errMessage && selectedFile)
                 await dispatch(uploadDocumentAction({ id: employee?._id, document: selectedFile }));
             if (personalInfo) {
                 setIsDisable(() => true);
@@ -252,16 +248,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     };
 
     const pdfUrlTransfer = (document) => {
-        const pdfBlob = new Blob([document.content], {
-            type: "application/pdf",
-        });
-
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        console.log("url link", pdfUrl);
+        const blob = new Blob([new Uint8Array(document.content.data)], { type: "application/pdf" });
+        // Open the PDF in a new window or tab
+        const pdfUrl = URL.createObjectURL(blob);
 
         const urlFile = {
-            uid: document.uid,
-            document_name: document.document_name,
+            uid: document._id,
+            name: document.document_name,
             document_type: document.document_type,
             contentType: document.contentType,
             file_url: pdfUrl, // Use the uploaded file URL here
@@ -279,11 +272,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     }, [employee]);
 
     useEffect(() => {
-        setUploadedfileList((uploadedfileList) => [
-            ...uploadedfileList,
-            ...documents.map((document) => pdfUrlTransfer(document)),
-        ]);
+        setUploadedfileList(() =>
+            documents.map((document) => {
+                return pdfUrlTransfer(document);
+            }),
+        );
     }, [documents]);
+
     return (
         <div className={style.FormBox}>
             <div className={style.topContent}>
@@ -535,7 +530,6 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                             // ]}
                                         >
                                             <div>
-                                                {" "}
                                                 {/* Use a div as a wrapper */}
                                                 <Upload.Dragger
                                                     name="pdfFile"
@@ -546,6 +540,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                     customRequest={handleFileUpload}
                                                     fileList={uploadedfileList}
                                                     onChange={handleFileChange}
+                                                    onRemove={(file) => {
+                                                        setUploadedfileList(
+                                                            uploadedfileList.filter(
+                                                                (cur) => cur.uid !== file.uid,
+                                                            ),
+                                                        );
+                                                    }}
                                                 >
                                                     <p className="ant-upload-drag-icon">
                                                         <InboxOutlined />
@@ -557,17 +558,17 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                         Support for a single upload.
                                                     </p>
                                                 </Upload.Dragger>
-                                                {uploadedfileList.map((file) => (
+                                                {/* {uploadedfileList.map((file) => (
                                                     <div key={file.uid}>
                                                         <a
                                                             href={file.file_url}
-                                                            download={file.document_name}
-                                                        ></a>
+                                                            download={file.name}
+                                                        >{`${file.name}`}</a>
                                                         <DeleteOutlined
                                                             onClick={() => handleFileRemove(file)}
                                                         />
                                                     </div>
-                                                ))}
+                                                ))} */}
                                             </div>
                                         </Form.Item>
                                     </div>
@@ -731,9 +732,15 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                     >
                                         Preview
                                     </a>,
-                                    <a href={file.file_url} download={file.document_name}>
+                                    <a href={file.file_url} download={file.name}>
                                         Download
                                     </a>,
+                                    // <Button
+                                    //     type="link"
+                                    //     onClick={() => handlePreview(file.file_url)}
+                                    // >
+                                    //     Preview
+                                    // </Button>,
                                     !isDisable && !personalInfo && (
                                         <DeleteOutlined onClick={() => handleFileRemove(file)} />
                                     ),
