@@ -79,6 +79,7 @@ const uploadDocument = async (req, res, next) => {
             content: Buffer.from(pdfFile.content), // Read the PDF file content
             document_status: "pending",
             employee: employeeId,
+            uid: pdfFile.uid,
             // documentUrl: uploadPath,
         });
 
@@ -117,7 +118,7 @@ const deleteDocument = async (req, res, next) => {
         // // Remove the document from the collection
         // await db.Document.findByIdAndRemove(documentId);
         await deletedDocument.deleteOne();
-        res.status(201).json({ message: "Document is deleted successfully" });
+        res.status(204).json({ message: "Document is deleted successfully" });
     } catch (err) {
         return next({
             status: 500,

@@ -23,6 +23,7 @@ import {
     setOnboardingApplication,
     uploadDocumentAction,
     fetchDocumentsAction,
+    deleteDocumentAction,
 } from "app/employeeSlice";
 import { fetchDocuments } from "services/employee";
 
@@ -33,15 +34,22 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
     const [imageUrl, setImageUrl] = useState("");
     const [selectedDate, setSelectedDate] = useState({
-        work_authorization: { start_date: "", end_date: "" },
+        work_authorization: {
+            start_date: employee.work_authorization.start_date
+                ? employee.work_authorization.start_date
+                : null,
+            end_date: employee.work_authorization.end_date
+                ? employee.work_authorization.end_date
+                : null,
+        },
     });
     const { documents } = useSelector((state) => state.employee);
     const { message: errMessage } = useSelector((state) => state.error);
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [dateValid, setDateValid] = useState(false);
+    const [selectedFile, setSelectedFile] = useState({ uid: "" });
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
     const [saved, setSaved] = useState(false);
-
     const handleImageLinkChange = (e) => {
         setImageUrl(e.target.value);
     };
@@ -73,13 +81,16 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const handleDateChange = (date, name) => {
         // Update the onboardingApplication with the selected value for Date
 
-        const dateString = date ? dayjs(date).format("MMMM D, YYYY, h:mm A") : null;
-        setSelectedDate({
-            work_authorization: {
-                ...selectedDate.work_authorization,
-                [name]: dateString,
-            },
-        });
+        if (date) {
+            const dateString = date.format("YYYY-MM-DD");
+            setSelectedDate({
+                work_authorization: {
+                    ...selectedDate.work_authorization,
+                    [name]: dateString,
+                },
+            });
+            setDateValid(true);
+        }
     };
 
     const disabledEndDate = (current) => {
@@ -87,14 +98,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         if (!current || !startDate) {
             return false;
         }
-        const currentString = dayjs(current).format("MMMM D, YYYY, h:mm A");
+        const currentString = dayjs(current).format("YYYY-MM-DD");
 
         return dayjs(currentString).isBefore(startDate);
     };
 
     const beforeUpload = (file) => {
         // Check if the number of uploaded files has reached the limit (e.g., 1 in this example)
-        if (uploadedfileList.length >= 1) {
+        if (Object.keys(selectedFile).length > 1) {
             message.error("You can only upload one file.");
             return false; // Prevent further file upload
         }
@@ -130,7 +141,8 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                 size: pdfFile.size,
                 type: pdfFile.type,
                 lastModified: pdfFile.lastModified,
-                document_type: "OPT RECEIPT", // The mv function is specific to the backend implementation, not relevant here
+                document_type: "OPT RECEIPT",
+                uid: pdfFile.uid, // The mv function is specific to the backend implementation, not relevant here
             };
 
             // Use the file details here, or log it to the console
@@ -149,7 +161,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                     status: "done",
                     file_url: pdfUrl, // Use the uploaded file URL here
                     thumbUrl: pdfUrl,
-                    details: fileDetails,
+                    document_type: "OPT RECEIPT",
+                    contentType: pdfFile.type,
+                    fromDocuments: "no",
                 },
             ];
             setUploadedfileList((uploadedfileList) => [...uploadedfileList, ...newFileList]);
@@ -167,6 +181,10 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     const handleFileRemove = (file) => {
         const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
         setUploadedfileList(newFileList);
+        if (file.fromDocuments === "yes") {
+            dispatch(deleteDocumentAction({ id: employee._id, documentId: file.id }));
+            setSelectedFile({ uid: "" });
+        }
     };
 
     const handleSaveForm = async (data) => {
@@ -189,7 +207,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             console.log("show final data", finalData);
 
             await dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
-            if (!errMessage && selectedFile)
+            if (!errMessage && Object.keys(selectedFile).length > 1)
                 await dispatch(uploadDocumentAction({ id: employee?._id, document: selectedFile }));
             if (personalInfo) {
                 setIsDisable(() => true);
@@ -245,6 +263,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
     const handleEdit = () => {
         setIsDisable(false);
+        // setSaved(false);
     };
 
     const pdfUrlTransfer = (document) => {
@@ -253,12 +272,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         const pdfUrl = URL.createObjectURL(blob);
 
         const urlFile = {
-            uid: document._id,
+            id: document._id,
+            uid: document.uid,
             name: document.document_name,
             document_type: document.document_type,
             contentType: document.contentType,
             file_url: pdfUrl, // Use the uploaded file URL here
             thumbUrl: pdfUrl,
+            fromDocuments: "yes",
         };
         return urlFile;
     };
@@ -269,14 +290,18 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         } else {
             console.log("employee._id does not exist");
         }
+        if (employee.work_authorization.start_date) {
+        }
     }, [employee]);
 
     useEffect(() => {
-        setUploadedfileList(() =>
-            documents.map((document) => {
-                return pdfUrlTransfer(document);
-            }),
-        );
+        if (documents.length >= 1) {
+            setUploadedfileList(() =>
+                documents.map((document) => {
+                    return pdfUrlTransfer(document);
+                }),
+            );
+        }
     }, [documents]);
 
     return (
@@ -521,16 +546,8 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                 }
                                                 return [];
                                             }}
-                                            // rules={[
-                                            //     {
-                                            //         required: true,
-                                            //         message:
-                                            //             "Please upload a PDF file",
-                                            //     },
-                                            // ]}
                                         >
-                                            <div>
-                                                {/* Use a div as a wrapper */}
+                                            {employee?.role === "Employee" && (
                                                 <Upload.Dragger
                                                     name="pdfFile"
                                                     accept=".pdf"
@@ -538,15 +555,14 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                     disabled={isDisable}
                                                     beforeUpload={beforeUpload}
                                                     customRequest={handleFileUpload}
-                                                    fileList={uploadedfileList}
-                                                    onChange={handleFileChange}
-                                                    onRemove={(file) => {
-                                                        setUploadedfileList(
-                                                            uploadedfileList.filter(
-                                                                (cur) => cur.uid !== file.uid,
-                                                            ),
-                                                        );
+                                                    itemRender={(
+                                                        originNode,
+                                                        file,
+                                                        currFileList,
+                                                    ) => {
+                                                        return null;
                                                     }}
+                                                    onChange={handleFileChange}
                                                 >
                                                     <p className="ant-upload-drag-icon">
                                                         <InboxOutlined />
@@ -558,19 +574,55 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                                         Support for a single upload.
                                                     </p>
                                                 </Upload.Dragger>
-                                                {/* {uploadedfileList.map((file) => (
-                                                    <div key={file.uid}>
+                                            )}
+                                        </Form.Item>
+                                        <List
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: "Please upload a PDF file",
+                                                },
+                                            ]}
+                                            header={<div>Summary of Uploaded Files</div>}
+                                            bordered
+                                            dataSource={uploadedfileList}
+                                            renderItem={(file) => (
+                                                <List.Item
+                                                    actions={[
+                                                        <a
+                                                            href={file.file_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Preview
+                                                        </a>,
                                                         <a
                                                             href={file.file_url}
                                                             download={file.name}
-                                                        >{`${file.name}`}</a>
-                                                        <DeleteOutlined
-                                                            onClick={() => handleFileRemove(file)}
-                                                        />
-                                                    </div>
-                                                ))} */}
-                                            </div>
-                                        </Form.Item>
+                                                        >
+                                                            Download
+                                                        </a>,
+                                                        // <Button
+                                                        //     type="link"
+                                                        //     onClick={() => handlePreview(file.file_url)}
+                                                        // >
+                                                        //     Preview
+                                                        // </Button>,
+                                                        !isDisable &&
+                                                            !personalInfo &&
+                                                            employee?.role === "Employee" && (
+                                                                <DeleteOutlined
+                                                                    onClick={() =>
+                                                                        handleFileRemove(file)
+                                                                    }
+                                                                />
+                                                            ),
+                                                    ]}
+                                                >
+                                                    {file.name}
+                                                </List.Item>
+                                            )}
+                                        />
                                     </div>
                                 )}
 
@@ -583,13 +635,21 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                                 </Form.Item>
                             )}
 
-                            <Form.Item label="Start Date">
+                            <Form.Item
+                                label="Start Date"
+                                rules={[
+                                    {
+                                        required: { dateValid },
+                                        message: "Please enter the start state",
+                                    },
+                                ]}
+                            >
                                 <DatePicker
                                     disabled={isDisable}
                                     value={
                                         selectedDate.work_authorization.start_date
                                             ? dayjs(selectedDate.work_authorization.start_date)
-                                            : dayjs(employee?.work_authorization?.start_date)
+                                            : null
                                     }
                                     onChange={(date) => handleDateChange(date, "start_date")}
                                 />
@@ -597,15 +657,20 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
                             <Form.Item
                                 label="End Date"
-                                // name={["work_authorization", "end_date"]}
+                                rules={[
+                                    {
+                                        required: { dateValid },
+                                        message: "Please enter the end state",
+                                    },
+                                ]}
                             >
                                 <DatePicker
                                     disabled={isDisable}
-                                    value={
+                                    value={dayjs(
                                         selectedDate.work_authorization.end_date
                                             ? dayjs(selectedDate.work_authorization.end_date)
-                                            : dayjs(employee?.work_authorization?.end_date)
-                                    }
+                                            : null,
+                                    )}
                                     onChange={(date) => handleDateChange(date, "end_date")}
                                     disabledDate={disabledEndDate}
                                 />
@@ -718,44 +783,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
 
                     {/* Add summary of uploaded files or documents */}
                     {/* ... */}
-                    <List
-                        header={<div>Summary of Uploaded Files</div>}
-                        bordered
-                        dataSource={uploadedfileList}
-                        renderItem={(file) => (
-                            <List.Item
-                                actions={[
-                                    <a
-                                        href={file.file_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        Preview
-                                    </a>,
-                                    <a href={file.file_url} download={file.name}>
-                                        Download
-                                    </a>,
-                                    // <Button
-                                    //     type="link"
-                                    //     onClick={() => handlePreview(file.file_url)}
-                                    // >
-                                    //     Preview
-                                    // </Button>,
-                                    !isDisable && !personalInfo && (
-                                        <DeleteOutlined onClick={() => handleFileRemove(file)} />
-                                    ),
-                                ]}
-                            >
-                                {file.name}
-                            </List.Item>
-                        )}
-                    />
                     {(onboardingStatus === "Never submitted" || onboardingStatus === "rejected") &&
                         !personalInfo && (
                             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                                 <Button type="primary" htmlType="submit">
-                                    save
+                                    Save
                                 </Button>
+
                                 <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
                                     Submit
                                 </Button>
