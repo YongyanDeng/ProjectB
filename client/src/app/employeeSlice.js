@@ -146,7 +146,7 @@ export const uploadDocumentAction = createAsyncThunk(
 );
 
 export const deleteDocumentAction = createAsyncThunk(
-    "currentEmployee/fetchDocuments",
+    "currentEmployee/deleteDocuments",
     async (data, thunkAPI) => {
         try {
             const Document = await deleteDocument(data);
@@ -274,16 +274,16 @@ const currentEmployeeSlice = createSlice({
             state.status = "pending";
         });
 
-        // //remove seleted document
-        // builder.addCase(deleteDocumentAction.fulfilled, (state, action) => {
-        //     state.status = "successed";
-        // });
-        // builder.addCase(deleteDocumentAction.rejected, (state, action) => {
-        //     state.status = "failed";
-        // });
-        // builder.addCase(deleteDocumentAction.pending, (state, action) => {
-        //     state.status = "pending";
-        // });
+        //remove seleted document
+        builder.addCase(deleteDocumentAction.fulfilled, (state, action) => {
+            state.status = "successed";
+        });
+        builder.addCase(deleteDocumentAction.rejected, (state, action) => {
+            state.status = "failed";
+        });
+        builder.addCase(deleteDocumentAction.pending, (state, action) => {
+            state.status = "pending";
+        });
 
         // //get employee info
         // builder.addCase(updateEmployeePassword.fulfilled, (state, action) => {
