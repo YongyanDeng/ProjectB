@@ -47,15 +47,17 @@ export default function HrOnboardingDetail() {
     };
 
     return (
-        <>
+        <div className="center-wrapper">
             {detail ? (
-                <div className="container">
+                <>
                     <EmployeeForm
                         employee={detail}
-                        personalInfo={true}
+                        personalInfo={false}
                         title={"Personal Information"}
                         onboardingStatus={detail.onboarding_status}
                         isDisabled={true}
+                        files={detail.documents}
+                        hrStatus={status}
                     />
                     <Form onFinish={handleSubmit}>
                         <Form.Item label="Review">
@@ -84,10 +86,10 @@ export default function HrOnboardingDetail() {
                             </Button>
                         </Form.Item>
                     </Form>
-                </div>
+                </>
             ) : (
                 <h1>Loading...</h1>
             )}
-        </>
+        </div>
     );
 }

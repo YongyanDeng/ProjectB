@@ -10,6 +10,7 @@ const OnboardingPage = () => {
     const dispatch = useDispatch();
     const [detail, setDetail] = useState(null);
     const navigate = useNavigate();
+
     useEffect(() => {
         dispatch(fetchEmployeeAction(employee.id));
         // dispatch(fetchDocumentsAction(employee.id));
@@ -35,9 +36,7 @@ const OnboardingPage = () => {
                                         employee={detail}
                                         personalInfo={false}
                                         title={"Onboarding application"}
-                                        onboardingStatus={
-                                            employee.onboarding_status
-                                        }
+                                        onboardingStatus={employee.onboarding_status}
                                         enableEdit={true}
                                     />
                                 );
@@ -47,12 +46,8 @@ const OnboardingPage = () => {
                                     <EmployeeForm
                                         employee={detail}
                                         personalInfo={false}
-                                        title={
-                                            "Resubmit for Rejected Onboarding application"
-                                        }
-                                        onboardingStatus={
-                                            employee.onboarding_status
-                                        }
+                                        title={"Resubmit for Rejected Onboarding application"}
+                                        onboardingStatus={employee.onboarding_status}
                                         enableEdit={true}
                                     />
                                 );
@@ -61,12 +56,8 @@ const OnboardingPage = () => {
                                     <EmployeeForm
                                         employee={detail}
                                         personalInfo={false}
-                                        title={
-                                            "Please wait for HR to review your application"
-                                        }
-                                        onboardingStatus={
-                                            employee.onboarding_status
-                                        }
+                                        title={"Please wait for HR to review your application"}
+                                        onboardingStatus={employee.onboarding_status}
                                         enableEdit={false}
                                     />
                                 );
@@ -85,7 +76,7 @@ const OnboardingPage = () => {
         );
     };
 
-    return <div>{renderContent()}</div>;
+    return <div className="center-wrapper">{renderContent()}</div>;
 };
 
 export default OnboardingPage;

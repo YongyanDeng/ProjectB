@@ -229,6 +229,16 @@ const currentEmployeeSlice = createSlice({
 
         //get employee info
         builder.addCase(fetchEmployeeAction.fulfilled, (state, action) => {
+            let dob = action.payload.identification_info.date_of_birth;
+            if (dob) {
+                dob = new Date(dob).toLocaleString("en-US", {
+                    month: "numeric",
+                    day: "numeric",
+                    year: "numeric",
+                });
+            }
+            action.payload.identification_info.date_of_birth = dob;
+
             state.employee = action.payload;
             state.status = "successed";
         });

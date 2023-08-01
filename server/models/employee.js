@@ -52,92 +52,115 @@ const employeeSchema = new mongoose.Schema({
     address: {
         building_apt: {
             type: String,
-            // required: true,
+            default: "",
         },
         street_name: {
             type: String,
-            // required: true,
+            default: "",
         },
         city: {
             type: String,
+            default: "",
         },
         state: {
             type: String,
+            default: "",
         },
         zip: {
             type: String,
+            default: "",
         },
     },
     contact_info: {
         cell_phone: {
             type: String,
+            default: "",
         },
         work_phone: {
             type: String,
+            default: "",
         },
     },
     identification_info: {
         SSN: {
             type: String,
+            default: "",
         },
         date_of_birth: {
             type: Date,
+            default: "",
         },
         gender: {
             type: String,
+            default: "",
         },
     },
     work_authorization: {
         title: {
             // ["Green Card", "Citizen", "Other"]
             type: String,
+            default: "",
         },
         start_date: {
             type: Date,
+            default: null,
         },
         end_date: {
             type: Date,
+            default: null,
         },
     },
     reference: {
         referee_info: {
             first_name: {
                 type: String,
+                default: "",
             },
             last_name: {
                 type: String,
+                default: "",
             },
             middle_name: {
                 type: String,
+                default: "",
             },
             phone: {
                 type: String,
+                default: "",
             },
             email: {
                 type: String,
+                default: "",
             },
             relationship: {
                 type: String,
+                default: "",
             },
         },
         emergency_contact: {
             first_name: {
                 type: String,
+                default: "",
             },
             last_name: {
                 type: String,
+                default: "",
             },
             middle_name: {
                 type: String,
+                default: "",
             },
             phone: {
                 type: String,
+                default: "",
             },
             email: {
                 type: String,
+                default: "",
             },
             relationship: {
                 type: String,
+                default: "",
             },
         },
     },
@@ -154,9 +177,11 @@ const employeeSchema = new mongoose.Schema({
     ],
     feedback: {
         type: String,
+        default: "",
     },
     usCitizen: {
         type: String,
+        default: "",
     },
 });
 
