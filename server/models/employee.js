@@ -93,10 +93,10 @@ const employeeSchema = new mongoose.Schema({
             type: String,
         },
         start_date: {
-            type: String,
+            type: Date,
         },
         end_date: {
-            type: String,
+            type: Date,
         },
     },
     reference: {
