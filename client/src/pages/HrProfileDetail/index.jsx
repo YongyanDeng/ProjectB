@@ -37,6 +37,8 @@ export default function HrProfileDetail() {
                     title={"Personal Information"}
                     onboardingStatus={detail.onboarding_status}
                     isDisabled={true}
+                    files={detail.documents}
+                    hrStatus={status}
                 />
             ) : (
                 <Spin size="large" />
