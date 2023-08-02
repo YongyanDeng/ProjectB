@@ -1,7 +1,7 @@
 import style from "./style.module.css";
-import "./styles.css";
 
 import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
     Form,
     Input,
@@ -13,10 +13,10 @@ import {
     DatePicker,
     List,
     Popconfirm,
+    Spin,
 } from "antd";
 import dayjs from "dayjs";
 import { InboxOutlined, DeleteOutlined, DownloadOutlined } from "@ant-design/icons";
-import { useSelector, useDispatch } from "react-redux";
 
 import {
     fetchEmployeeAction,
@@ -253,6 +253,7 @@ const EmployeeForm = ({
     const handleFirstCancelButton = () => {
         setPopConfirmVisible(true);
     };
+
     // Handler for confirming the action
     const handleConfirm = () => {
         // navigate to page before clicking edit
@@ -294,15 +295,15 @@ const EmployeeForm = ({
     useEffect(() => {
         if (operator.role === "Employee") {
             dispatch(fetchDocumentsAction(employee.id));
-            setSelectedDate(() => {
-                return {
-                    work_authorization: {
-                        start_date: employee.work_authorization?.start_date,
-                        end_date: employee.work_authorization?.end_date,
-                    },
-                };
-            });
         }
+        setSelectedDate(() => {
+            return {
+                work_authorization: {
+                    start_date: employee.work_authorization?.start_date,
+                    end_date: employee.work_authorization?.end_date,
+                },
+            };
+        });
     }, [employee]);
 
     useEffect(() => {
@@ -330,10 +331,11 @@ const EmployeeForm = ({
                         initialValues={employee}
                         onFinish={handleSaveForm}
                         labelAlign="left"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
+                        labelCol={{ span: 9 }}
+                        wrapperCol={{ span: 15 }}
                     >
                         <Form.Item
+                            className={style.formItem}
                             label="First Name"
                             name={["name", "first_name"]}
                             rules={[
@@ -346,6 +348,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Last Name"
                             name={["name", "last_name"]}
                             rules={[
@@ -357,13 +360,25 @@ const EmployeeForm = ({
                         >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                        <Form.Item label="Middle Name" name={["name", "middle_name"]}>
+                        <Form.Item
+                            className={style.formItem}
+                            label="Middle Name"
+                            name={["name", "middle_name"]}
+                        >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                        <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
+                        <Form.Item
+                            className={style.formItem}
+                            label="Preferred Name"
+                            name={["name", "preferred_name"]}
+                        >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                        <Form.Item label="Profile Picture" name="profile_picture">
+                        <Form.Item
+                            className={style.formItem}
+                            label="Profile Picture"
+                            name="profile_picture"
+                        >
                             <Input
                                 id="image-link-input"
                                 placeholder="Profile Picture"
@@ -372,7 +387,7 @@ const EmployeeForm = ({
                             />
                         </Form.Item>
 
-                        <Form.Item>
+                        <Form.Item className={style.formItem} wrapperCol={{ offset: 9, span: 15 }}>
                             <img
                                 src={imageUrl ? imageUrl : employee?.profile_picture}
                                 style={{
@@ -380,10 +395,11 @@ const EmployeeForm = ({
                                     height: "200px",
                                     objectFit: "cover",
                                 }}
-                                alt="Image"
+                                alt=""
                             />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Street Name"
                             name={["address", "street_name"]} // Use an array for nested fields
                             rules={[
@@ -396,6 +412,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Building / Apt"
                             name={["address", "building_apt"]} // Use an array for nested fields
                             rules={[
@@ -408,6 +425,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="City"
                             name={["address", "city"]}
                             rules={[
@@ -420,6 +438,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="State"
                             name={["address", "state"]}
                             rules={[
@@ -432,6 +451,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="ZIP"
                             name={["address", "zip"]}
                             rules={[
@@ -444,6 +464,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Cell Phone Number"
                             name={["contact_info", "cell_phone"]}
                             rules={[
@@ -455,13 +476,18 @@ const EmployeeForm = ({
                         >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                        <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
+                        <Form.Item
+                            className={style.formItem}
+                            label="Work Phone Number"
+                            name={["contact_info", "work_phone"]}
+                        >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                        <Form.Item label="Email">
+                        <Form.Item className={style.formItem} label="Email">
                             <Input disabled value={employee?.email} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="SSN"
                             name={["identification_info", "SSN"]}
                             rules={[
@@ -474,6 +500,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Date of Birth"
                             name={["identification_info", "date_of_birth"]}
                             rules={[
@@ -486,6 +513,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Gender"
                             name={["identification_info", "gender"]}
                             rules={[
@@ -502,6 +530,7 @@ const EmployeeForm = ({
                             </Select>
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             label="Permanent resident or citizen of the U.S.?"
                             name="usCitizen"
                         >
@@ -512,6 +541,7 @@ const EmployeeForm = ({
                         </Form.Item>
                         {employee?.usCitizen === "yes" && (
                             <Form.Item
+                                className={style.formItem}
                                 label="What is your work authorization?"
                                 name={["work_authorization", "title"]}
                             >
@@ -526,8 +556,9 @@ const EmployeeForm = ({
                             </Form.Item>
                         )}
                         {employee?.usCitizen === "no" && (
-                            <div>
+                            <>
                                 <Form.Item
+                                    className={style.formItem}
                                     label="What is your work authorization?"
                                     name={["work_authorization", "title"]}
                                 >
@@ -542,25 +573,24 @@ const EmployeeForm = ({
 
                                 {employee?.work_authorization?.title === "F1(CPT/OPT)" &&
                                     !personalInfo && (
-                                        <div>
-                                            <Form.Item
-                                                label="Upload OPT RECEIPT File"
-                                                name="pdfFile"
-                                                getValueFromEvent={(e) => {
-                                                    if (Array.isArray(e)) {
-                                                        return e;
-                                                    } else if (e && e.fileList) {
-                                                        // Filter the fileList to contain only one file
-                                                        const filteredFileList = e.fileList.slice(
-                                                            0,
-                                                            0,
-                                                        );
-                                                        return filteredFileList;
-                                                    }
-                                                    return [];
-                                                }}
-                                            >
-                                                {employee?.role === "Employee" && (
+                                        <>
+                                            {operator?.role === "Employee" && (
+                                                <Form.Item
+                                                    className={style.formItem}
+                                                    label="Upload OPT RECEIPT File"
+                                                    name="pdfFile"
+                                                    getValueFromEvent={(e) => {
+                                                        if (Array.isArray(e)) {
+                                                            return e;
+                                                        } else if (e && e.fileList) {
+                                                            // Filter the fileList to contain only one file
+                                                            const filteredFileList =
+                                                                e.fileList.slice(0, 0);
+                                                            return filteredFileList;
+                                                        }
+                                                        return [];
+                                                    }}
+                                                >
                                                     <Upload.Dragger
                                                         name="pdfFile"
                                                         accept=".pdf"
@@ -587,64 +617,70 @@ const EmployeeForm = ({
                                                             Support for a single upload.
                                                         </p>
                                                     </Upload.Dragger>
-                                                )}
+                                                </Form.Item>
+                                            )}
+                                            <Form.Item className={style.formItem} label="Files">
+                                                <List
+                                                    rules={[
+                                                        {
+                                                            required: true,
+                                                            message: "Please upload a PDF file",
+                                                        },
+                                                    ]}
+                                                    header={<div>Summary of Uploaded Files</div>}
+                                                    bordered
+                                                    dataSource={
+                                                        operator.role === "Employee"
+                                                            ? uploadedfileList
+                                                            : files
+                                                    }
+                                                    renderItem={(file) => (
+                                                        <List.Item
+                                                            actions={[
+                                                                <a
+                                                                    href={file.file_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    Preview
+                                                                </a>,
+                                                                <a
+                                                                    href={file.file_url}
+                                                                    download={file.name}
+                                                                >
+                                                                    Download
+                                                                </a>,
+                                                                // <Button
+                                                                //     type="link"
+                                                                //     onClick={() => handlePreview(file.file_url)}
+                                                                // >
+                                                                //     Preview
+                                                                // </Button>,
+                                                                !isDisable &&
+                                                                    !personalInfo &&
+                                                                    employee?.role ===
+                                                                        "Employee" && (
+                                                                        <DeleteOutlined
+                                                                            onClick={() =>
+                                                                                handleFileRemove(
+                                                                                    file,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    ),
+                                                            ]}
+                                                        >
+                                                            {file.name}
+                                                        </List.Item>
+                                                    )}
+                                                />
                                             </Form.Item>
-                                            <List
-                                                rules={[
-                                                    {
-                                                        required: true,
-                                                        message: "Please upload a PDF file",
-                                                    },
-                                                ]}
-                                                header={<div>Summary of Uploaded Files</div>}
-                                                bordered
-                                                dataSource={
-                                                    operator.role === "Employee"
-                                                        ? uploadedfileList
-                                                        : files
-                                                }
-                                                renderItem={(file) => (
-                                                    <List.Item
-                                                        actions={[
-                                                            <a
-                                                                href={file.file_url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                Preview
-                                                            </a>,
-                                                            <a
-                                                                href={file.file_url}
-                                                                download={file.name}
-                                                            >
-                                                                Download
-                                                            </a>,
-                                                            // <Button
-                                                            //     type="link"
-                                                            //     onClick={() => handlePreview(file.file_url)}
-                                                            // >
-                                                            //     Preview
-                                                            // </Button>,
-                                                            !isDisable &&
-                                                                !personalInfo &&
-                                                                employee?.role === "Employee" && (
-                                                                    <DeleteOutlined
-                                                                        onClick={() =>
-                                                                            handleFileRemove(file)
-                                                                        }
-                                                                    />
-                                                                ),
-                                                        ]}
-                                                    >
-                                                        {file.name}
-                                                    </List.Item>
-                                                )}
-                                            />
-                                        </div>
+                                        </>
                                     )}
 
                                 {employee?.work_authorization?.title === "Other" && (
                                     <Form.Item
+                                        className={style.formItem}
                                         label="Specify Visa Title"
                                         name={["work_authorization", "title"]}
                                     >
@@ -653,6 +689,7 @@ const EmployeeForm = ({
                                 )}
 
                                 <Form.Item
+                                    className={style.formItem}
                                     label="Start Date"
                                     rules={[
                                         {
@@ -673,6 +710,7 @@ const EmployeeForm = ({
                                 </Form.Item>
 
                                 <Form.Item
+                                    className={style.formItem}
                                     label="End Date"
                                     rules={[
                                         {
@@ -692,11 +730,13 @@ const EmployeeForm = ({
                                         disabledDate={disabledEndDate}
                                     />
                                 </Form.Item>
-                            </div>
+                            </>
                         )}
                         {!personalInfo && (
-                            <Form.Item label="Reference">
+                            <>
+                                <Form.Item className={style.formItem} label="Reference"></Form.Item>
                                 <Form.Item
+                                    className={style.formItem}
                                     name={["reference", "referee_info", "first_name"]}
                                     label="First Name"
                                     rules={[
@@ -709,6 +749,7 @@ const EmployeeForm = ({
                                     <Input disabled={isDisable} />
                                 </Form.Item>
                                 <Form.Item
+                                    className={style.formItem}
                                     name={["reference", "referee_info", "last_name"]}
                                     label="Last Name"
                                     rules={[
@@ -721,24 +762,28 @@ const EmployeeForm = ({
                                     <Input disabled={isDisable} />
                                 </Form.Item>
                                 <Form.Item
+                                    className={style.formItem}
                                     name={["reference", "referee_info", "middle_name"]}
                                     label="Middle Name"
                                 >
                                     <Input disabled={isDisable} />
                                 </Form.Item>
                                 <Form.Item
+                                    className={style.formItem}
                                     name={["reference", "referee_info", "phone"]}
                                     label="Phone"
                                 >
                                     <Input disabled={isDisable} />
                                 </Form.Item>
                                 <Form.Item
+                                    className={style.formItem}
                                     name={["reference", "referee_info", "email"]}
                                     label="Email"
                                 >
                                     <Input disabled={isDisable} />
                                 </Form.Item>
                                 <Form.Item
+                                    className={style.formItem}
                                     name={["reference", "referee_info", "relationship"]}
                                     label="Relationship"
                                     rules={[
@@ -750,11 +795,12 @@ const EmployeeForm = ({
                                 >
                                     <Input disabled={isDisable} />
                                 </Form.Item>
-                            </Form.Item>
+                            </>
                         )}
                         {/* Emergency Contacts */}
-                        <Form.Item label="Emergency Contact"></Form.Item>
+                        <Form.Item className={style.formItem} label="Emergency Contact"></Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             name={["reference", "emergency_contact", "first_name"]}
                             label="First Name"
                             rules={[
@@ -767,6 +813,7 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             name={["reference", "emergency_contact", "last_name"]}
                             label="Last Name"
                             rules={[
@@ -779,18 +826,28 @@ const EmployeeForm = ({
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
                             name={["reference", "emergency_contact", "middle_name"]}
                             label="Middle Name"
                         >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                        <Form.Item name={["reference", "emergency_contact", "phone"]} label="Phone">
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item name={["reference", "emergency_contact", "email"]} label="Email">
+                        <Form.Item
+                            className={style.formItem}
+                            name={["reference", "emergency_contact", "phone"]}
+                            label="Phone"
+                        >
                             <Input disabled={isDisable} />
                         </Form.Item>
                         <Form.Item
+                            className={style.formItem}
+                            name={["reference", "emergency_contact", "email"]}
+                            label="Email"
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            className={style.formItem}
                             name={["reference", "emergency_contact", "relationship"]}
                             label="Relationship"
                             rules={[
@@ -808,7 +865,10 @@ const EmployeeForm = ({
                         {(onboardingStatus === "Never submitted" ||
                             onboardingStatus === "Rejected") &&
                             !personalInfo && (
-                                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                                <Form.Item
+                                    className={style.formItem}
+                                    wrapperCol={{ offset: 8, span: 16 }}
+                                >
                                     <Button type="primary" htmlType="submit">
                                         Save
                                     </Button>
@@ -820,7 +880,10 @@ const EmployeeForm = ({
                             )}
 
                         {personalInfo && isDisable && (
-                            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                            <Form.Item
+                                className={style.formItem}
+                                wrapperCol={{ offset: 8, span: 16 }}
+                            >
                                 <Button style={{ marginLeft: 10 }} onClick={handleEdit}>
                                     Edit
                                 </Button>
@@ -829,7 +892,10 @@ const EmployeeForm = ({
 
                         {personalInfo && !isDisable && (
                             <div>
-                                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                                <Form.Item
+                                    className={style.formItem}
+                                    wrapperCol={{ offset: 8, span: 16 }}
+                                >
                                     <Button type="primary" htmlType="submit">
                                         save
                                     </Button>
@@ -841,7 +907,7 @@ const EmployeeForm = ({
                                     </Button>
                                 </Form.Item>
 
-                                <Form.Item>
+                                <Form.Item className={style.formItem}>
                                     {/* The button or element that triggers the Popconfirm */}
                                     <Popconfirm
                                         title="Are you sure you want to discard all of
@@ -858,7 +924,7 @@ const EmployeeForm = ({
                     </Form>
                 </div>
             ) : (
-                <h1>Loading...</h1>
+                <Spin />
             )}
         </>
     );

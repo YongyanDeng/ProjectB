@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Spin } from "antd";
-import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 
 import { getProfileDetail } from "app/hrSlice";
 import EmployeeForm from "components/EmployeeForm";
@@ -24,25 +23,46 @@ export default function HrProfileDetail() {
 
     useEffect(() => {
         if (status === "successed" && selectedEmployee.id === employeeId) {
-            setDetail(selectedEmployee);
+            let tmp = selectedEmployee.documents.map((document) => {
+                let blob = new Blob([new Uint8Array(document.content.data)], {
+                    type: "application/pdf",
+                });
+                // Open the PDF in a new window or tab
+                let pdfUrl = URL.createObjectURL(blob);
+                return {
+                    id: document.id,
+                    uid: document.uid,
+                    name: document.document_name,
+                    document_type: document.document_type,
+                    contentType: document.contentType,
+                    file_url: pdfUrl, // Use the uploaded file URL here
+                    thumbUrl: pdfUrl,
+                    fromDocuments: "yes",
+                };
+            });
+            const tmpSE = { ...selectedEmployee };
+            tmpSE.documents = tmp;
+            setDetail(tmpSE);
         }
     }, [selectedEmployee]);
 
     return (
-        <div className="center-wrapper">
+        <>
             {detail ? (
-                <EmployeeForm
-                    employee={detail}
-                    personalInfo={true}
-                    title={"Personal Information"}
-                    onboardingStatus={detail.onboarding_status}
-                    isDisabled={true}
-                    files={detail.documents}
-                    hrStatus={status}
-                />
+                <div className="center-wrapper">
+                    <EmployeeForm
+                        employee={detail}
+                        personalInfo={false}
+                        title={"Profile"}
+                        onboardingStatus={detail.onboarding_status}
+                        isDisabled={true}
+                        files={detail.documents}
+                        hrStatus={status}
+                    />
+                </div>
             ) : (
                 <Spin size="large" />
             )}
-        </div>
+        </>
     );
 }

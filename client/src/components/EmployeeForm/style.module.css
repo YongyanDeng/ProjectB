@@ -30,6 +30,10 @@
     align-items: center;
 }
 
+.formItem {
+    width: 800px;
+}
+
 /* styles.css */
 /* .ant-input[disabled]::before {
     color: red;
