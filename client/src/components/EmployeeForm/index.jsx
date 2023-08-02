@@ -1,5 +1,4 @@
 import style from "./style.module.css";
-import "./styles.css";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -253,6 +252,7 @@ const EmployeeForm = ({
     const handleFirstCancelButton = () => {
         setPopConfirmVisible(true);
     };
+
     // Handler for confirming the action
     const handleConfirm = () => {
         // navigate to page before clicking edit
@@ -294,15 +294,15 @@ const EmployeeForm = ({
     useEffect(() => {
         if (operator.role === "Employee") {
             dispatch(fetchDocumentsAction(employee.id));
-            setSelectedDate(() => {
-                return {
-                    work_authorization: {
-                        start_date: employee.work_authorization?.start_date,
-                        end_date: employee.work_authorization?.end_date,
-                    },
-                };
-            });
         }
+        setSelectedDate(() => {
+            return {
+                work_authorization: {
+                    start_date: employee.work_authorization?.start_date,
+                    end_date: employee.work_authorization?.end_date,
+                },
+            };
+        });
     }, [employee]);
 
     useEffect(() => {
@@ -330,8 +330,8 @@ const EmployeeForm = ({
                         initialValues={employee}
                         onFinish={handleSaveForm}
                         labelAlign="left"
-                        labelCol={{ span: 6 }}
-                        wrapperCol={{ span: 18 }}
+                        labelCol={{ span: 9 }}
+                        wrapperCol={{ span: 15 }}
                     >
                         <Form.Item
                             label="First Name"
@@ -380,7 +380,7 @@ const EmployeeForm = ({
                                     height: "200px",
                                     objectFit: "cover",
                                 }}
-                                alt="Image"
+                                alt=""
                             />
                         </Form.Item>
                         <Form.Item
@@ -526,7 +526,7 @@ const EmployeeForm = ({
                             </Form.Item>
                         )}
                         {employee?.usCitizen === "no" && (
-                            <div>
+                            <>
                                 <Form.Item
                                     label="What is your work authorization?"
                                     name={["work_authorization", "title"]}
@@ -542,25 +542,23 @@ const EmployeeForm = ({
 
                                 {employee?.work_authorization?.title === "F1(CPT/OPT)" &&
                                     !personalInfo && (
-                                        <div>
-                                            <Form.Item
-                                                label="Upload OPT RECEIPT File"
-                                                name="pdfFile"
-                                                getValueFromEvent={(e) => {
-                                                    if (Array.isArray(e)) {
-                                                        return e;
-                                                    } else if (e && e.fileList) {
-                                                        // Filter the fileList to contain only one file
-                                                        const filteredFileList = e.fileList.slice(
-                                                            0,
-                                                            0,
-                                                        );
-                                                        return filteredFileList;
-                                                    }
-                                                    return [];
-                                                }}
-                                            >
-                                                {employee?.role === "Employee" && (
+                                        <>
+                                            {operator?.role === "Employee" && (
+                                                <Form.Item
+                                                    label="Upload OPT RECEIPT File"
+                                                    name="pdfFile"
+                                                    getValueFromEvent={(e) => {
+                                                        if (Array.isArray(e)) {
+                                                            return e;
+                                                        } else if (e && e.fileList) {
+                                                            // Filter the fileList to contain only one file
+                                                            const filteredFileList =
+                                                                e.fileList.slice(0, 0);
+                                                            return filteredFileList;
+                                                        }
+                                                        return [];
+                                                    }}
+                                                >
                                                     <Upload.Dragger
                                                         name="pdfFile"
                                                         accept=".pdf"
@@ -587,60 +585,65 @@ const EmployeeForm = ({
                                                             Support for a single upload.
                                                         </p>
                                                     </Upload.Dragger>
-                                                )}
+                                                </Form.Item>
+                                            )}
+                                            <Form.Item label="Files">
+                                                <List
+                                                    rules={[
+                                                        {
+                                                            required: true,
+                                                            message: "Please upload a PDF file",
+                                                        },
+                                                    ]}
+                                                    header={<div>Summary of Uploaded Files</div>}
+                                                    bordered
+                                                    dataSource={
+                                                        operator.role === "Employee"
+                                                            ? uploadedfileList
+                                                            : files
+                                                    }
+                                                    renderItem={(file) => (
+                                                        <List.Item
+                                                            actions={[
+                                                                <a
+                                                                    href={file.file_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    Preview
+                                                                </a>,
+                                                                <a
+                                                                    href={file.file_url}
+                                                                    download={file.name}
+                                                                >
+                                                                    Download
+                                                                </a>,
+                                                                // <Button
+                                                                //     type="link"
+                                                                //     onClick={() => handlePreview(file.file_url)}
+                                                                // >
+                                                                //     Preview
+                                                                // </Button>,
+                                                                !isDisable &&
+                                                                    !personalInfo &&
+                                                                    employee?.role ===
+                                                                        "Employee" && (
+                                                                        <DeleteOutlined
+                                                                            onClick={() =>
+                                                                                handleFileRemove(
+                                                                                    file,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    ),
+                                                            ]}
+                                                        >
+                                                            {file.name}
+                                                        </List.Item>
+                                                    )}
+                                                />
                                             </Form.Item>
-                                            <List
-                                                rules={[
-                                                    {
-                                                        required: true,
-                                                        message: "Please upload a PDF file",
-                                                    },
-                                                ]}
-                                                header={<div>Summary of Uploaded Files</div>}
-                                                bordered
-                                                dataSource={
-                                                    operator.role === "Employee"
-                                                        ? uploadedfileList
-                                                        : files
-                                                }
-                                                renderItem={(file) => (
-                                                    <List.Item
-                                                        actions={[
-                                                            <a
-                                                                href={file.file_url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                            >
-                                                                Preview
-                                                            </a>,
-                                                            <a
-                                                                href={file.file_url}
-                                                                download={file.name}
-                                                            >
-                                                                Download
-                                                            </a>,
-                                                            // <Button
-                                                            //     type="link"
-                                                            //     onClick={() => handlePreview(file.file_url)}
-                                                            // >
-                                                            //     Preview
-                                                            // </Button>,
-                                                            !isDisable &&
-                                                                !personalInfo &&
-                                                                employee?.role === "Employee" && (
-                                                                    <DeleteOutlined
-                                                                        onClick={() =>
-                                                                            handleFileRemove(file)
-                                                                        }
-                                                                    />
-                                                                ),
-                                                        ]}
-                                                    >
-                                                        {file.name}
-                                                    </List.Item>
-                                                )}
-                                            />
-                                        </div>
+                                        </>
                                     )}
 
                                 {employee?.work_authorization?.title === "Other" && (
@@ -692,10 +695,11 @@ const EmployeeForm = ({
                                         disabledDate={disabledEndDate}
                                     />
                                 </Form.Item>
-                            </div>
+                            </>
                         )}
                         {!personalInfo && (
-                            <Form.Item label="Reference">
+                            <>
+                                <Form.Item label="Reference"></Form.Item>
                                 <Form.Item
                                     name={["reference", "referee_info", "first_name"]}
                                     label="First Name"
@@ -750,7 +754,7 @@ const EmployeeForm = ({
                                 >
                                     <Input disabled={isDisable} />
                                 </Form.Item>
-                            </Form.Item>
+                            </>
                         )}
                         {/* Emergency Contacts */}
                         <Form.Item label="Emergency Contact"></Form.Item>

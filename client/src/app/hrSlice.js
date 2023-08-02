@@ -161,6 +161,15 @@ const hrSlice = createSlice({
         });
 
         builder.addCase(getProfileDetail.fulfilled, (state, action) => {
+            let dob = action.payload.identification_info.date_of_birth;
+            if (dob) {
+                dob = new Date(dob).toLocaleString("en-US", {
+                    month: "numeric",
+                    day: "numeric",
+                    year: "numeric",
+                });
+            }
+            action.payload.identification_info.date_of_birth = dob;
             state.selectedEmployee = action.payload;
             state.status = "successed";
         });

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Form, Input, Select, Button, message } from "antd";
-import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 
 import { getProfileDetail, reviewOBApplication } from "app/hrSlice";
 import EmployeeForm from "components/EmployeeForm";
@@ -25,7 +24,26 @@ export default function HrOnboardingDetail() {
 
     useEffect(() => {
         if (status === "successed" && selectedEmployee.id === employeeId) {
-            setDetail(selectedEmployee);
+            let tmp = selectedEmployee.documents.map((document) => {
+                let blob = new Blob([new Uint8Array(document.content.data)], {
+                    type: "application/pdf",
+                });
+                // Open the PDF in a new window or tab
+                let pdfUrl = URL.createObjectURL(blob);
+                return {
+                    id: document.id,
+                    uid: document.uid,
+                    name: document.document_name,
+                    document_type: document.document_type,
+                    contentType: document.contentType,
+                    file_url: pdfUrl, // Use the uploaded file URL here
+                    thumbUrl: pdfUrl,
+                    fromDocuments: "yes",
+                };
+            });
+            const tmpSE = { ...selectedEmployee };
+            tmpSE.documents = tmp;
+            setDetail(tmpSE);
         }
     }, [selectedEmployee]);
 
@@ -53,7 +71,7 @@ export default function HrOnboardingDetail() {
                     <EmployeeForm
                         employee={detail}
                         personalInfo={false}
-                        title={"Personal Information"}
+                        title={"Application Detail"}
                         onboardingStatus={detail.onboarding_status}
                         isDisabled={true}
                         files={detail.documents}

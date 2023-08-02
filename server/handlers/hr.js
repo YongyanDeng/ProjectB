@@ -88,13 +88,14 @@ exports.getAnApplicaton = async function (req, res, next) {
             role,
             address,
             profile_picture,
-            contact_Info,
+            contact_info,
             identification_info,
             work_authorization,
             reference,
             onboarding_status,
             documents,
             feedback,
+            usCitizen,
         } = employee;
 
         const docs = [];
@@ -113,13 +114,14 @@ exports.getAnApplicaton = async function (req, res, next) {
                 role,
                 address,
                 profile_picture,
-                contact_Info,
+                contact_info,
                 identification_info,
                 work_authorization,
                 reference,
                 onboarding_status,
                 documents: docs,
                 feedback,
+                usCitizen,
             });
         }
 
@@ -141,13 +143,14 @@ exports.getAnApplicaton = async function (req, res, next) {
             role,
             address,
             profile_picture,
-            contact_Info,
+            contact_info,
             identification_info,
             work_authorization: extendedWorkAuth,
             reference,
             onboarding_status,
             documents: docs,
             feedback,
+            usCitizen,
         });
     } catch (err) {
         return next({
