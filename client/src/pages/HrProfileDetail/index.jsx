@@ -29,7 +29,7 @@ export default function HrProfileDetail() {
     }, [selectedEmployee]);
 
     return (
-        <div className="profile-container">
+        <div className="center-wrapper">
             {detail ? (
                 <EmployeeForm
                     employee={detail}
@@ -37,6 +37,8 @@ export default function HrProfileDetail() {
                     title={"Personal Information"}
                     onboardingStatus={detail.onboarding_status}
                     isDisabled={true}
+                    files={detail.documents}
+                    hrStatus={status}
                 />
             ) : (
                 <Spin size="large" />

@@ -17,9 +17,42 @@ const updateEmployee = async function (req, res, next) {
         }
 
         Object.assign(employee, updates);
-        const updatedEmployee = await employee.save();
+        await employee.save();
 
-        return res.status(201).json(updatedEmployee);
+        const {
+            id,
+            email,
+            username,
+            name,
+            profile_picture,
+            role,
+            address,
+            contact_info,
+            identification_info,
+            work_authorization,
+            reference,
+            onboarding_status,
+            documents,
+            feedback,
+            usCitizen,
+        } = employee;
+        return res.status(201).json({
+            id,
+            email,
+            username,
+            name,
+            profile_picture,
+            role,
+            address,
+            contact_info,
+            identification_info,
+            work_authorization,
+            reference,
+            onboarding_status,
+            documents,
+            feedback,
+            usCitizen,
+        });
     } catch (err) {
         return next({
             status: 500,
@@ -38,8 +71,41 @@ const getEmployee = async (req, res, next) => {
             return res.status(404).json({ error: "Employee not found" });
         }
 
-        return res.status(200).json(employee);
-    } catch (error) {
+        const {
+            id,
+            email,
+            username,
+            name,
+            profile_picture,
+            role,
+            address,
+            contact_info,
+            identification_info,
+            work_authorization,
+            reference,
+            onboarding_status,
+            documents,
+            feedback,
+            usCitizen,
+        } = employee;
+        return res.status(200).json({
+            id,
+            email,
+            username,
+            name,
+            profile_picture,
+            role,
+            address,
+            contact_info,
+            identification_info,
+            work_authorization,
+            reference,
+            onboarding_status,
+            documents,
+            feedback,
+            usCitizen,
+        });
+    } catch (err) {
         return next({
             status: 500,
             message: err.message,

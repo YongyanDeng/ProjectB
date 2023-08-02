@@ -17,7 +17,33 @@ const getAllDocuments = async (req, res, next) => {
         // Find all documents designed by the employee
         const documents = await db.Document.find({ employee: employeeId });
 
-        return res.status(200).json(documents);
+        const docs = [];
+        for (const document of documents) {
+            const {
+                id,
+                document_type,
+                document_name,
+                contentType,
+                content,
+                document_status,
+                employee,
+                feedback,
+                uid,
+            } = document;
+            docs.push({
+                id,
+                document_type,
+                document_name,
+                contentType,
+                content,
+                document_status,
+                employee,
+                feedback,
+                uid,
+            });
+        }
+
+        return res.status(200).json(docs);
     } catch (err) {
         console.error("Error retrieving documents:", err);
         res.status(500).json({ error: "Something went wrong" });

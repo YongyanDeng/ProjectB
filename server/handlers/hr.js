@@ -100,7 +100,7 @@ exports.getAnApplicaton = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            docs.push(document);
+            if (docs) docs.push(document);
         }
 
         // Corner case

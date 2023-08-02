@@ -21,6 +21,9 @@ export default function MainLayout() {
             height: !isMobile ? "48px" : "auto",
             backgroundColor: "#111827",
             padding: "8px 64px",
+
+            position: "absolute",
+            top: "0",
         }),
         [isMobile],
     );
@@ -35,6 +38,9 @@ export default function MainLayout() {
             height: !isMobile ? "85px" : "auto",
             color: "#FFFFFF",
             backgroundColor: "#111827",
+
+            position: "absolute",
+            bottom: "0",
         }),
         [isMobile],
     );
@@ -49,6 +55,9 @@ export default function MainLayout() {
             alignItems: "center",
             backgroundColor: "#F9FAFB",
             overflow: "auto",
+
+            position: "absolute",
+            top: "48px",
         }),
         [isMobile],
     );

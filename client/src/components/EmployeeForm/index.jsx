@@ -1,4 +1,5 @@
 import style from "./style.module.css";
+import "./styles.css";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -29,21 +30,20 @@ import { fetchDocuments } from "services/employee";
 
 const { Option } = Select;
 
-const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableEdit }) => {
+const EmployeeForm = ({
+    employee,
+    personalInfo,
+    title,
+    onboardingStatus,
+    enableEdit,
+    files,
+    hrStatus,
+}) => {
     const dispatch = useDispatch();
 
     const [imageUrl, setImageUrl] = useState("");
-    const [selectedDate, setSelectedDate] = useState({
-        work_authorization: {
-            start_date: employee.work_authorization.start_date
-                ? employee.work_authorization.start_date
-                : null,
-            end_date: employee.work_authorization.end_date
-                ? employee.work_authorization.end_date
-                : null,
-        },
-    });
-    const { documents } = useSelector((state) => state.employee);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const { employee: operator, documents, status } = useSelector((state) => state.employee);
     const { message: errMessage } = useSelector((state) => state.error);
     const [dateValid, setDateValid] = useState(false);
     const [selectedFile, setSelectedFile] = useState({ uid: "" });
@@ -90,6 +90,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                 },
             });
             setDateValid(true);
+        } else {
+            setSelectedDate({
+                work_authorization: {
+                    ...selectedDate.work_authorization,
+                    [name]: null,
+                },
+            });
         }
     };
 
@@ -182,7 +189,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
         setUploadedfileList(newFileList);
         if (file.fromDocuments === "yes") {
-            dispatch(deleteDocumentAction({ id: employee._id, documentId: file.id }));
+            dispatch(deleteDocumentAction({ id: employee.id, documentId: file.id }));
             setSelectedFile({ uid: "" });
         }
     };
@@ -206,9 +213,9 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
             };
             console.log("show final data", finalData);
 
-            await dispatch(updateEmployeeAction({ id: employee?._id, employee: finalData }));
+            await dispatch(updateEmployeeAction({ id: employee?.id, employee: finalData }));
             if (!errMessage && Object.keys(selectedFile).length > 1)
-                await dispatch(uploadDocumentAction({ id: employee?._id, document: selectedFile }));
+                await dispatch(uploadDocumentAction({ id: employee?.id, document: selectedFile }));
             if (personalInfo) {
                 setIsDisable(() => true);
             }
@@ -223,13 +230,13 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         if (saved) {
             dispatch(
                 uploadDocumentAction({
-                    id: employee?._id,
+                    id: employee?.id,
                     document: selectedFile,
                 }),
             );
             dispatch(
                 updateEmployeeAction({
-                    id: employee?._id,
+                    id: employee?.id,
                     employee: { onboarding_status: "Pending" },
                 }),
             );
@@ -272,7 +279,7 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
         const pdfUrl = URL.createObjectURL(blob);
 
         const urlFile = {
-            id: document._id,
+            id: document.id,
             uid: document.uid,
             name: document.document_name,
             document_type: document.document_type,
@@ -285,12 +292,16 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     };
 
     useEffect(() => {
-        if (employee?._id) {
-            dispatch(fetchDocumentsAction(employee._id));
-        } else {
-            console.log("employee._id does not exist");
-        }
-        if (employee.work_authorization.start_date) {
+        if (operator.role === "Employee") {
+            dispatch(fetchDocumentsAction(employee.id));
+            setSelectedDate(() => {
+                return {
+                    work_authorization: {
+                        start_date: employee.work_authorization?.start_date,
+                        end_date: employee.work_authorization?.end_date,
+                    },
+                };
+            });
         }
     }, [employee]);
 
@@ -305,432 +316,444 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
     }, [documents]);
 
     return (
-        <div className={style.FormBox}>
-            <div className={style.topContent}>
-                <Typography.Title level={2} className={style.title}>
-                    {title}
-                </Typography.Title>
-            </div>
-            <div
-                style={{
-                    backgroundColor: "#FFF",
-                    width: "100%",
-                    padding: "5px",
-                    textAlign: "center",
-                }}
-            >
-                <Form
-                    initialValues={employee}
-                    onFinish={handleSaveForm}
-                    layout="vertical"
-                    labelCol={{ span: 8 }}
-                    wrapperCol={{ span: 16 }}
-                >
-                    <Form.Item
-                        label="First Name"
-                        name={["name", "first_name"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your first name",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Last Name"
-                        name={["name", "last_name"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your last name",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item label="Middle Name" name={["name", "middle_name"]}>
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item label="Profile Picture" name="profile_picture">
-                        <Input
-                            id="image-link-input"
-                            placeholder="Profile Picture"
-                            onChange={handleImageLinkChange}
-                            disabled={isDisable}
-                        />
-                    </Form.Item>
+        <>
+            {(hrStatus && hrStatus === "successed") || status === "successed" ? (
+                <div className={style.FormBox}>
+                    <div className={style.topContent}>
+                        <Typography.Title level={2} className={style.title}>
+                            {title}
+                        </Typography.Title>
+                    </div>
 
-                    <Form.Item>
-                        <img
-                            src={imageUrl ? imageUrl : employee?.profile_picture}
-                            style={{
-                                width: "200px",
-                                height: "200px",
-                                objectFit: "cover",
-                            }}
-                            alt="Image"
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        label="Street Name"
-                        name={["address", "street_name"]} // Use an array for nested fields
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your street name",
-                            },
-                        ]}
+                    <Form
+                        className={style.formContent}
+                        initialValues={employee}
+                        onFinish={handleSaveForm}
+                        labelAlign="left"
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
                     >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Building / Apt"
-                        name={["address", "building_apt"]} // Use an array for nested fields
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your building or apt number",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="City"
-                        name={["address", "city"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter the city",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="State"
-                        name={["address", "state"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter the state",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="ZIP"
-                        name={["address", "zip"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter the ZIP",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Cell Phone Number"
-                        name={["contact_info", "cell_phone"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your cell phone number",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item label="Email">
-                        <Input disabled value={employee?.email} />
-                    </Form.Item>
-                    <Form.Item
-                        label="SSN"
-                        name={["identification_info", "SSN"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your SSN",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Date of Birth"
-                        name={["identification_info", "date_of_birth"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your date of birth",
-                            },
-                        ]}
-                    >
-                        <Input disabled={isDisable} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Gender"
-                        name={["identification_info", "gender"]}
-                        rules={[
-                            {
-                                required: true,
-                                message: "Please enter your gender",
-                            },
-                        ]}
-                    >
-                        <Select disabled={isDisable}>
-                            <Option value="male">Male</Option>
-                            <Option value="female">Female</Option>
-                            <Option value="other">I do not wish to answer</Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label="Permanent resident or citizen of the U.S.?" name="usCitizen">
-                        <Select onChange={handleUsCitizenChange} disabled={isDisable}>
-                            <Option value="yes">Yes</Option>
-                            <Option value="no">No</Option>
-                        </Select>
-                    </Form.Item>
-                    {employee?.usCitizen === "yes" && (
                         <Form.Item
-                            label="What is your work authorization?"
-                            name={["work_authorization", "title"]}
+                            label="First Name"
+                            name={["name", "first_name"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your first name",
+                                },
+                            ]}
                         >
-                            <Select
-                                value={employee?.work_authorization.title}
-                                onChange={handleWorkAuthorization}
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Last Name"
+                            name={["name", "last_name"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your last name",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item label="Middle Name" name={["name", "middle_name"]}>
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item label="Preferred Name" name={["name", "preferred_name"]}>
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item label="Profile Picture" name="profile_picture">
+                            <Input
+                                id="image-link-input"
+                                placeholder="Profile Picture"
+                                onChange={handleImageLinkChange}
                                 disabled={isDisable}
-                            >
-                                <Option value="Green Card">Green Card</Option>
-                                <Option value="Citizen">Citizen</Option>
+                            />
+                        </Form.Item>
+
+                        <Form.Item>
+                            <img
+                                src={imageUrl ? imageUrl : employee?.profile_picture}
+                                style={{
+                                    width: "200px",
+                                    height: "200px",
+                                    objectFit: "cover",
+                                }}
+                                alt="Image"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label="Street Name"
+                            name={["address", "street_name"]} // Use an array for nested fields
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your street name",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Building / Apt"
+                            name={["address", "building_apt"]} // Use an array for nested fields
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your building or apt number",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="City"
+                            name={["address", "city"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter the city",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="State"
+                            name={["address", "state"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter the state",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="ZIP"
+                            name={["address", "zip"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter the ZIP",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Cell Phone Number"
+                            name={["contact_info", "cell_phone"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your cell phone number",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item label="Work Phone Number" name={["contact_info", "work_phone"]}>
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item label="Email">
+                            <Input disabled value={employee?.email} />
+                        </Form.Item>
+                        <Form.Item
+                            label="SSN"
+                            name={["identification_info", "SSN"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your SSN",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Date of Birth"
+                            name={["identification_info", "date_of_birth"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your date of birth",
+                                },
+                            ]}
+                        >
+                            <Input disabled={isDisable} />
+                        </Form.Item>
+                        <Form.Item
+                            label="Gender"
+                            name={["identification_info", "gender"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter your gender",
+                                },
+                            ]}
+                        >
+                            <Select disabled={isDisable}>
+                                <Option value="male">Male</Option>
+                                <Option value="female">Female</Option>
+                                <Option value="other">I do not wish to answer</Option>
                             </Select>
                         </Form.Item>
-                    )}
-                    {employee?.usCitizen === "no" && (
-                        <div>
+                        <Form.Item
+                            label="Permanent resident or citizen of the U.S.?"
+                            name="usCitizen"
+                        >
+                            <Select onChange={handleUsCitizenChange} disabled={isDisable}>
+                                <Option value="yes">Yes</Option>
+                                <Option value="no">No</Option>
+                            </Select>
+                        </Form.Item>
+                        {employee?.usCitizen === "yes" && (
                             <Form.Item
                                 label="What is your work authorization?"
                                 name={["work_authorization", "title"]}
                             >
-                                <Select onChange={handleWorkAuthorization} disabled={isDisable}>
-                                    <Option value="H1-B">H1-B</Option>
-                                    <Option value="L2">L2</Option>
-                                    <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
-                                    <Option value="H4">H4</Option>
-                                    <Option value="Other">Other</Option>
+                                <Select
+                                    value={employee?.work_authorization.title}
+                                    onChange={handleWorkAuthorization}
+                                    disabled={isDisable}
+                                >
+                                    <Option value="Green Card">Green Card</Option>
+                                    <Option value="Citizen">Citizen</Option>
                                 </Select>
                             </Form.Item>
+                        )}
+                        {employee?.usCitizen === "no" && (
+                            <div>
+                                <Form.Item
+                                    label="What is your work authorization?"
+                                    name={["work_authorization", "title"]}
+                                >
+                                    <Select onChange={handleWorkAuthorization} disabled={isDisable}>
+                                        <Option value="H1-B">H1-B</Option>
+                                        <Option value="L2">L2</Option>
+                                        <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
+                                        <Option value="H4">H4</Option>
+                                        <Option value="Other">Other</Option>
+                                    </Select>
+                                </Form.Item>
 
-                            {employee?.work_authorization?.title === "F1(CPT/OPT)" &&
-                                !personalInfo && (
-                                    <div>
-                                        <Form.Item
-                                            label="Upload OPT RECEIPT File"
-                                            name="pdfFile"
-                                            getValueFromEvent={(e) => {
-                                                if (Array.isArray(e)) {
-                                                    return e;
-                                                } else if (e && e.fileList) {
-                                                    // Filter the fileList to contain only one file
-                                                    const filteredFileList = e.fileList.slice(0, 0);
-                                                    return filteredFileList;
+                                {employee?.work_authorization?.title === "F1(CPT/OPT)" &&
+                                    !personalInfo && (
+                                        <div>
+                                            <Form.Item
+                                                label="Upload OPT RECEIPT File"
+                                                name="pdfFile"
+                                                getValueFromEvent={(e) => {
+                                                    if (Array.isArray(e)) {
+                                                        return e;
+                                                    } else if (e && e.fileList) {
+                                                        // Filter the fileList to contain only one file
+                                                        const filteredFileList = e.fileList.slice(
+                                                            0,
+                                                            0,
+                                                        );
+                                                        return filteredFileList;
+                                                    }
+                                                    return [];
+                                                }}
+                                            >
+                                                {employee?.role === "Employee" && (
+                                                    <Upload.Dragger
+                                                        name="pdfFile"
+                                                        accept=".pdf"
+                                                        multiple={false}
+                                                        disabled={isDisable}
+                                                        beforeUpload={beforeUpload}
+                                                        customRequest={handleFileUpload}
+                                                        itemRender={(
+                                                            originNode,
+                                                            file,
+                                                            currFileList,
+                                                        ) => {
+                                                            return null;
+                                                        }}
+                                                        onChange={handleFileChange}
+                                                    >
+                                                        <p className="ant-upload-drag-icon">
+                                                            <InboxOutlined />
+                                                        </p>
+                                                        <p className="ant-upload-text">
+                                                            please upload OPT RECEIPT file
+                                                        </p>
+                                                        <p className="ant-upload-hint">
+                                                            Support for a single upload.
+                                                        </p>
+                                                    </Upload.Dragger>
+                                                )}
+                                            </Form.Item>
+                                            <List
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Please upload a PDF file",
+                                                    },
+                                                ]}
+                                                header={<div>Summary of Uploaded Files</div>}
+                                                bordered
+                                                dataSource={
+                                                    operator.role === "Employee"
+                                                        ? uploadedfileList
+                                                        : files
                                                 }
-                                                return [];
-                                            }}
-                                        >
-                                            {employee?.role === "Employee" && (
-                                                <Upload.Dragger
-                                                    name="pdfFile"
-                                                    accept=".pdf"
-                                                    multiple={false}
-                                                    disabled={isDisable}
-                                                    beforeUpload={beforeUpload}
-                                                    customRequest={handleFileUpload}
-                                                    itemRender={(
-                                                        originNode,
-                                                        file,
-                                                        currFileList,
-                                                    ) => {
-                                                        return null;
-                                                    }}
-                                                    onChange={handleFileChange}
-                                                >
-                                                    <p className="ant-upload-drag-icon">
-                                                        <InboxOutlined />
-                                                    </p>
-                                                    <p className="ant-upload-text">
-                                                        please upload OPT RECEIPT file
-                                                    </p>
-                                                    <p className="ant-upload-hint">
-                                                        Support for a single upload.
-                                                    </p>
-                                                </Upload.Dragger>
-                                            )}
-                                        </Form.Item>
-                                        <List
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "Please upload a PDF file",
-                                                },
-                                            ]}
-                                            header={<div>Summary of Uploaded Files</div>}
-                                            bordered
-                                            dataSource={uploadedfileList}
-                                            renderItem={(file) => (
-                                                <List.Item
-                                                    actions={[
-                                                        <a
-                                                            href={file.file_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                        >
-                                                            Preview
-                                                        </a>,
-                                                        <a
-                                                            href={file.file_url}
-                                                            download={file.name}
-                                                        >
-                                                            Download
-                                                        </a>,
-                                                        // <Button
-                                                        //     type="link"
-                                                        //     onClick={() => handlePreview(file.file_url)}
-                                                        // >
-                                                        //     Preview
-                                                        // </Button>,
-                                                        !isDisable &&
-                                                            !personalInfo &&
-                                                            employee?.role === "Employee" && (
-                                                                <DeleteOutlined
-                                                                    onClick={() =>
-                                                                        handleFileRemove(file)
-                                                                    }
-                                                                />
-                                                            ),
-                                                    ]}
-                                                >
-                                                    {file.name}
-                                                </List.Item>
-                                            )}
-                                        />
-                                    </div>
+                                                renderItem={(file) => (
+                                                    <List.Item
+                                                        actions={[
+                                                            <a
+                                                                href={file.file_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                Preview
+                                                            </a>,
+                                                            <a
+                                                                href={file.file_url}
+                                                                download={file.name}
+                                                            >
+                                                                Download
+                                                            </a>,
+                                                            // <Button
+                                                            //     type="link"
+                                                            //     onClick={() => handlePreview(file.file_url)}
+                                                            // >
+                                                            //     Preview
+                                                            // </Button>,
+                                                            !isDisable &&
+                                                                !personalInfo &&
+                                                                employee?.role === "Employee" && (
+                                                                    <DeleteOutlined
+                                                                        onClick={() =>
+                                                                            handleFileRemove(file)
+                                                                        }
+                                                                    />
+                                                                ),
+                                                        ]}
+                                                    >
+                                                        {file.name}
+                                                    </List.Item>
+                                                )}
+                                            />
+                                        </div>
+                                    )}
+
+                                {employee?.work_authorization?.title === "Other" && (
+                                    <Form.Item
+                                        label="Specify Visa Title"
+                                        name={["work_authorization", "title"]}
+                                    >
+                                        <Input disabled={isDisable} />
+                                    </Form.Item>
                                 )}
 
-                            {employee?.work_authorization?.title === "Other" && (
                                 <Form.Item
-                                    label="Specify Visa Title"
-                                    name={["work_authorization", "title"]}
+                                    label="Start Date"
+                                    rules={[
+                                        {
+                                            required: { dateValid },
+                                            message: "Please enter the start state",
+                                        },
+                                    ]}
+                                >
+                                    <DatePicker
+                                        disabled={isDisable}
+                                        value={
+                                            selectedDate?.work_authorization.start_date
+                                                ? dayjs(selectedDate.work_authorization.start_date)
+                                                : null
+                                        }
+                                        onChange={(date) => handleDateChange(date, "start_date")}
+                                    />
+                                </Form.Item>
+
+                                <Form.Item
+                                    label="End Date"
+                                    rules={[
+                                        {
+                                            required: { dateValid },
+                                            message: "Please enter the end state",
+                                        },
+                                    ]}
+                                >
+                                    <DatePicker
+                                        disabled={isDisable}
+                                        value={
+                                            selectedDate?.work_authorization.end_date
+                                                ? dayjs(selectedDate.work_authorization.end_date)
+                                                : null
+                                        }
+                                        onChange={(date) => handleDateChange(date, "end_date")}
+                                        disabledDate={disabledEndDate}
+                                    />
+                                </Form.Item>
+                            </div>
+                        )}
+                        {!personalInfo && (
+                            <Form.Item label="Reference">
+                                <Form.Item
+                                    name={["reference", "referee_info", "first_name"]}
+                                    label="First Name"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please enter your reference first name",
+                                        },
+                                    ]}
                                 >
                                     <Input disabled={isDisable} />
                                 </Form.Item>
-                            )}
-
-                            <Form.Item
-                                label="Start Date"
-                                rules={[
-                                    {
-                                        required: { dateValid },
-                                        message: "Please enter the start state",
-                                    },
-                                ]}
-                            >
-                                <DatePicker
-                                    disabled={isDisable}
-                                    value={
-                                        selectedDate.work_authorization.start_date
-                                            ? dayjs(selectedDate.work_authorization.start_date)
-                                            : null
-                                    }
-                                    onChange={(date) => handleDateChange(date, "start_date")}
-                                />
+                                <Form.Item
+                                    name={["reference", "referee_info", "last_name"]}
+                                    label="Last Name"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please enter your reference last name",
+                                        },
+                                    ]}
+                                >
+                                    <Input disabled={isDisable} />
+                                </Form.Item>
+                                <Form.Item
+                                    name={["reference", "referee_info", "middle_name"]}
+                                    label="Middle Name"
+                                >
+                                    <Input disabled={isDisable} />
+                                </Form.Item>
+                                <Form.Item
+                                    name={["reference", "referee_info", "phone"]}
+                                    label="Phone"
+                                >
+                                    <Input disabled={isDisable} />
+                                </Form.Item>
+                                <Form.Item
+                                    name={["reference", "referee_info", "email"]}
+                                    label="Email"
+                                >
+                                    <Input disabled={isDisable} />
+                                </Form.Item>
+                                <Form.Item
+                                    name={["reference", "referee_info", "relationship"]}
+                                    label="Relationship"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Please enter your reference relationship",
+                                        },
+                                    ]}
+                                >
+                                    <Input disabled={isDisable} />
+                                </Form.Item>
                             </Form.Item>
-
-                            <Form.Item
-                                label="End Date"
-                                rules={[
-                                    {
-                                        required: { dateValid },
-                                        message: "Please enter the end state",
-                                    },
-                                ]}
-                            >
-                                <DatePicker
-                                    disabled={isDisable}
-                                    value={dayjs(
-                                        selectedDate.work_authorization.end_date
-                                            ? dayjs(selectedDate.work_authorization.end_date)
-                                            : null,
-                                    )}
-                                    onChange={(date) => handleDateChange(date, "end_date")}
-                                    disabledDate={disabledEndDate}
-                                />
-                            </Form.Item>
-                        </div>
-                    )}
-                    {!personalInfo && (
-                        <Form.Item label="Reference">
-                            <Form.Item
-                                name={["reference", "referee_info", "first_name"]}
-                                label="First Name"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please enter your reference first name",
-                                    },
-                                ]}
-                            >
-                                <Input disabled={isDisable} />
-                            </Form.Item>
-                            <Form.Item
-                                name={["reference", "referee_info", "last_name"]}
-                                label="Last Name"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please enter your reference last name",
-                                    },
-                                ]}
-                            >
-                                <Input disabled={isDisable} />
-                            </Form.Item>
-                            <Form.Item
-                                name={["reference", "referee_info", "middle_name"]}
-                                label="Middle Name"
-                            >
-                                <Input disabled={isDisable} />
-                            </Form.Item>
-                            <Form.Item name={["reference", "referee_info", "phone"]} label="Phone">
-                                <Input disabled={isDisable} />
-                            </Form.Item>
-                            <Form.Item name={["reference", "referee_info", "email"]} label="Email">
-                                <Input disabled={isDisable} />
-                            </Form.Item>
-                            <Form.Item
-                                name={["reference", "referee_info", "relationship"]}
-                                label="Relationship"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: "Please enter your reference relationship",
-                                    },
-                                ]}
-                            >
-                                <Input disabled={isDisable} />
-                            </Form.Item>
-                        </Form.Item>
-                    )}
-                    {/* Emergency Contacts */}
-                    <Form.Item label="Emergency Contact">
+                        )}
+                        {/* Emergency Contacts */}
+                        <Form.Item label="Emergency Contact"></Form.Item>
                         <Form.Item
                             name={["reference", "emergency_contact", "first_name"]}
                             label="First Name"
@@ -779,62 +802,65 @@ const EmployeeForm = ({ employee, personalInfo, title, onboardingStatus, enableE
                         >
                             <Input disabled={isDisable} />
                         </Form.Item>
-                    </Form.Item>
 
-                    {/* Add summary of uploaded files or documents */}
-                    {/* ... */}
-                    {(onboardingStatus === "Never submitted" || onboardingStatus === "rejected") &&
-                        !personalInfo && (
+                        {/* Add summary of uploaded files or documents */}
+                        {/* ... */}
+                        {(onboardingStatus === "Never submitted" ||
+                            onboardingStatus === "Rejected") &&
+                            !personalInfo && (
+                                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                                    <Button type="primary" htmlType="submit">
+                                        Save
+                                    </Button>
+
+                                    <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
+                                        Submit
+                                    </Button>
+                                </Form.Item>
+                            )}
+
+                        {personalInfo && isDisable && (
                             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                                <Button type="primary" htmlType="submit">
-                                    Save
-                                </Button>
-
-                                <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
-                                    Submit
+                                <Button style={{ marginLeft: 10 }} onClick={handleEdit}>
+                                    Edit
                                 </Button>
                             </Form.Item>
                         )}
 
-                    {personalInfo && isDisable && (
-                        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                            <Button style={{ marginLeft: 10 }} onClick={handleEdit}>
-                                Edit
-                            </Button>
-                        </Form.Item>
-                    )}
+                        {personalInfo && !isDisable && (
+                            <div>
+                                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                                    <Button type="primary" htmlType="submit">
+                                        save
+                                    </Button>
+                                    <Button
+                                        style={{ marginLeft: 10 }}
+                                        onClick={handleFirstCancelButton}
+                                    >
+                                        cancel
+                                    </Button>
+                                </Form.Item>
 
-                    {personalInfo && !isDisable && (
-                        <div>
-                            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                                <Button type="primary" htmlType="submit">
-                                    save
-                                </Button>
-                                <Button
-                                    style={{ marginLeft: 10 }}
-                                    onClick={handleFirstCancelButton}
-                                >
-                                    cancel
-                                </Button>
-                            </Form.Item>
-
-                            <Form.Item>
-                                {/* The button or element that triggers the Popconfirm */}
-                                <Popconfirm
-                                    title="Are you sure you want to discard all of
+                                <Form.Item>
+                                    {/* The button or element that triggers the Popconfirm */}
+                                    <Popconfirm
+                                        title="Are you sure you want to discard all of
                                 the changes?"
-                                    open={popConfirmVisible}
-                                    onConfirm={handleConfirm}
-                                    onCancel={handleCancel}
-                                    okText="Yes"
-                                    cancelText="No"
-                                ></Popconfirm>
-                            </Form.Item>
-                        </div>
-                    )}
-                </Form>
-            </div>
-        </div>
+                                        open={popConfirmVisible}
+                                        onConfirm={handleConfirm}
+                                        onCancel={handleCancel}
+                                        okText="Yes"
+                                        cancelText="No"
+                                    ></Popconfirm>
+                                </Form.Item>
+                            </div>
+                        )}
+                    </Form>
+                </div>
+            ) : (
+                <h1>Loading...</h1>
+            )}
+        </>
     );
 };
 
