@@ -47,20 +47,22 @@ export default function HrProfileDetail() {
     }, [selectedEmployee]);
 
     return (
-        <div className="center-wrapper">
+        <>
             {detail ? (
-                <EmployeeForm
-                    employee={detail}
-                    personalInfo={false}
-                    title={"Personal Information"}
-                    onboardingStatus={detail.onboarding_status}
-                    isDisabled={true}
-                    files={detail.documents}
-                    hrStatus={status}
-                />
+                <div className="center-wrapper">
+                    <EmployeeForm
+                        employee={detail}
+                        personalInfo={false}
+                        title={"Profile"}
+                        onboardingStatus={detail.onboarding_status}
+                        isDisabled={true}
+                        files={detail.documents}
+                        hrStatus={status}
+                    />
+                </div>
             ) : (
                 <Spin size="large" />
             )}
-        </div>
+        </>
     );
 }

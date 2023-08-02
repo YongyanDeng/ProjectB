@@ -3,7 +3,7 @@ import "./styles.css";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Form, Input, Select, Button, message } from "antd";
+import { Form, Input, Select, Button, message, Spin } from "antd";
 
 import { getProfileDetail, reviewOBApplication } from "app/hrSlice";
 import EmployeeForm from "components/EmployeeForm";
@@ -65,9 +65,9 @@ export default function HrOnboardingDetail() {
     };
 
     return (
-        <div className="center-wrapper">
+        <>
             {detail ? (
-                <>
+                <div className="center-wrapper">
                     <EmployeeForm
                         employee={detail}
                         personalInfo={false}
@@ -77,7 +77,12 @@ export default function HrOnboardingDetail() {
                         files={detail.documents}
                         hrStatus={status}
                     />
-                    <Form onFinish={handleSubmit}>
+                    <Form
+                        className="review-section"
+                        onFinish={handleSubmit}
+                        labelCol={{ span: 9 }}
+                        wrapperCol={{ span: 15 }}
+                    >
                         <Form.Item label="Review">
                             <Select
                                 placeholder="HR Review"
@@ -92,22 +97,22 @@ export default function HrOnboardingDetail() {
                             <Form.Item label="Feedback">
                                 <Input.TextArea
                                     rows={4}
-                                    placeholder="Write your feedback here."
+                                    placeholder="Please leave your feedback here."
                                     value={feedback}
                                     onChange={handleFeedback}
                                 />
                             </Form.Item>
                         ) : null}
-                        <Form.Item>
+                        <Form.Item wrapperCol={{ offset: 12, span: 12 }}>
                             <Button type="primary" htmlType="submit">
                                 Submit
                             </Button>
                         </Form.Item>
                     </Form>
-                </>
+                </div>
             ) : (
-                <h1>Loading...</h1>
+                <Spin size="large" />
             )}
-        </div>
+        </>
     );
 }
