@@ -3,7 +3,7 @@ import "./styles.css";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { Form, Input, Table, Button, Select, Space, message, Spin } from "antd";
+import { Form, Input, Table, Button, Select, Space, message, Spin, Typography } from "antd";
 import { FilePdfOutlined, MailOutlined } from "@ant-design/icons";
 import emailjs from "@emailjs/browser";
 
@@ -140,94 +140,117 @@ export default function HrVisaDetail() {
     return (
         <>
             {detail ? (
-                <div className="detail">
-                    <Form onFinish={handleFormSubmit} labelAlign="left" labelCol={{ span: 10 }}>
-                        <Form.Item label="Name">
-                            <Input value={detail.name} disabled={true} />
-                        </Form.Item>
-                        <Form.Item label="Work Authorization">
-                            <Input value={detail.work_authorization.title} disabled={true} />
-                        </Form.Item>
-                        <Form.Item label="Start Date">
-                            <Input
-                                value={
-                                    detail.work_authorization.start_date
-                                        ? new Date(
-                                              detail.work_authorization.start_date,
-                                          ).toLocaleString("en-US", {
-                                              month: "numeric",
-                                              day: "numeric",
-                                              year: "numeric",
-                                          })
-                                        : null
-                                }
-                                disabled={true}
-                            />
-                        </Form.Item>
-                        <Form.Item label="End Date">
-                            <Input
-                                value={
-                                    detail.work_authorization.end_date
-                                        ? new Date(
-                                              detail.work_authorization.end_date,
-                                          ).toLocaleString("en-US", {
-                                              month: "numeric",
-                                              day: "numeric",
-                                              year: "numeric",
-                                          })
-                                        : null
-                                }
-                                disabled={true}
-                            />
-                        </Form.Item>
-                        <Form.Item label="Remaining">
-                            <Input
-                                value={detail?.work_authorization.remaining_days}
-                                disabled={true}
-                                suffix="days"
-                            />
-                        </Form.Item>
-                        <Form.Item>
-                            <Table dataSource={detail?.documents} columns={columns} />
-                        </Form.Item>
-                        {detail.next_step ? (
-                            <Form.Item label="Review">
-                                <Select
-                                    placeholder="HR Review"
-                                    options={[
-                                        { value: "approved", label: "Approve" },
-                                        { value: "rejected", label: "Reject" },
-                                    ]}
-                                    onChange={handleOptionChange}
-                                />
-                            </Form.Item>
-                        ) : null}
-                        {review === "rejected" ? (
-                            <Form.Item label="Feedback">
-                                <Input.TextArea
-                                    rows={4}
-                                    placeholder="Write your feedback here."
-                                    value={feedback}
-                                    onChange={handleFeedback}
-                                />
-                            </Form.Item>
-                        ) : null}
-                        {detail.next_step ? (
-                            <Form.Item label="Next Step">
-                                <Space.Compact>
-                                    <Input value={detail.next_step} />
-                                    <Button type="primary" onClick={handleNotification}>
-                                        <MailOutlined />
+                <div className="center-wrapper">
+                    <div className="detail">
+                        <Typography.Title level={2}>{`Visa Files`}</Typography.Title>
+
+                        <Form onFinish={handleFormSubmit} labelAlign="left" labelCol={{ span: 10 }}>
+                            <div className="contentBox">
+                                <Form.Item label="Name">
+                                    <Input value={detail.name} disabled={true} />
+                                </Form.Item>
+                                <Form.Item label="Work Authorization">
+                                    <Input
+                                        value={detail.work_authorization.title}
+                                        disabled={true}
+                                    />
+                                </Form.Item>
+                                <Form.Item label="Start Date">
+                                    <Input
+                                        value={
+                                            detail.work_authorization.start_date
+                                                ? new Date(
+                                                      detail.work_authorization.start_date,
+                                                  ).toLocaleString("en-US", {
+                                                      month: "numeric",
+                                                      day: "numeric",
+                                                      year: "numeric",
+                                                  })
+                                                : null
+                                        }
+                                        disabled={true}
+                                    />
+                                </Form.Item>
+                                <Form.Item label="End Date">
+                                    <Input
+                                        value={
+                                            detail.work_authorization.end_date
+                                                ? new Date(
+                                                      detail.work_authorization.end_date,
+                                                  ).toLocaleString("en-US", {
+                                                      month: "numeric",
+                                                      day: "numeric",
+                                                      year: "numeric",
+                                                  })
+                                                : null
+                                        }
+                                        disabled={true}
+                                    />
+                                </Form.Item>
+                                <Form.Item label="Remaining">
+                                    <Input
+                                        value={detail?.work_authorization.remaining_days}
+                                        disabled={true}
+                                        suffix="days"
+                                    />
+                                </Form.Item>
+                                <Form.Item>
+                                    <Table dataSource={detail?.documents} columns={columns} />
+                                </Form.Item>
+                            </div>
+                            <div className="review">
+                                {detail.next_step ? (
+                                    <Form.Item
+                                        label="Review"
+                                        wrapperCol={{ offset: 0, span: 24 }}
+                                        className="review-component"
+                                    >
+                                        <Select
+                                            placeholder="HR Review"
+                                            options={[
+                                                { value: "approved", label: "Approve" },
+                                                { value: "rejected", label: "Reject" },
+                                            ]}
+                                            onChange={handleOptionChange}
+                                        />
+                                    </Form.Item>
+                                ) : null}
+                                {review === "rejected" ? (
+                                    <Form.Item
+                                        label="Feedback"
+                                        wrapperCol={{ offset: 0, span: 24 }}
+                                        className="review-component"
+                                    >
+                                        <Input.TextArea
+                                            rows={4}
+                                            placeholder="Write your feedback here."
+                                            value={feedback}
+                                            onChange={handleFeedback}
+                                        />
+                                    </Form.Item>
+                                ) : null}
+                                {detail.next_step ? (
+                                    <Form.Item
+                                        label="Next Step"
+                                        wrapperCol={{ offset: 0, span: 24 }}
+                                        className="review-component"
+                                    >
+                                        <Space.Compact>
+                                            <Input value={detail.next_step} />
+                                            <Button type="primary" onClick={handleNotification}>
+                                                <MailOutlined />
+                                            </Button>
+                                        </Space.Compact>
+                                    </Form.Item>
+                                ) : null}
+                                <Form.Item>
+                                    <Button type="primary" htmlType="submit">
+                                        Submit
                                     </Button>
-                                </Space.Compact>
-                            </Form.Item>
-                        ) : null}
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit">
-                                Submit
-                            </Button>
-                        </Form.Item>
-                    </Form>
+                                </Form.Item>
+                            </div>
+                        </Form>
+                    </div>
                 </div>
             ) : (
                 <Spin size="large" />

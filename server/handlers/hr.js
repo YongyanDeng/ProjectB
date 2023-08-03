@@ -101,7 +101,7 @@ exports.getAnApplicaton = async function (req, res, next) {
         const docs = [];
         for (const documentId of documents) {
             const document = await db.Document.findById(documentId);
-            if (docs) docs.push(document);
+            if (document) docs.push(document);
         }
 
         // Corner case
@@ -182,33 +182,73 @@ exports.reviewApplication = async function (req, res, next) {
         // Output
         const {
             id,
+            email,
             username,
             name,
             role,
             address,
             profile_picture,
-            contact_Info,
+            contact_info,
             identification_info,
             work_authorization,
             reference,
             onboarding_status,
             documents,
+            usCitizen,
         } = employee;
+
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            if (document) docs.push(document);
+        }
+
+        // Corner case
+        if (!work_authorization.title) {
+            return res.status(200).json({
+                id,
+                email,
+                username,
+                name,
+                role,
+                address,
+                profile_picture,
+                contact_info,
+                identification_info,
+                work_authorization,
+                reference,
+                onboarding_status,
+                documents: docs,
+                usCitizen,
+            });
+        }
+
+        // Calculate OPT's remaining days
+        let end = work_authorization.end_date.getTime();
+        let now = new Date().getTime();
+        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        const extendedWorkAuth = {
+            ...work_authorization,
+            remaining_days,
+        };
+
+        // Output
         return res.status(200).json({
             id,
+            email,
             username,
             name,
             role,
             address,
             profile_picture,
-            contact_Info,
+            contact_info,
             identification_info,
-            work_authorization,
+            work_authorization: extendedWorkAuth,
             reference,
             onboarding_status,
-            documents,
-            document_status: !!documents.length ? "No file uploaded yet" : "Pending",
+            documents: docs,
             feedback,
+            usCitizen,
         });
     } catch (err) {
         return next({

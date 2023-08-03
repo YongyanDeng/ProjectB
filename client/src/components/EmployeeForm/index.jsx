@@ -1,6 +1,6 @@
 import style from "./style.module.css";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
     Form,
@@ -25,13 +25,14 @@ import {
     uploadDocumentAction,
     fetchDocumentsAction,
     deleteDocumentAction,
+    setTextInfo,
 } from "app/employeeSlice";
 import { fetchDocuments } from "services/employee";
 
 const { Option } = Select;
 
 const EmployeeForm = ({
-    employee,
+    formData,
     personalInfo,
     title,
     onboardingStatus,
@@ -50,15 +51,40 @@ const EmployeeForm = ({
     const [uploadedfileList, setUploadedfileList] = useState([]);
     const [isDisable, setIsDisable] = useState(!enableEdit);
     const [saved, setSaved] = useState(false);
-    const handleImageLinkChange = (e) => {
-        setImageUrl(e.target.value);
+
+    const handleTextInput = (name) => (e) => {
+        dispatch(
+            setTextInfo({
+                name,
+                content: e.target.value,
+            }),
+        );
+    };
+
+    const handleOptionInput = (name) => (value) => {
+        dispatch(
+            setTextInfo({
+                name,
+                content: value,
+            }),
+        );
+    };
+
+    const handleImageLinkChange = (name) => (e) => {
+        setImageUrl(() => e.target.value);
+        dispatch(
+            setTextInfo({
+                name,
+                content: e.target.value,
+            }),
+        );
     };
 
     const handleUsCitizenChange = (value) => {
         // Update the onboardingApplication with the selected value for usCitizen
         dispatch(
             setOnboardingApplication({
-                ...employee,
+                ...formData,
                 usCitizen: value,
             }),
         );
@@ -69,9 +95,9 @@ const EmployeeForm = ({
 
         dispatch(
             setOnboardingApplication({
-                ...employee,
+                ...formData,
                 work_authorization: {
-                    ...employee?.work_authorization,
+                    ...formData?.work_authorization,
                     title: value,
                 },
             }),
@@ -189,60 +215,75 @@ const EmployeeForm = ({
         const newFileList = uploadedfileList.filter((item) => item.uid !== file.uid);
         setUploadedfileList(newFileList);
         if (file.fromDocuments === "yes") {
-            dispatch(deleteDocumentAction({ id: employee.id, documentId: file.id }));
-            setSelectedFile({ uid: "" });
+            dispatch(deleteDocumentAction({ id: formData.id, documentId: file.id }));
         }
+        setSelectedFile({ uid: "" });
     };
 
-    const handleSaveForm = async (data) => {
+    const handleSaveForm = async () => {
         try {
-            const savedEmployee = { ...employee };
-            console.log("show data", data);
-            console.log("show employee", savedEmployee);
+            console.log("show employee", formData);
             // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
-            const savedData = Object.assign({}, savedEmployee, data);
-            console.log("show saved data", savedData);
+
             console.log("show selectedDate", selectedDate);
             const finalData = {
-                ...savedData,
+                ...formData,
                 work_authorization: {
-                    title: savedData.work_authorization.title,
+                    title: formData.work_authorization.title,
                     start_date: selectedDate.work_authorization.start_date,
                     end_date: selectedDate.work_authorization.end_date,
                 },
             };
             console.log("show final data", finalData);
 
-            await dispatch(updateEmployeeAction({ id: employee?.id, employee: finalData }));
+            await dispatch(updateEmployeeAction({ id: formData?.id, employee: finalData }));
             if (!errMessage && Object.keys(selectedFile).length > 1)
-                await dispatch(uploadDocumentAction({ id: employee?.id, document: selectedFile }));
+                await dispatch(uploadDocumentAction({ id: formData?.id, document: selectedFile }));
             if (personalInfo) {
                 setIsDisable(() => true);
             }
+
             message.success("employee data saved successfully!");
             setSaved(() => true);
+
+            await dispatch(fetchEmployeeAction(formData.id));
         } catch (err) {
             console.error(err);
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (saved) {
-            dispatch(
-                uploadDocumentAction({
-                    id: employee?.id,
-                    document: selectedFile,
-                }),
-            );
-            dispatch(
+            await dispatch(
                 updateEmployeeAction({
-                    id: employee?.id,
+                    id: formData?.id,
                     employee: { onboarding_status: "Pending" },
                 }),
             );
             setIsDisable(true);
         } else {
-            message.error("please save onboarding application before clicking submit");
+            console.log("show employee", formData);
+            // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
+
+            console.log("show selectedDate", selectedDate);
+            const finalData = {
+                ...formData,
+                work_authorization: {
+                    title: formData.work_authorization.title,
+                    start_date: selectedDate.work_authorization.start_date,
+                    end_date: selectedDate.work_authorization.end_date,
+                },
+                onboarding_status: "Pending",
+            };
+            console.log("show final data", finalData);
+
+            await dispatch(updateEmployeeAction({ id: formData?.id, employee: finalData }));
+            if (!errMessage && Object.keys(selectedFile).length > 1)
+                await dispatch(uploadDocumentAction({ id: formData?.id, document: selectedFile }));
+
+            setIsDisable(true);
+
+            message.success("employee data saved successfully!");
         }
     };
 
@@ -280,7 +321,7 @@ const EmployeeForm = ({
         const pdfUrl = URL.createObjectURL(blob);
 
         const urlFile = {
-            id: document.id,
+            id: document._id,
             uid: document.uid,
             name: document.document_name,
             document_type: document.document_type,
@@ -293,18 +334,18 @@ const EmployeeForm = ({
     };
 
     useEffect(() => {
-        if (operator.role === "Employee") {
-            dispatch(fetchDocumentsAction(employee.id));
-        }
+        // if (operator.role === "Employee") {
+        //     dispatch(fetchDocumentsAction(formData.id));
+        // }
         setSelectedDate(() => {
             return {
                 work_authorization: {
-                    start_date: employee.work_authorization?.start_date,
-                    end_date: employee.work_authorization?.end_date,
+                    start_date: formData.work_authorization?.start_date,
+                    end_date: formData.work_authorization?.end_date,
                 },
             };
         });
-    }, [employee]);
+    }, [formData]);
 
     useEffect(() => {
         if (documents.length >= 1) {
@@ -319,612 +360,784 @@ const EmployeeForm = ({
     return (
         <>
             {(hrStatus && hrStatus === "successed") || status === "successed" ? (
-                <div className={style.FormBox}>
-                    <div className={style.topContent}>
-                        <Typography.Title level={2} className={style.title}>
-                            {title}
-                        </Typography.Title>
-                    </div>
+                <div className="center-wrapper">
+                    <div className={style.FormBox}>
+                        <div className={style.topContent}>
+                            <Typography.Title level={2} className={style.title}>
+                                {title}
+                            </Typography.Title>
+                        </div>
 
-                    <Form
-                        className={style.formContent}
-                        initialValues={employee}
-                        onFinish={handleSaveForm}
-                        labelAlign="left"
-                        labelCol={{ span: 9 }}
-                        wrapperCol={{ span: 15 }}
-                    >
-                        <Form.Item
-                            className={style.formItem}
-                            label="First Name"
-                            name={["name", "first_name"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your first name",
-                                },
-                            ]}
+                        <Form
+                            className={style.formContent}
+                            initialValues={formData}
+                            onFinish={handleSaveForm}
+                            labelAlign="left"
+                            labelCol={{ span: 9 }}
+                            wrapperCol={{ span: 15 }}
                         >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Last Name"
-                            name={["name", "last_name"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your last name",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Middle Name"
-                            name={["name", "middle_name"]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Preferred Name"
-                            name={["name", "preferred_name"]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Profile Picture"
-                            name="profile_picture"
-                        >
-                            <Input
-                                id="image-link-input"
-                                placeholder="Profile Picture"
-                                onChange={handleImageLinkChange}
-                                disabled={isDisable}
-                            />
-                        </Form.Item>
-
-                        <Form.Item className={style.formItem} wrapperCol={{ offset: 9, span: 15 }}>
-                            <img
-                                src={imageUrl ? imageUrl : employee?.profile_picture}
-                                style={{
-                                    width: "200px",
-                                    height: "200px",
-                                    objectFit: "cover",
-                                }}
-                                alt=""
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Street Name"
-                            name={["address", "street_name"]} // Use an array for nested fields
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your street name",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Building / Apt"
-                            name={["address", "building_apt"]} // Use an array for nested fields
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your building or apt number",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="City"
-                            name={["address", "city"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter the city",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="State"
-                            name={["address", "state"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter the state",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="ZIP"
-                            name={["address", "zip"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter the ZIP",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Cell Phone Number"
-                            name={["contact_info", "cell_phone"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your cell phone number",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Work Phone Number"
-                            name={["contact_info", "work_phone"]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item className={style.formItem} label="Email">
-                            <Input disabled value={employee?.email} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="SSN"
-                            name={["identification_info", "SSN"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your SSN",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Date of Birth"
-                            name={["identification_info", "date_of_birth"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your date of birth",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Gender"
-                            name={["identification_info", "gender"]}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your gender",
-                                },
-                            ]}
-                        >
-                            <Select disabled={isDisable}>
-                                <Option value="male">Male</Option>
-                                <Option value="female">Female</Option>
-                                <Option value="other">I do not wish to answer</Option>
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            label="Permanent resident or citizen of the U.S.?"
-                            name="usCitizen"
-                        >
-                            <Select onChange={handleUsCitizenChange} disabled={isDisable}>
-                                <Option value="yes">Yes</Option>
-                                <Option value="no">No</Option>
-                            </Select>
-                        </Form.Item>
-                        {employee?.usCitizen === "yes" && (
                             <Form.Item
                                 className={style.formItem}
-                                label="What is your work authorization?"
-                                name={["work_authorization", "title"]}
+                                label="First Name"
+                                name={["name", "first_name"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your first name",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["name", "first_name"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Last Name"
+                                name={["name", "last_name"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your last name",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["name", "last_name"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Middle Name"
+                                name={["name", "middle_name"]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["name", "middle_name"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Preferred Name"
+                                name={["name", "preferred_name"]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["name", "preferred_name"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Profile Picture"
+                                name="profile_picture"
+                            >
+                                <Input
+                                    id="image-link-input"
+                                    placeholder="Profile Picture"
+                                    onChange={handleImageLinkChange(["profile_picture"])}
+                                    disabled={isDisable}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                className={style.formItem}
+                                wrapperCol={{ offset: 9, span: 15 }}
+                            >
+                                <img
+                                    src={imageUrl ? imageUrl : formData?.profile_picture}
+                                    style={{
+                                        width: "200px",
+                                        height: "200px",
+                                        objectFit: "cover",
+                                    }}
+                                    alt=""
+                                />
+                            </Form.Item>
+                            <Form.Item label="Address" className={style.formItem}></Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Street Name"
+                                name={["address", "street_name"]} // Use an array for nested fields
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your street name",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["address", "street_name"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Building / Apt"
+                                name={["address", "building_apt"]} // Use an array for nested fields
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your building or apt number",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["address", "building_apt"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="City"
+                                name={["address", "city"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter the city",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["address", "city"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="State"
+                                name={["address", "state"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter the state",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["address", "state"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="ZIP"
+                                name={["address", "zip"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter the ZIP",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["address", "zip"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label="Contact Information"
+                                className={style.formItem}
+                            ></Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Cell Phone Number"
+                                name={["contact_info", "cell_phone"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your cell phone number",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["contact_info", "cell_phone"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Work Phone Number"
+                                name={["contact_info", "work_phone"]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["contact_info", "work_phone"])}
+                                />
+                            </Form.Item>
+                            <Form.Item className={style.formItem} label="Email">
+                                <Input disabled value={formData?.email} />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="SSN"
+                                name={["identification_info", "SSN"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your SSN",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput(["identification_info", "SSN"])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Date of Birth"
+                                name={["identification_info", "date_of_birth"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your date of birth",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "identification_info",
+                                        "date_of_birth",
+                                    ])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Gender"
+                                name={["identification_info", "gender"]}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your gender",
+                                    },
+                                ]}
                             >
                                 <Select
-                                    value={employee?.work_authorization.title}
-                                    onChange={handleWorkAuthorization}
                                     disabled={isDisable}
+                                    onChange={handleOptionInput(["identification_info", "gender"])}
                                 >
-                                    <Option value="Green Card">Green Card</Option>
-                                    <Option value="Citizen">Citizen</Option>
+                                    <Option value="male">Male</Option>
+                                    <Option value="female">Female</Option>
+                                    <Option value="other">I do not wish to answer</Option>
                                 </Select>
                             </Form.Item>
-                        )}
-                        {employee?.usCitizen === "no" && (
-                            <>
+                            <Form.Item
+                                label="Work Authorization"
+                                className={style.formItem}
+                            ></Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                label="Permanent resident or citizen of the U.S.?"
+                                name="usCitizen"
+                            >
+                                <Select
+                                    onChange={handleOptionInput(["usCitizen"])}
+                                    disabled={isDisable}
+                                >
+                                    <Option value="yes">Yes</Option>
+                                    <Option value="no">No</Option>
+                                </Select>
+                            </Form.Item>
+                            {formData.usCitizen === "yes" && (
                                 <Form.Item
                                     className={style.formItem}
                                     label="What is your work authorization?"
                                     name={["work_authorization", "title"]}
                                 >
-                                    <Select onChange={handleWorkAuthorization} disabled={isDisable}>
-                                        <Option value="H1-B">H1-B</Option>
-                                        <Option value="L2">L2</Option>
-                                        <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
-                                        <Option value="H4">H4</Option>
-                                        <Option value="Other">Other</Option>
+                                    <Select
+                                        value={formData?.work_authorization.title}
+                                        onChange={handleOptionInput([
+                                            "work_authorization",
+                                            "title",
+                                        ])}
+                                        disabled={isDisable}
+                                    >
+                                        <Option value="Green Card">Green Card</Option>
+                                        <Option value="Citizen">Citizen</Option>
                                     </Select>
                                 </Form.Item>
-
-                                {employee?.work_authorization?.title === "F1(CPT/OPT)" &&
-                                    !personalInfo && (
-                                        <>
-                                            {operator?.role === "Employee" && (
-                                                <Form.Item
-                                                    className={style.formItem}
-                                                    label="Upload OPT RECEIPT File"
-                                                    name="pdfFile"
-                                                    getValueFromEvent={(e) => {
-                                                        if (Array.isArray(e)) {
-                                                            return e;
-                                                        } else if (e && e.fileList) {
-                                                            // Filter the fileList to contain only one file
-                                                            const filteredFileList =
-                                                                e.fileList.slice(0, 0);
-                                                            return filteredFileList;
-                                                        }
-                                                        return [];
-                                                    }}
-                                                >
-                                                    <Upload.Dragger
-                                                        name="pdfFile"
-                                                        accept=".pdf"
-                                                        multiple={false}
-                                                        disabled={isDisable}
-                                                        beforeUpload={beforeUpload}
-                                                        customRequest={handleFileUpload}
-                                                        itemRender={(
-                                                            originNode,
-                                                            file,
-                                                            currFileList,
-                                                        ) => {
-                                                            return null;
-                                                        }}
-                                                        onChange={handleFileChange}
-                                                    >
-                                                        <p className="ant-upload-drag-icon">
-                                                            <InboxOutlined />
-                                                        </p>
-                                                        <p className="ant-upload-text">
-                                                            please upload OPT RECEIPT file
-                                                        </p>
-                                                        <p className="ant-upload-hint">
-                                                            Support for a single upload.
-                                                        </p>
-                                                    </Upload.Dragger>
-                                                </Form.Item>
-                                            )}
-                                            <Form.Item className={style.formItem} label="Files">
-                                                <List
-                                                    rules={[
-                                                        {
-                                                            required: true,
-                                                            message: "Please upload a PDF file",
-                                                        },
-                                                    ]}
-                                                    header={<div>Summary of Uploaded Files</div>}
-                                                    bordered
-                                                    dataSource={
-                                                        operator.role === "Employee"
-                                                            ? uploadedfileList
-                                                            : files
-                                                    }
-                                                    renderItem={(file) => (
-                                                        <List.Item
-                                                            actions={[
-                                                                <a
-                                                                    href={file.file_url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                >
-                                                                    Preview
-                                                                </a>,
-                                                                <a
-                                                                    href={file.file_url}
-                                                                    download={file.name}
-                                                                >
-                                                                    Download
-                                                                </a>,
-                                                                // <Button
-                                                                //     type="link"
-                                                                //     onClick={() => handlePreview(file.file_url)}
-                                                                // >
-                                                                //     Preview
-                                                                // </Button>,
-                                                                !isDisable &&
-                                                                    !personalInfo &&
-                                                                    employee?.role ===
-                                                                        "Employee" && (
-                                                                        <DeleteOutlined
-                                                                            onClick={() =>
-                                                                                handleFileRemove(
-                                                                                    file,
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                    ),
-                                                            ]}
-                                                        >
-                                                            {file.name}
-                                                        </List.Item>
-                                                    )}
-                                                />
-                                            </Form.Item>
-                                        </>
-                                    )}
-
-                                {employee?.work_authorization?.title === "Other" && (
+                            )}
+                            {formData.usCitizen === "no" && (
+                                <>
                                     <Form.Item
                                         className={style.formItem}
-                                        label="Specify Visa Title"
+                                        label="What is your work authorization?"
                                         name={["work_authorization", "title"]}
                                     >
-                                        <Input disabled={isDisable} />
+                                        <Select
+                                            onChange={handleOptionInput([
+                                                "work_authorization",
+                                                "title",
+                                            ])}
+                                            disabled={isDisable}
+                                        >
+                                            <Option value="H1-B">H1-B</Option>
+                                            <Option value="L2">L2</Option>
+                                            <Option value="F1(CPT/OPT)">F1(CPT/OPT)</Option>
+                                            <Option value="H4">H4</Option>
+                                            <Option value="Other">Other</Option>
+                                        </Select>
+                                    </Form.Item>
+
+                                    {formData?.work_authorization?.title === "F1(CPT/OPT)" &&
+                                        !personalInfo && (
+                                            <>
+                                                {operator?.role === "Employee" && (
+                                                    <Form.Item
+                                                        className={style.formItem}
+                                                        label="Upload OPT RECEIPT File"
+                                                        name="pdfFile"
+                                                        getValueFromEvent={(e) => {
+                                                            if (Array.isArray(e)) {
+                                                                return e;
+                                                            } else if (e && e.fileList) {
+                                                                // Filter the fileList to contain only one file
+                                                                const filteredFileList =
+                                                                    e.fileList.slice(0, 0);
+                                                                return filteredFileList;
+                                                            }
+                                                            return [];
+                                                        }}
+                                                    >
+                                                        <Upload.Dragger
+                                                            name="pdfFile"
+                                                            accept=".pdf"
+                                                            multiple={false}
+                                                            disabled={isDisable}
+                                                            beforeUpload={beforeUpload}
+                                                            customRequest={handleFileUpload}
+                                                            itemRender={(
+                                                                originNode,
+                                                                file,
+                                                                currFileList,
+                                                            ) => {
+                                                                return null;
+                                                            }}
+                                                            onChange={handleFileChange}
+                                                        >
+                                                            <p className="ant-upload-drag-icon">
+                                                                <InboxOutlined />
+                                                            </p>
+                                                            <p className="ant-upload-text">
+                                                                please upload OPT RECEIPT file
+                                                            </p>
+                                                            <p className="ant-upload-hint">
+                                                                Support for a single upload.
+                                                            </p>
+                                                        </Upload.Dragger>
+                                                    </Form.Item>
+                                                )}
+                                                <Form.Item className={style.formItem} label="Files">
+                                                    <List
+                                                        rules={[
+                                                            {
+                                                                required: true,
+                                                                message: "Please upload a PDF file",
+                                                            },
+                                                        ]}
+                                                        header={
+                                                            <div>Summary of Uploaded Files</div>
+                                                        }
+                                                        bordered
+                                                        dataSource={
+                                                            operator.role === "Employee"
+                                                                ? uploadedfileList
+                                                                : files
+                                                        }
+                                                        renderItem={(file) => (
+                                                            <List.Item
+                                                                actions={[
+                                                                    <a
+                                                                        href={file.file_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                    >
+                                                                        Preview
+                                                                    </a>,
+                                                                    <a
+                                                                        href={file.file_url}
+                                                                        download={file.name}
+                                                                    >
+                                                                        Download
+                                                                    </a>,
+                                                                    !isDisable &&
+                                                                        !personalInfo &&
+                                                                        formData?.role ===
+                                                                            "Employee" && (
+                                                                            <DeleteOutlined
+                                                                                onClick={() =>
+                                                                                    handleFileRemove(
+                                                                                        file,
+                                                                                    )
+                                                                                }
+                                                                            />
+                                                                        ),
+                                                                ]}
+                                                            >
+                                                                {file.name}
+                                                            </List.Item>
+                                                        )}
+                                                    />
+                                                </Form.Item>
+                                            </>
+                                        )}
+                                    {!["", "H1-B", "L2", "F1(CPT/OPT)", "H4"].includes(
+                                        formData?.work_authorization?.title,
+                                    ) && (
+                                        <Form.Item
+                                            className={style.formItem}
+                                            label="Specify Visa Title"
+                                            name={["work_authorization", "title"]}
+                                        >
+                                            <Input
+                                                disabled={isDisable}
+                                                onChange={handleTextInput([
+                                                    "work_authorization",
+                                                    "title",
+                                                ])}
+                                            />
+                                        </Form.Item>
+                                    )}
+
+                                    <Form.Item
+                                        className={style.formItem}
+                                        label="Start Date"
+                                        rules={[
+                                            {
+                                                required: { dateValid },
+                                                message: "Please enter the start state",
+                                            },
+                                        ]}
+                                    >
+                                        <DatePicker
+                                            disabled={isDisable}
+                                            value={
+                                                selectedDate?.work_authorization.start_date
+                                                    ? dayjs(
+                                                          selectedDate.work_authorization
+                                                              .start_date,
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(date) =>
+                                                handleDateChange(date, "start_date")
+                                            }
+                                        />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        className={style.formItem}
+                                        label="End Date"
+                                        rules={[
+                                            {
+                                                required: { dateValid },
+                                                message: "Please enter the end state",
+                                            },
+                                        ]}
+                                    >
+                                        <DatePicker
+                                            disabled={isDisable}
+                                            value={
+                                                selectedDate?.work_authorization.end_date
+                                                    ? dayjs(
+                                                          selectedDate.work_authorization.end_date,
+                                                      )
+                                                    : null
+                                            }
+                                            onChange={(date) => handleDateChange(date, "end_date")}
+                                            disabledDate={disabledEndDate}
+                                        />
+                                    </Form.Item>
+                                </>
+                            )}
+                            {!personalInfo && (
+                                <>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        label="Reference"
+                                    ></Form.Item>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        name={["reference", "referee_info", "first_name"]}
+                                        label="First Name"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter your reference first name",
+                                            },
+                                        ]}
+                                    >
+                                        <Input
+                                            disabled={isDisable}
+                                            onChange={handleTextInput([
+                                                "reference",
+                                                "referee_info",
+                                                "first_name",
+                                            ])}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        name={["reference", "referee_info", "last_name"]}
+                                        label="Last Name"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter your reference last name",
+                                            },
+                                        ]}
+                                    >
+                                        <Input
+                                            disabled={isDisable}
+                                            onChange={handleTextInput([
+                                                "reference",
+                                                "referee_info",
+                                                "last_name",
+                                            ])}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        name={["reference", "referee_info", "middle_name"]}
+                                        label="Middle Name"
+                                    >
+                                        <Input
+                                            disabled={isDisable}
+                                            onChange={handleTextInput([
+                                                "reference",
+                                                "referee_info",
+                                                "middle_name",
+                                            ])}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        name={["reference", "referee_info", "phone"]}
+                                        label="Phone"
+                                    >
+                                        <Input
+                                            disabled={isDisable}
+                                            onChange={handleTextInput([
+                                                "reference",
+                                                "referee_info",
+                                                "phone",
+                                            ])}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        name={["reference", "referee_info", "email"]}
+                                        label="Email"
+                                    >
+                                        <Input
+                                            disabled={isDisable}
+                                            onChange={handleTextInput([
+                                                "reference",
+                                                "referee_info",
+                                                "email",
+                                            ])}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        name={["reference", "referee_info", "relationship"]}
+                                        label="Relationship"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Please enter your reference relationship",
+                                            },
+                                        ]}
+                                    >
+                                        <Input
+                                            disabled={isDisable}
+                                            onChange={handleTextInput([
+                                                "reference",
+                                                "referee_info",
+                                                "relationship",
+                                            ])}
+                                        />
+                                    </Form.Item>
+                                </>
+                            )}
+                            {/* Emergency Contacts */}
+                            <Form.Item
+                                className={style.formItem}
+                                label="Emergency Contact"
+                            ></Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                name={["reference", "emergency_contact", "first_name"]}
+                                label="First Name"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your reference first name",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "reference",
+                                        "emergency_contact",
+                                        "first_name",
+                                    ])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                name={["reference", "emergency_contact", "last_name"]}
+                                label="Last Name"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your reference last name",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "reference",
+                                        "emergency_contact",
+                                        "last_name",
+                                    ])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                name={["reference", "emergency_contact", "middle_name"]}
+                                label="Middle Name"
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "reference",
+                                        "emergency_contact",
+                                        "middle_name",
+                                    ])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                name={["reference", "emergency_contact", "phone"]}
+                                label="Phone"
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "reference",
+                                        "emergency_contact",
+                                        "phone",
+                                    ])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                name={["reference", "emergency_contact", "email"]}
+                                label="Email"
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "reference",
+                                        "emergency_contact",
+                                        "email",
+                                    ])}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={style.formItem}
+                                name={["reference", "emergency_contact", "relationship"]}
+                                label="Relationship"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please enter your emergency contact relationship",
+                                    },
+                                ]}
+                            >
+                                <Input
+                                    disabled={isDisable}
+                                    onChange={handleTextInput([
+                                        "reference",
+                                        "emergency_contact",
+                                        "relationship",
+                                    ])}
+                                />
+                            </Form.Item>
+
+                            {/* Add summary of uploaded files or documents */}
+                            {/* ... */}
+                            {(onboardingStatus === "Never submitted" ||
+                                onboardingStatus === "Rejected") &&
+                                operator.role === "Employee" &&
+                                !personalInfo && (
+                                    <Form.Item
+                                        className={style.formItem}
+                                        wrapperCol={{ offset: 8, span: 16 }}
+                                    >
+                                        <Button type="primary" htmlType="submit">
+                                            Save
+                                        </Button>
+
+                                        <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
+                                            Submit
+                                        </Button>
                                     </Form.Item>
                                 )}
 
-                                <Form.Item
-                                    className={style.formItem}
-                                    label="Start Date"
-                                    rules={[
-                                        {
-                                            required: { dateValid },
-                                            message: "Please enter the start state",
-                                        },
-                                    ]}
-                                >
-                                    <DatePicker
-                                        disabled={isDisable}
-                                        value={
-                                            selectedDate?.work_authorization.start_date
-                                                ? dayjs(selectedDate.work_authorization.start_date)
-                                                : null
-                                        }
-                                        onChange={(date) => handleDateChange(date, "start_date")}
-                                    />
-                                </Form.Item>
-
-                                <Form.Item
-                                    className={style.formItem}
-                                    label="End Date"
-                                    rules={[
-                                        {
-                                            required: { dateValid },
-                                            message: "Please enter the end state",
-                                        },
-                                    ]}
-                                >
-                                    <DatePicker
-                                        disabled={isDisable}
-                                        value={
-                                            selectedDate?.work_authorization.end_date
-                                                ? dayjs(selectedDate.work_authorization.end_date)
-                                                : null
-                                        }
-                                        onChange={(date) => handleDateChange(date, "end_date")}
-                                        disabledDate={disabledEndDate}
-                                    />
-                                </Form.Item>
-                            </>
-                        )}
-                        {!personalInfo && (
-                            <>
-                                <Form.Item className={style.formItem} label="Reference"></Form.Item>
-                                <Form.Item
-                                    className={style.formItem}
-                                    name={["reference", "referee_info", "first_name"]}
-                                    label="First Name"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter your reference first name",
-                                        },
-                                    ]}
-                                >
-                                    <Input disabled={isDisable} />
-                                </Form.Item>
-                                <Form.Item
-                                    className={style.formItem}
-                                    name={["reference", "referee_info", "last_name"]}
-                                    label="Last Name"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter your reference last name",
-                                        },
-                                    ]}
-                                >
-                                    <Input disabled={isDisable} />
-                                </Form.Item>
-                                <Form.Item
-                                    className={style.formItem}
-                                    name={["reference", "referee_info", "middle_name"]}
-                                    label="Middle Name"
-                                >
-                                    <Input disabled={isDisable} />
-                                </Form.Item>
-                                <Form.Item
-                                    className={style.formItem}
-                                    name={["reference", "referee_info", "phone"]}
-                                    label="Phone"
-                                >
-                                    <Input disabled={isDisable} />
-                                </Form.Item>
-                                <Form.Item
-                                    className={style.formItem}
-                                    name={["reference", "referee_info", "email"]}
-                                    label="Email"
-                                >
-                                    <Input disabled={isDisable} />
-                                </Form.Item>
-                                <Form.Item
-                                    className={style.formItem}
-                                    name={["reference", "referee_info", "relationship"]}
-                                    label="Relationship"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: "Please enter your reference relationship",
-                                        },
-                                    ]}
-                                >
-                                    <Input disabled={isDisable} />
-                                </Form.Item>
-                            </>
-                        )}
-                        {/* Emergency Contacts */}
-                        <Form.Item className={style.formItem} label="Emergency Contact"></Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            name={["reference", "emergency_contact", "first_name"]}
-                            label="First Name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your reference first name",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            name={["reference", "emergency_contact", "last_name"]}
-                            label="Last Name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your reference last name",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            name={["reference", "emergency_contact", "middle_name"]}
-                            label="Middle Name"
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            name={["reference", "emergency_contact", "phone"]}
-                            label="Phone"
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            name={["reference", "emergency_contact", "email"]}
-                            label="Email"
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-                        <Form.Item
-                            className={style.formItem}
-                            name={["reference", "emergency_contact", "relationship"]}
-                            label="Relationship"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please enter your emergency contact relationship",
-                                },
-                            ]}
-                        >
-                            <Input disabled={isDisable} />
-                        </Form.Item>
-
-                        {/* Add summary of uploaded files or documents */}
-                        {/* ... */}
-                        {(onboardingStatus === "Never submitted" ||
-                            onboardingStatus === "Rejected") &&
-                            !personalInfo && (
+                            {personalInfo && isDisable && (
                                 <Form.Item
                                     className={style.formItem}
                                     wrapperCol={{ offset: 8, span: 16 }}
                                 >
-                                    <Button type="primary" htmlType="submit">
-                                        Save
-                                    </Button>
-
-                                    <Button style={{ marginLeft: 10 }} onClick={handleSubmit}>
-                                        Submit
+                                    <Button style={{ marginLeft: 10 }} onClick={handleEdit}>
+                                        Edit
                                     </Button>
                                 </Form.Item>
                             )}
 
-                        {personalInfo && isDisable && (
-                            <Form.Item
-                                className={style.formItem}
-                                wrapperCol={{ offset: 8, span: 16 }}
-                            >
-                                <Button style={{ marginLeft: 10 }} onClick={handleEdit}>
-                                    Edit
-                                </Button>
-                            </Form.Item>
-                        )}
-
-                        {personalInfo && !isDisable && (
-                            <div>
-                                <Form.Item
-                                    className={style.formItem}
-                                    wrapperCol={{ offset: 8, span: 16 }}
-                                >
-                                    <Button type="primary" htmlType="submit">
-                                        save
-                                    </Button>
-                                    <Button
-                                        style={{ marginLeft: 10 }}
-                                        onClick={handleFirstCancelButton}
+                            {personalInfo && !isDisable && (
+                                <div>
+                                    <Form.Item
+                                        className={style.formItem}
+                                        wrapperCol={{ offset: 8, span: 16 }}
                                     >
-                                        cancel
-                                    </Button>
-                                </Form.Item>
+                                        <Button type="primary" htmlType="submit">
+                                            save
+                                        </Button>
+                                        <Button
+                                            style={{ marginLeft: 10 }}
+                                            onClick={handleFirstCancelButton}
+                                        >
+                                            cancel
+                                        </Button>
+                                    </Form.Item>
 
-                                <Form.Item className={style.formItem}>
-                                    {/* The button or element that triggers the Popconfirm */}
-                                    <Popconfirm
-                                        title="Are you sure you want to discard all of
+                                    <Form.Item className={style.formItem}>
+                                        {/* The button or element that triggers the Popconfirm */}
+                                        <Popconfirm
+                                            title="Are you sure you want to discard all of
                                 the changes?"
-                                        open={popConfirmVisible}
-                                        onConfirm={handleConfirm}
-                                        onCancel={handleCancel}
-                                        okText="Yes"
-                                        cancelText="No"
-                                    ></Popconfirm>
-                                </Form.Item>
-                            </div>
-                        )}
-                    </Form>
+                                            open={popConfirmVisible}
+                                            onConfirm={handleConfirm}
+                                            onCancel={handleCancel}
+                                            okText="Yes"
+                                            cancelText="No"
+                                        ></Popconfirm>
+                                    </Form.Item>
+                                </div>
+                            )}
+                        </Form>
+                    </div>
                 </div>
             ) : (
-                <Spin />
+                <Spin size="large" />
             )}
         </>
     );

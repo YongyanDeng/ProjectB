@@ -137,14 +137,17 @@ const deleteDocument = async (req, res, next) => {
         if (!deletedDocument) {
             return res.status(404).json({ error: "Document not found" });
         }
+
         // verify if this document belongs to employee who wants to delete this doc
         if (deletedDocument.employee.toString() !== req.params.id) {
             return res.status(401).json({ error: "Unauthorized to delete this document" });
         }
+
         // // Remove the document from the collection
         // await db.Document.findByIdAndRemove(documentId);
         await deletedDocument.deleteOne();
-        res.status(204).json({ message: "Document is deleted successfully" });
+        // res.status(204).json({ message: "Document is deleted successfully" });
+        res.status(200).json(deletedDocument);
     } catch (err) {
         return next({
             status: 500,
@@ -152,6 +155,7 @@ const deleteDocument = async (req, res, next) => {
         });
     }
 };
+
 module.exports = {
     getAllDocuments,
     getDocument,
