@@ -8,10 +8,13 @@
 }
 
 @media screen and (max-width: 392px) {
-    /* .center-wrapper {
+    .center-wrapper {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        flex-direction: column;
-    } */
+
+        top: 0;
+        position: absolute;
+    }
 }

@@ -8,7 +8,7 @@ exports.uploadRegisterToken = async function (req, res, next) {
         const { email, hashToken } = req.body;
         // Set expiration as 3 hours later
         const expirationTime = new Date();
-        expirationTime.setMinutes(expirationTime.getMinutes() + 1);
+        expirationTime.setMinutes(expirationTime.getMinutes() + 3);
 
         // Upload to db
         const createdToken = await db.RegisterToken.create({
@@ -36,17 +36,14 @@ exports.registerTokenCheck = async function (req, res, next) {
         if (!foundToken) return res.status(401).json({ error: { message: "Token not exist" } });
 
         // Check token's status
-        if (foundToken.status === "pending") {
-            foundToken.status = "activated";
-            await foundToken.save();
-        } else {
+        if (foundToken.status !== "pending") {
             return res
                 .status(401)
                 .json({ error: { message: `Your register token is ${foundToken.status}!` } });
         }
 
         return res.status(200).json({
-            foundToken,
+            message: "passed",
         });
     } catch (err) {
         return next({

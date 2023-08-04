@@ -1,9 +1,9 @@
 import "./styles.css";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Input, Typography, Button, Drawer, Space, message } from "antd";
+import { Typography, Button, Drawer, Space, message } from "antd";
 import {
     MenuOutlined,
     UserOutlined,
@@ -23,9 +23,7 @@ export default function Navbar() {
     const { pathname: location } = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { isAuthenticated, employee } = useSelector(
-        (state) => state.employee
-    );
+    const { isAuthenticated, employee } = useSelector((state) => state.employee);
     const [open, setOpen] = useState(false);
     const [features, setFeatures] = useState([]);
 
@@ -44,17 +42,33 @@ export default function Navbar() {
                   },
                   {
                       name: "Visa Status Management",
-                      icon: (
-                          <SafetyCertificateOutlined
-                              style={{ fontSize: "20px" }}
-                          />
-                      ),
+                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
                       link: "/hr/visas",
                   },
                   {
                       name: "Hiring Management",
                       icon: <AuditOutlined style={{ fontSize: "20px" }} />,
                       link: "/hr/hiringManagement",
+                  },
+                  {
+                      name: "Account Management",
+                      // icon: <AuditOutlined style={{ fontSize: "20px" }} />,
+                      // link: "/hr/hiringManagement",
+                  },
+                  {
+                      name: "Onboarding Application",
+                      icon: <UserOutlined style={{ fontSize: "20px" }} />,
+                      link: `/employee/${employee.id}/OnboardingPage`,
+                  },
+                  {
+                      name: "Personal Information",
+                      icon: <UserOutlined style={{ fontSize: "20px" }} />,
+                      link: `/employee/${employee.id}/PersonalInfoPage`,
+                  },
+                  {
+                      name: "Visa Status Management",
+                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
+                      link: `/employee/${employee.id}/visa`,
                   },
               ])
             : setFeatures([
@@ -75,11 +89,7 @@ export default function Navbar() {
                   },
                   {
                       name: "Visa Status Management",
-                      icon: (
-                          <SafetyCertificateOutlined
-                              style={{ fontSize: "20px" }}
-                          />
-                      ),
+                      icon: <SafetyCertificateOutlined style={{ fontSize: "20px" }} />,
                       link: `/employee/${employee.id}/visa`,
                   },
               ]);

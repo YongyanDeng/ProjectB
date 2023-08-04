@@ -67,7 +67,7 @@ export default function HrOnboardingDetail() {
     return (
         <>
             {detail ? (
-                <div className="applicationBox">
+                <div className="center-wrapper">
                     <EmployeeForm
                         formData={detail}
                         personalInfo={false}

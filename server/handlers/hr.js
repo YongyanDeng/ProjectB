@@ -29,6 +29,17 @@ exports.getAllProfiles = async function (req, res, next) {
             });
             return acc;
         }, []);
+
+        output.sort((a, b) => {
+            if (a.name.last_name < b.name.last_name) {
+                return -1;
+            }
+            if (a.name.last_name > b.name.last_name) {
+                return 1;
+            }
+            return 0;
+        });
+
         return res.status(200).json(output);
     } catch (err) {
         return next({
@@ -58,6 +69,16 @@ exports.getAllApplications = async function (req, res, next) {
             });
             return acc;
         }, []);
+
+        output.sort((a, b) => {
+            if (a.name.last_name < b.name.last_name) {
+                return -1;
+            }
+            if (a.name.last_name > b.name.last_name) {
+                return 1;
+            }
+            return 0;
+        });
 
         // Output
         return res.status(200).json(output);
@@ -280,6 +301,26 @@ exports.getVisaList = async function (req, res, next) {
             }
             all.push({ id, email, name, work_authorization });
         }
+
+        inProgress.sort((a, b) => {
+            if (a.name.last_name < b.name.last_name) {
+                return -1;
+            }
+            if (a.name.last_name > b.name.last_name) {
+                return 1;
+            }
+            return 0;
+        });
+
+        all.sort((a, b) => {
+            if (a.name.last_name < b.name.last_name) {
+                return -1;
+            }
+            if (a.name.last_name > b.name.last_name) {
+                return 1;
+            }
+            return 0;
+        });
 
         // Output
         return res.status(200).json({

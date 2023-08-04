@@ -76,3 +76,17 @@
     height: 200px;
     margin: 10px;
 }
+
+@media screen and (max-width: 392px) {
+    .visaManagement {
+        width: 380px;
+    }
+
+    .contentBox {
+        width: 370px;
+    }
+
+    .fileBox {
+        width: 350px;
+    }
+}

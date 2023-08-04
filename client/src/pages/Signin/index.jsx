@@ -66,9 +66,9 @@ export default function SignUp() {
                 errors={error}
                 buttomText={
                     <>
-                        <Typography>
+                        {/* <Typography>
                             Don't have an account? <Link to={"/signup"}>Sign up</Link>
-                        </Typography>
+                        </Typography> */}
                         <Link className="right-link" to={"/updatepassword"}>
                             Forget password?
                         </Link>

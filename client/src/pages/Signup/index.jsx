@@ -7,7 +7,7 @@ import { signUpEmployee } from "app/employeeSlice";
 import { removeError } from "app/errorSlice";
 import { Typography } from "antd";
 
-export default function SignUp() {
+export default function SignUp({ hashToken }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { status } = useSelector((state) => state.employee);
@@ -64,7 +64,7 @@ export default function SignUp() {
         setSubmitted(true);
         // Convert to lowercase to match database's property
         const { Email: email, Password: password, Username: username } = data;
-        dispatch(signUpEmployee({ email, password, username }));
+        dispatch(signUpEmployee({ email, password, username, hashToken }));
     };
 
     return (

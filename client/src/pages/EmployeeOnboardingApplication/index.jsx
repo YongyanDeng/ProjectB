@@ -29,52 +29,59 @@ const OnboardingPage = () => {
     const renderContent = () => {
         return (
             <>
-                {detail
-                    ? // Use curly braces to wrap the switch statement content
-                      (() => {
-                          switch (employee.onboarding_status) {
-                              case "Never submitted":
-                                  // return <div>never submitted</div>;
-                                  return (
-                                      <EmployeeForm
-                                          formData={detail}
-                                          personalInfo={false}
-                                          title={"Onboarding application"}
-                                          onboardingStatus={employee.onboarding_status}
-                                          enableEdit={true}
-                                      />
-                                  );
+                {detail ? (
+                    // Use curly braces to wrap the switch statement content
+                    (() => {
+                        switch (employee.onboarding_status) {
+                            case "Never submitted":
+                                // return <div>never submitted</div>;
+                                return (
+                                    <div className="center-wrapper">
+                                        <EmployeeForm
+                                            formData={detail}
+                                            personalInfo={false}
+                                            title={"Onboarding application"}
+                                            onboardingStatus={employee.onboarding_status}
+                                            enableEdit={true}
+                                        />
+                                    </div>
+                                );
 
-                              case "Rejected":
-                                  return (
-                                      <EmployeeForm
-                                          formData={detail}
-                                          personalInfo={false}
-                                          title={"Resubmit for Rejected Onboarding application"}
-                                          onboardingStatus={employee.onboarding_status}
-                                          enableEdit={true}
-                                      />
-                                  );
-                              case "Pending":
-                                  return (
-                                      <EmployeeForm
-                                          formData={detail}
-                                          personalInfo={false}
-                                          title={"Please wait for HR to review your application"}
-                                          onboardingStatus={employee.onboarding_status}
-                                          enableEdit={false}
-                                      />
-                                  );
-                              case "Approved":
-                                  // Redirect to the home page
-                                  navigate("/"); // Update this with the actual home page URL
-                                  return null;
-                              default:
-                                  return null;
-                          }
-                      })()
-                    : // <Spin size="large" />
-                      null}
+                            case "Rejected":
+                                return (
+                                    <div className="center-wrapper">
+                                        <EmployeeForm
+                                            formData={detail}
+                                            personalInfo={false}
+                                            title={"Resubmit for Rejected Onboarding application"}
+                                            onboardingStatus={employee.onboarding_status}
+                                            enableEdit={true}
+                                        />
+                                    </div>
+                                );
+                            case "Pending":
+                                return (
+                                    <div className="center-wrapper">
+                                        <EmployeeForm
+                                            formData={detail}
+                                            personalInfo={false}
+                                            title={"Please wait for HR to review your application"}
+                                            onboardingStatus={employee.onboarding_status}
+                                            enableEdit={false}
+                                        />
+                                    </div>
+                                );
+                            case "Approved":
+                                // Redirect to the home page
+                                navigate("/"); // Update this with the actual home page URL
+                                return null;
+                            default:
+                                return null;
+                        }
+                    })()
+                ) : (
+                    <Spin size="large" />
+                )}
             </>
         );
     };

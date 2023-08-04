@@ -22,83 +22,9 @@ export default function EmployeeVisa() {
 
     useEffect(() => {
         dispatch(fetchEmployeeAction(employee.id));
-        // dispatch(fetchDocumentsAction(employee.id));
     }, []);
 
     useEffect(() => {
-        // if (status === "successed" && documents?.length) {
-        //     let docs = [];
-        //     let index = 0;
-        //     for (const file_type of visaProcess) {
-        //         const doc = documents.find((element) => element.document_type === file_type);
-        //         if (doc) {
-        //             docs.push({
-        //                 key: index + 1,
-        //                 name: doc.document_name,
-        //                 content: doc.content.data,
-        //                 type: doc.document_type,
-        //                 status: doc.document_status,
-        //                 feedback: doc,
-        //             });
-        //             index++;
-        //         }
-        //     }
-
-        //     let next_step = null;
-        //     let message = "";
-        //     // Determine the next step in the visa process
-        //     const last = documents[documents.length - 1];
-        //     if (last?.document_status !== "approved") {
-        //         next_step = visaProcess[Math.min(3, documents.length - 1)];
-        //     } else if (documents.length < 4) {
-        //         next_step = visaProcess[documents.length];
-        //     }
-
-        //     // Generate a message based on the status of the last document
-        //     const { document_type, document_status, feedback } = last;
-        //     if (document_type === "OPT RECEIPT") {
-        //         if (document_status === "pending") {
-        //             message = "Waiting for HR to approve your OPT Receipt";
-        //         } else if (document_status === "approved") {
-        //             message = "Please upload a copy of your OPT EAD";
-        //         } else if (document_status === "rejected") {
-        //             message = feedback;
-        //         }
-        //     } else if (document_type === "OPT EAD") {
-        //         if (document_status === "pending") {
-        //             message = "Waiting for HR to approve your OPT EAD";
-        //         } else if (document_status === "approved") {
-        //             message = "Please download and fill out the I-983 form";
-        //         } else if (document_status === "rejected") {
-        //             message = feedback;
-        //         }
-        //     } else if (document_type === "I-983") {
-        //         if (document_status === "pending") {
-        //             message = "Waiting for HR to approve and sign your I-983";
-        //         } else if (document_status === "approved") {
-        //             message =
-        //                 "Please send the I-983 along with all necessary documents to your school and upload the new I-20";
-        //         } else if (document_status === "rejected") {
-        //             message = feedback;
-        //         }
-        //     } else if (document_type === "I-20") {
-        //         if (document_status === "pending") {
-        //             message = "Waiting for HR to approve your I-20";
-        //         } else if (document_status === "approved") {
-        //             message = "All documents have been approved";
-        //         } else if (document_status === "rejected") {
-        //             message = feedback;
-        //         }
-        //     }
-
-        //     setDetail({
-        //         documents: docs,
-        //         next_step,
-        //         last,
-        //         message,
-        //     });
-        // }
-
         if (status === "successed" && documents?.length) {
             let docs = [];
 
