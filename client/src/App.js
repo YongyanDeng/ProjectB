@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "pages/Home";
-import SignUp from "pages/Signup";
 import SignIn from "pages/Signin";
 import ProtectLayout from "components/Layout/ProtectLayout";
 import HRProtectLayout from "components/Layout/HRProtectLayout";
@@ -19,10 +18,11 @@ import EmailHistory from "pages/EmailHistory";
 import HiringManagement from "pages/HrHiringManagement";
 import HrOnboardingDetail from "pages/HrOnboardingDetail";
 
-import NotFound from "pages/NotFound";
 import PersonalInfoPage from "pages/EmployeePersonalInfo";
 import OnboardingPage from "pages/EmployeeOnboardingApplication";
 import EmployeeVisa from "pages/EmployeeVisa";
+
+import NotFound from "pages/NotFound";
 
 function App() {
     return (
@@ -30,9 +30,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
-                    <Route path="register/:hashToken" element={<Register />} />
                     <Route element={<AuthProtectLayout />}>
-                        <Route path="signup" element={<SignUp />} />
+                        <Route path="register/:hashToken" element={<Register />} />
                         <Route path="signin" element={<SignIn />} />
                         <Route path="updatePassword" element={<UpdatePassword />} />
                     </Route>

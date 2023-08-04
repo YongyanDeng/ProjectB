@@ -59,7 +59,7 @@ export default function HrOnboardingDetail() {
         // update application review
         dispatch(reviewOBApplication({ id: employee.id, employeeId, review, feedback }))
             .then(() => message.success("Reviewed"))
-            .catch((err) => {
+            .catch(() => {
                 message.error(errMessage);
             });
     };
@@ -69,7 +69,7 @@ export default function HrOnboardingDetail() {
             {detail ? (
                 <div className="center-wrapper">
                     <EmployeeForm
-                        employee={detail}
+                        formData={detail}
                         personalInfo={false}
                         title={"Application Detail"}
                         onboardingStatus={detail.onboarding_status}
@@ -80,8 +80,8 @@ export default function HrOnboardingDetail() {
                     <Form
                         className="review-section"
                         onFinish={handleSubmit}
-                        labelCol={{ span: 9 }}
-                        wrapperCol={{ span: 15 }}
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
                     >
                         <Form.Item label="Review">
                             <Select

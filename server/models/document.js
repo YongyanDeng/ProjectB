@@ -44,6 +44,11 @@ documentSchema.pre("deleteOne", { document: true }, async function (next) {
     try {
         // find the employee and update employee.documents
         const employee = await Employee.findById(this.employee);
+        if (!employee)
+            return next({
+                status: 401,
+                message: "Employee not found",
+            });
         employee.documents.remove(this.id);
         await employee.save();
         return next();

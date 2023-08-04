@@ -2,22 +2,26 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Spin } from "antd";
+
 import { fetchEmployeeAction, fetchDocumentsAction } from "app/employeeSlice";
 import EmployeeForm from "components/EmployeeForm";
 
 const OnboardingPage = () => {
-    const { employee, status } = useSelector((state) => state.employee);
+    const { employee, documents, status } = useSelector((state) => state.employee);
     const dispatch = useDispatch();
     const [detail, setDetail] = useState(null);
+    const [loaded, setLoaded] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        setLoaded(true);
         dispatch(fetchEmployeeAction(employee.id));
         // dispatch(fetchDocumentsAction(employee.id));
     }, []);
 
     useEffect(() => {
-        if (status === "successed" && !!Object.keys(employee).length) {
+        if (loaded && status === "successed") {
             setDetail(employee);
         }
     }, [employee]);
@@ -32,34 +36,40 @@ const OnboardingPage = () => {
                             case "Never submitted":
                                 // return <div>never submitted</div>;
                                 return (
-                                    <EmployeeForm
-                                        employee={detail}
-                                        personalInfo={false}
-                                        title={"Onboarding application"}
-                                        onboardingStatus={employee.onboarding_status}
-                                        enableEdit={true}
-                                    />
+                                    <div className="center-wrapper">
+                                        <EmployeeForm
+                                            formData={detail}
+                                            personalInfo={false}
+                                            title={"Onboarding application"}
+                                            onboardingStatus={employee.onboarding_status}
+                                            enableEdit={true}
+                                        />
+                                    </div>
                                 );
 
                             case "Rejected":
                                 return (
-                                    <EmployeeForm
-                                        employee={detail}
-                                        personalInfo={false}
-                                        title={"Resubmit for Rejected Onboarding application"}
-                                        onboardingStatus={employee.onboarding_status}
-                                        enableEdit={true}
-                                    />
+                                    <div className="center-wrapper">
+                                        <EmployeeForm
+                                            formData={detail}
+                                            personalInfo={false}
+                                            title={"Resubmit for Rejected Onboarding application"}
+                                            onboardingStatus={employee.onboarding_status}
+                                            enableEdit={true}
+                                        />
+                                    </div>
                                 );
                             case "Pending":
                                 return (
-                                    <EmployeeForm
-                                        employee={detail}
-                                        personalInfo={false}
-                                        title={"Please wait for HR to review your application"}
-                                        onboardingStatus={employee.onboarding_status}
-                                        enableEdit={false}
-                                    />
+                                    <div className="center-wrapper">
+                                        <EmployeeForm
+                                            formData={detail}
+                                            personalInfo={false}
+                                            title={"Please wait for HR to review your application"}
+                                            onboardingStatus={employee.onboarding_status}
+                                            enableEdit={false}
+                                        />
+                                    </div>
                                 );
                             case "Approved":
                                 // Redirect to the home page
@@ -70,13 +80,13 @@ const OnboardingPage = () => {
                         }
                     })()
                 ) : (
-                    <h1>Loading..</h1>
+                    <Spin size="large" />
                 )}
             </>
         );
     };
 
-    return <div className="center-wrapper">{renderContent()}</div>;
+    return renderContent();
 };
 
 export default OnboardingPage;

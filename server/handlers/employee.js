@@ -11,7 +11,7 @@ const updateEmployee = async function (req, res, next) {
         const updates = req.body;
 
         // Find the employee by ID
-        const employee = await db.Employee.findById(employeeId).select("-password");
+        const employee = await db.Employee.findById(employeeId);
         if (!employee) {
             return res.status(404).json({ error: "Employee not found" });
         }
@@ -36,6 +36,13 @@ const updateEmployee = async function (req, res, next) {
             feedback,
             usCitizen,
         } = employee;
+
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            if (document) docs.push(document);
+        }
+
         return res.status(201).json({
             id,
             email,
@@ -49,7 +56,7 @@ const updateEmployee = async function (req, res, next) {
             work_authorization,
             reference,
             onboarding_status,
-            documents,
+            documents: docs,
             feedback,
             usCitizen,
         });
@@ -66,7 +73,7 @@ const getEmployee = async (req, res, next) => {
         const employeeId = req.params.id;
 
         // Find the employee by ID
-        const employee = await db.Employee.findById(employeeId).select("-password");
+        const employee = await db.Employee.findById(employeeId);
         if (!employee) {
             return res.status(404).json({ error: "Employee not found" });
         }
@@ -88,6 +95,13 @@ const getEmployee = async (req, res, next) => {
             feedback,
             usCitizen,
         } = employee;
+
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            if (document) docs.push(document);
+        }
+
         return res.status(200).json({
             id,
             email,
@@ -101,7 +115,7 @@ const getEmployee = async (req, res, next) => {
             work_authorization,
             reference,
             onboarding_status,
-            documents,
+            documents: docs,
             feedback,
             usCitizen,
         });

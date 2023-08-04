@@ -30,7 +30,7 @@ export default function HrProfileDetail() {
                 // Open the PDF in a new window or tab
                 let pdfUrl = URL.createObjectURL(blob);
                 return {
-                    id: document.id,
+                    id: document._id,
                     uid: document.uid,
                     name: document.document_name,
                     document_type: document.document_type,
@@ -51,7 +51,7 @@ export default function HrProfileDetail() {
             {detail ? (
                 <div className="center-wrapper">
                     <EmployeeForm
-                        employee={detail}
+                        formData={detail}
                         personalInfo={false}
                         title={"Profile"}
                         onboardingStatus={detail.onboarding_status}

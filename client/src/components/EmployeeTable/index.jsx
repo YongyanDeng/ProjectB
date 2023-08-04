@@ -1,4 +1,5 @@
 import "./styles.css";
+
 import { Typography, Input, Table, Tabs } from "antd";
 
 export default function EmployeeTable({

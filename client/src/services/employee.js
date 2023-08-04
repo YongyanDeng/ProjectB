@@ -36,8 +36,9 @@ export const uploadDocument = async ({ id, document }) => {
     });
 };
 export const deleteDocument = async ({ id, documentId }) => {
-    return await apiCall({
+    const res = await apiCall({
         url: `/api/employees/${id}/documents/${documentId}`,
         method: "DELETE",
     });
+    return res;
 };

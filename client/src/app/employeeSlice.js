@@ -170,8 +170,19 @@ const currentEmployeeSlice = createSlice({
         logOut: (state, action) => {
             state.isAuthenticated = false;
             state.employee = {};
+            state.documents = [];
             state.status = "idle";
             localStorage.removeItem("token");
+        },
+        setTextInfo: (state, action) => {
+            const path = action.payload.name;
+            if (path.length === 3) {
+                state.employee[path[0]][path[1]][path[2]] = action.payload.content;
+            } else if (path.length === 2) {
+                state.employee[path[0]][path[1]] = action.payload.content;
+            } else if (path.length) {
+                state.employee[path[0]] = action.payload.content;
+            }
         },
         setOnboardingApplication: (state, action) => {
             state.employee = action.payload;
@@ -240,6 +251,7 @@ const currentEmployeeSlice = createSlice({
             action.payload.identification_info.date_of_birth = dob;
 
             state.employee = action.payload;
+            state.documents = action.payload.documents;
             state.status = "successed";
         });
         builder.addCase(fetchEmployeeAction.rejected, (state, action) => {
@@ -251,8 +263,19 @@ const currentEmployeeSlice = createSlice({
 
         //update employee info
         builder.addCase(updateEmployeeAction.fulfilled, (state, action) => {
-            state.status = "successed";
+            let dob = action.payload.identification_info.date_of_birth;
+            if (dob) {
+                dob = new Date(dob).toLocaleString("en-US", {
+                    month: "numeric",
+                    day: "numeric",
+                    year: "numeric",
+                });
+            }
+            action.payload.identification_info.date_of_birth = dob;
+
             state.employee = action.payload;
+            state.documents = action.payload.documents;
+            state.status = "successed";
         });
         builder.addCase(updateEmployeeAction.rejected, (state, action) => {
             state.status = "failed";
@@ -308,7 +331,7 @@ const currentEmployeeSlice = createSlice({
     },
 });
 
-export const { setCurrentEmployee, logOut, setOnboardingApplication } =
+export const { setCurrentEmployee, logOut, setTextInfo, setOnboardingApplication } =
     currentEmployeeSlice.actions;
 export default currentEmployeeSlice.reducer;
 //

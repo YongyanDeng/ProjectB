@@ -1,0 +1,92 @@
+.visaManagement {
+    display: flex;
+    flex-direction: column;
+    width: 1000px;
+    max-height: 100%;
+    padding: 20px 20px;
+    background-color: #fff;
+    margin: 30px 0px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 16px 1px rgba(229, 229, 229, 0.8);
+
+    align-items: center;
+}
+
+.contentBox {
+    display: flex;
+    flex-direction: column;
+
+    width: 800px;
+    height: auto;
+    padding: 20px;
+    margin: 20px;
+    border: #ededed solid 2px;
+    border-radius: 10px;
+
+    justify-content: center;
+    align-items: center;
+}
+
+.messageBox {
+    display: flex;
+    flex-direction: column;
+
+    width: auto;
+    height: auto;
+    padding: 10px 10px;
+    margin: 20px 0px;
+    align-items: center;
+}
+
+.messageBox h1 {
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #ff0000;
+    animation: fade-in 2s ease-in-out;
+}
+
+.sample {
+    display: flex;
+    flex-direction: row;
+    width: 800px;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.filesBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+.fileBox {
+    width: 600px;
+    height: 200px;
+    margin: 10px;
+}
+
+@media screen and (max-width: 392px) {
+    .visaManagement {
+        width: 380px;
+    }
+
+    .contentBox {
+        width: 370px;
+    }
+
+    .fileBox {
+        width: 350px;
+    }
+}

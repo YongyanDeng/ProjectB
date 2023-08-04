@@ -57,7 +57,8 @@ export default function MainLayout() {
             overflow: "auto",
 
             position: "absolute",
-            top: "48px",
+            top: !isMobile ? "48px" : "166px",
+            bottom: !isMobile ? null : "150px",
         }),
         [isMobile],
     );

@@ -60,6 +60,18 @@ exports.signin = async function (req, res, next) {
  */
 exports.signup = async function (req, res, next) {
     try {
+        const { hashToken } = req.body;
+        const decodedToken = decodeURIComponent(hashToken);
+        const foundToken = await db.RegisterToken.findOne({ token: decodedToken });
+        if (!foundToken) return res.status(401).json({ error: { message: "Token not exist" } });
+
+        // Check token's status
+        if (foundToken.status !== "pending") {
+            return res
+                .status(401)
+                .json({ error: { message: `Your register token is ${foundToken.status}!` } });
+        }
+
         const employee = await db.Employee.create(req.body);
         const { id, username, role, documents } = employee;
         const token = await jwt.sign(
@@ -70,6 +82,10 @@ exports.signup = async function (req, res, next) {
             },
             process.env.JWT_SECRET_KEY
         );
+
+        foundToken.status = "activated";
+        await foundToken.save();
+
         return res.status(200).json({
             id,
             username,
