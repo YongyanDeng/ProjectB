@@ -263,8 +263,19 @@ const currentEmployeeSlice = createSlice({
 
         //update employee info
         builder.addCase(updateEmployeeAction.fulfilled, (state, action) => {
-            state.status = "successed";
+            let dob = action.payload.identification_info.date_of_birth;
+            if (dob) {
+                dob = new Date(dob).toLocaleString("en-US", {
+                    month: "numeric",
+                    day: "numeric",
+                    year: "numeric",
+                });
+            }
+            action.payload.identification_info.date_of_birth = dob;
+
             state.employee = action.payload;
+            state.documents = action.payload.documents;
+            state.status = "successed";
         });
         builder.addCase(updateEmployeeAction.rejected, (state, action) => {
             state.status = "failed";

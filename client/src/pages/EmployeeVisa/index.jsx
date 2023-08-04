@@ -181,7 +181,7 @@ export default function EmployeeVisa() {
                 size: pdfFile.size,
                 type: pdfFile.type,
                 lastModified: pdfFile.lastModified,
-                document_type: "OPT RECEIPT",
+                document_type: `${detail.next_step}`,
                 uid: pdfFile.uid, // The mv function is specific to the backend implementation, not relevant here
             };
 
@@ -283,7 +283,7 @@ export default function EmployeeVisa() {
         },
         {
             title: "",
-            dataIndex: "content",
+            dataIndex: "contentData",
             key: "url",
             render: (content) => {
                 return (
@@ -321,7 +321,7 @@ export default function EmployeeVisa() {
                     <div className="messageBox">
                         {detail?.message && <h1>{detail.message}</h1>}
                         {detail?.next_step && detail.next_step === "I-983" && (
-                            <div>
+                            <div className="sample">
                                 <div>
                                     <a
                                         href="https://www.ice.gov/doclib/sevis/pdf/i983.pdf"

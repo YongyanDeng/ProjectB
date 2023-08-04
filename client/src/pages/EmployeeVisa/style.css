@@ -32,7 +32,7 @@
     flex-direction: column;
 
     width: auto;
-    height: 30px;
+    height: auto;
     padding: 10px 10px;
     margin: 20px 0px;
     align-items: center;
@@ -44,6 +44,15 @@
     font-size: 16px;
     color: #ff0000;
     animation: fade-in 2s ease-in-out;
+}
+
+.sample {
+    display: flex;
+    flex-direction: row;
+    width: 800px;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px;
 }
 
 @keyframes fade-in {

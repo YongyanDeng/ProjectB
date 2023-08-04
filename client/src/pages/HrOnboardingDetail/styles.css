@@ -1,3 +1,12 @@
+.applicationBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 1000px;
+}
+
 .review-section {
-    width: 800px;
+    margin-top: 4800px;
+    width: 500px;
 }

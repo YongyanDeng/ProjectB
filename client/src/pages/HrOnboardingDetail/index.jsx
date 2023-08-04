@@ -67,7 +67,7 @@ export default function HrOnboardingDetail() {
     return (
         <>
             {detail ? (
-                <div className="center-wrapper">
+                <div className="applicationBox">
                     <EmployeeForm
                         formData={detail}
                         personalInfo={false}
@@ -80,8 +80,8 @@ export default function HrOnboardingDetail() {
                     <Form
                         className="review-section"
                         onFinish={handleSubmit}
-                        labelCol={{ span: 9 }}
-                        wrapperCol={{ span: 15 }}
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
                     >
                         <Form.Item label="Review">
                             <Select

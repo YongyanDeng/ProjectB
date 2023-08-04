@@ -22,8 +22,8 @@ export default function MainLayout() {
             backgroundColor: "#111827",
             padding: "8px 64px",
 
-            position: "absolute",
-            top: "0",
+            position: !isMobile && "absolute",
+            top: !isMobile && "0",
         }),
         [isMobile],
     );
@@ -39,8 +39,8 @@ export default function MainLayout() {
             color: "#FFFFFF",
             backgroundColor: "#111827",
 
-            position: "absolute",
-            bottom: "0",
+            position: !isMobile && "absolute",
+            bottom: !isMobile && "0",
         }),
         [isMobile],
     );
@@ -56,8 +56,8 @@ export default function MainLayout() {
             backgroundColor: "#F9FAFB",
             overflow: "auto",
 
-            position: "absolute",
-            top: "48px",
+            position: !isMobile && "absolute",
+            top: !isMobile && "48px",
         }),
         [isMobile],
     );

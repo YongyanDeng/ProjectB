@@ -226,8 +226,45 @@ const EmployeeForm = ({
             // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
 
             console.log("show selectedDate", selectedDate);
+
+            const {
+                id,
+                email,
+                username,
+                name,
+                profile_picture,
+                role,
+                address,
+                contact_info,
+                identification_info,
+                work_authorization,
+                reference,
+                onboarding_status,
+                documents,
+                feedback,
+                usCitizen,
+            } = formData;
+
+            const docs = [];
+            for (const document of uploadedfileList) {
+                if (document.id) docs.push(document.id);
+            }
+
             const finalData = {
-                ...formData,
+                id,
+                email,
+                username,
+                name,
+                profile_picture,
+                role,
+                address,
+                contact_info,
+                identification_info,
+                reference,
+                onboarding_status,
+                documents: docs,
+                feedback,
+                usCitizen,
                 work_authorization: {
                     title: formData.work_authorization.title,
                     start_date: selectedDate.work_authorization.start_date,
@@ -246,7 +283,7 @@ const EmployeeForm = ({
             message.success("employee data saved successfully!");
             setSaved(() => true);
 
-            await dispatch(fetchEmployeeAction(formData.id));
+            // await dispatch(fetchEmployeeAction(formData.id));
         } catch (err) {
             console.error(err);
         }
@@ -264,10 +301,46 @@ const EmployeeForm = ({
         } else {
             console.log("show employee", formData);
             // data.work_authorization.end_date=data.work_authorization.end_date.toISOString();
-
             console.log("show selectedDate", selectedDate);
+
+            const {
+                id,
+                email,
+                username,
+                name,
+                profile_picture,
+                role,
+                address,
+                contact_info,
+                identification_info,
+                work_authorization,
+                reference,
+                onboarding_status,
+                documents,
+                feedback,
+                usCitizen,
+            } = formData;
+
+            const docs = [];
+            for (const document of uploadedfileList) {
+                if (document.id) docs.push(document.id);
+            }
+
             const finalData = {
-                ...formData,
+                id,
+                email,
+                username,
+                name,
+                profile_picture,
+                role,
+                address,
+                contact_info,
+                identification_info,
+                reference,
+                onboarding_status,
+                documents: docs,
+                feedback,
+                usCitizen,
                 work_authorization: {
                     title: formData.work_authorization.title,
                     start_date: selectedDate.work_authorization.start_date,
@@ -1109,13 +1182,13 @@ const EmployeeForm = ({
                                         wrapperCol={{ offset: 8, span: 16 }}
                                     >
                                         <Button type="primary" htmlType="submit">
-                                            save
+                                            Save
                                         </Button>
                                         <Button
                                             style={{ marginLeft: 10 }}
                                             onClick={handleFirstCancelButton}
                                         >
-                                            cancel
+                                            Cancel
                                         </Button>
                                     </Form.Item>
 

@@ -36,6 +36,13 @@ const updateEmployee = async function (req, res, next) {
             feedback,
             usCitizen,
         } = employee;
+
+        const docs = [];
+        for (const documentId of documents) {
+            const document = await db.Document.findById(documentId);
+            if (document) docs.push(document);
+        }
+
         return res.status(201).json({
             id,
             email,
@@ -49,7 +56,7 @@ const updateEmployee = async function (req, res, next) {
             work_authorization,
             reference,
             onboarding_status,
-            documents,
+            documents: docs,
             feedback,
             usCitizen,
         });
