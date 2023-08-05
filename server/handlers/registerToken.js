@@ -8,7 +8,7 @@ exports.uploadRegisterToken = async function (req, res, next) {
         const { email, hashToken } = req.body;
         // Set expiration as 3 hours later
         const expirationTime = new Date();
-        expirationTime.setMinutes(expirationTime.getMinutes() + 3);
+        expirationTime.setMinutes(expirationTime.getMinutes() + 2);
 
         // Upload to db
         const createdToken = await db.RegisterToken.create({

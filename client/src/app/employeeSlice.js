@@ -192,8 +192,9 @@ const currentEmployeeSlice = createSlice({
         // Sign in
         builder.addCase(signInEmployee.fulfilled, (state, action) => {
             state.isAuthenticated = !!Object.keys(action.payload).length;
-            const { id, username, role, name, documents, feedback } = action.payload;
-            state.employee = { id, username, role, name, documents, feedback };
+            const { id, username, role, name, documents, feedback, onboarding_status } =
+                action.payload;
+            state.employee = { id, username, role, name, documents, feedback, onboarding_status };
             state.status = "successed";
         });
         builder.addCase(signInEmployee.rejected, (state, action) => {

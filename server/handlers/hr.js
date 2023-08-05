@@ -66,6 +66,8 @@ exports.getAllApplications = async function (req, res, next) {
                 id,
                 email,
                 name,
+                role,
+                onboarding_status,
             });
             return acc;
         }, []);
@@ -147,9 +149,13 @@ exports.getAnApplicaton = async function (req, res, next) {
         }
 
         // Calculate OPT's remaining days
-        let end = work_authorization.end_date.getTime();
-        let now = new Date().getTime();
-        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        let remaining_days = "NaN";
+        if (work_authorization.end_date && work_authorization.start_date) {
+            let end = work_authorization.end_date.getTime();
+            let now = new Date().getTime();
+            remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        }
+
         const extendedWorkAuth = {
             ...work_authorization,
             remaining_days,
@@ -245,9 +251,13 @@ exports.reviewApplication = async function (req, res, next) {
         }
 
         // Calculate OPT's remaining days
-        let end = work_authorization.end_date.getTime();
-        let now = new Date().getTime();
-        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        let remaining_days = "NaN";
+        if (work_authorization.end_date && work_authorization.start_date) {
+            let end = work_authorization.end_date.getTime();
+            let now = new Date().getTime();
+            remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        }
+
         const extendedWorkAuth = {
             ...work_authorization,
             remaining_days,
@@ -368,9 +378,13 @@ exports.getOneVisa = async function (req, res, next) {
         }
 
         // Calculate OPT's remaining days
-        let end = work_authorization.end_date.getTime();
-        let now = new Date().getTime();
-        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        let remaining_days = "NaN";
+        if (work_authorization.end_date && work_authorization.start_date) {
+            let end = work_authorization.end_date.getTime();
+            let now = new Date().getTime();
+            remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        }
+
         const extendedWorkAuth = {
             ...work_authorization,
             remaining_days,
@@ -432,9 +446,13 @@ exports.reviewOneVisa = async function (req, res, next) {
         }
 
         // Calculate OPT's remaining days
-        let end = work_authorization.end_date.getTime();
-        let now = new Date().getTime();
-        const remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        let remaining_days = "NaN";
+        if (work_authorization.end_date && work_authorization.start_date) {
+            let end = work_authorization.end_date.getTime();
+            let now = new Date().getTime();
+            remaining_days = Math.floor((end - now) / (1000 * 3600 * 24));
+        }
+
         const extendedWorkAuth = {
             ...work_authorization,
             remaining_days,

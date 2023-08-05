@@ -29,6 +29,7 @@ export default function HiringManagement() {
                     id: application.id,
                     email: application.email,
                     name: `${application.name.first_name} ${application.name.last_name}`,
+                    onboarding_status: application.onboarding_status,
                 };
             }),
         );
@@ -63,6 +64,11 @@ export default function HiringManagement() {
         },
         {
             title: "Onboarding Status",
+            dataIndex: "onboarding_status",
+            key: "onboarding_status",
+        },
+        {
+            title: "",
             key: "View Application",
             render: (application) => (
                 <Link to={`/hr/hiringManagement/${application.id}`}>View Application</Link>
