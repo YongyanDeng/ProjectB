@@ -11,6 +11,7 @@ import {
     TeamOutlined,
     SafetyCertificateOutlined,
     AuditOutlined,
+    FileDoneOutlined,
 } from "@ant-design/icons";
 
 import { logOut } from "app/employeeSlice";
@@ -57,7 +58,7 @@ export default function Navbar() {
                   },
                   {
                       name: "Onboarding Application",
-                      icon: <UserOutlined style={{ fontSize: "20px" }} />,
+                      icon: <FileDoneOutlined style={{ fontSize: "20px" }} />,
                       link: `/employee/${employee.id}/OnboardingPage`,
                   },
                   {

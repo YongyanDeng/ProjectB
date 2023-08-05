@@ -15,7 +15,7 @@ exports.signin = async function (req, res, next) {
             email: req.body.email,
         });
 
-        const { id, username, role, name, ducoments, feedback } = employee;
+        const { id, username, role, name, ducoments, feedback, onboarding_status } = employee;
 
         const isMatch = await employee.comparePassword(req.body.password, next);
         if (isMatch) {
@@ -36,6 +36,7 @@ exports.signin = async function (req, res, next) {
                 ducoments,
                 token,
                 feedback,
+                onboarding_status,
             });
         } else {
             return next({
@@ -52,7 +53,7 @@ exports.signin = async function (req, res, next) {
 };
 
 /**
- * Signup process.
+ * Signup process with register token.
  * @param {body: {email, password, username}} req
  * @param {id, username, role, documents, token} res
  * @param {middleware()} next

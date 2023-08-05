@@ -8,6 +8,10 @@ export default function Home() {
 
     if (!isAuthenticated) return <Navigate to="/signin" state={{ from: "/" }} />;
 
+    if (employee.onboarding_status !== "Approved") {
+        return <Navigate to={`/employee/${employee.id}/OnboardingPage`} state={{ from: "/" }} />;
+    }
+
     // return <PersonalInfoPage />;
     return (
         <>

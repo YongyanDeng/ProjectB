@@ -441,6 +441,11 @@ const EmployeeForm = ({
                         <Typography.Title level={2} className={style.title}>
                             {title}
                         </Typography.Title>
+                        {formData.onboarding_status === "Rejected" && (
+                            <Typography.Title level={4} className={style.feedback}>
+                                {`HR FEEDBACK: ${formData.feedback}`}
+                            </Typography.Title>
+                        )}
                     </div>
 
                     <Form
@@ -752,51 +757,54 @@ const EmployeeForm = ({
                                 {formData?.work_authorization?.title === "F1(CPT/OPT)" &&
                                     !personalInfo && (
                                         <>
-                                            {operator?.role === "Employee" && (
-                                                <Form.Item
-                                                    className={style.formItem}
-                                                    label="Upload OPT RECEIPT File"
-                                                    name="pdfFile"
-                                                    getValueFromEvent={(e) => {
-                                                        if (Array.isArray(e)) {
-                                                            return e;
-                                                        } else if (e && e.fileList) {
-                                                            // Filter the fileList to contain only one file
-                                                            const filteredFileList =
-                                                                e.fileList.slice(0, 0);
-                                                            return filteredFileList;
-                                                        }
-                                                        return [];
-                                                    }}
-                                                >
-                                                    <Upload.Dragger
+                                            {
+                                                // operator?.role === "Employee"
+                                                formData.role === operator.role && (
+                                                    <Form.Item
+                                                        className={style.formItem}
+                                                        label="Upload OPT RECEIPT File"
                                                         name="pdfFile"
-                                                        accept=".pdf"
-                                                        multiple={false}
-                                                        disabled={isDisable}
-                                                        beforeUpload={beforeUpload}
-                                                        customRequest={handleFileUpload}
-                                                        itemRender={(
-                                                            originNode,
-                                                            file,
-                                                            currFileList,
-                                                        ) => {
-                                                            return null;
+                                                        getValueFromEvent={(e) => {
+                                                            if (Array.isArray(e)) {
+                                                                return e;
+                                                            } else if (e && e.fileList) {
+                                                                // Filter the fileList to contain only one file
+                                                                const filteredFileList =
+                                                                    e.fileList.slice(0, 0);
+                                                                return filteredFileList;
+                                                            }
+                                                            return [];
                                                         }}
-                                                        onChange={handleFileChange}
                                                     >
-                                                        <p className="ant-upload-drag-icon">
-                                                            <InboxOutlined />
-                                                        </p>
-                                                        <p className="ant-upload-text">
-                                                            please upload OPT RECEIPT file
-                                                        </p>
-                                                        <p className="ant-upload-hint">
-                                                            Support for a single upload.
-                                                        </p>
-                                                    </Upload.Dragger>
-                                                </Form.Item>
-                                            )}
+                                                        <Upload.Dragger
+                                                            name="pdfFile"
+                                                            accept=".pdf"
+                                                            multiple={false}
+                                                            disabled={isDisable}
+                                                            beforeUpload={beforeUpload}
+                                                            customRequest={handleFileUpload}
+                                                            itemRender={(
+                                                                originNode,
+                                                                file,
+                                                                currFileList,
+                                                            ) => {
+                                                                return null;
+                                                            }}
+                                                            onChange={handleFileChange}
+                                                        >
+                                                            <p className="ant-upload-drag-icon">
+                                                                <InboxOutlined />
+                                                            </p>
+                                                            <p className="ant-upload-text">
+                                                                please upload OPT RECEIPT file
+                                                            </p>
+                                                            <p className="ant-upload-hint">
+                                                                Support for a single upload.
+                                                            </p>
+                                                        </Upload.Dragger>
+                                                    </Form.Item>
+                                                )
+                                            }
                                             <Form.Item className={style.formItem} label="Files">
                                                 <List
                                                     rules={[
@@ -1127,7 +1135,7 @@ const EmployeeForm = ({
                         {/* ... */}
                         {(onboardingStatus === "Never submitted" ||
                             onboardingStatus === "Rejected") &&
-                            operator.role === "Employee" &&
+                            operator.role === formData.role &&
                             !personalInfo && (
                                 <Form.Item
                                     className={style.formItem}
